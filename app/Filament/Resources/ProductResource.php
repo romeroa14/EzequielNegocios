@@ -42,7 +42,13 @@ class ProductResource extends Resource
                         $set('subcategory_id', null);
                     })
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nombre de la categoría')
+                            ->required()
+                            ->maxLength(255),
+                    ]),
 
                 Forms\Components\Select::make('subcategory_id')
                     ->label('Subcategoría')
@@ -78,16 +84,20 @@ class ProductResource extends Resource
                             ->default(true),
                     ]),
                 Forms\Components\TextInput::make('name')
+                    ->label('Nombre del producto')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Textarea::make('description')
+                    ->label('Descripción del producto')
                     ->required()
                     ->maxLength(65535)
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('sku_base')
+                    ->label('SKU base')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Select::make('unit_type')
+                    ->label('Unidad de medida')
                     ->options([
                         'kg' => 'Kilogramos',
                         'ton' => 'Toneladas',
@@ -97,6 +107,7 @@ class ProductResource extends Resource
                     ])
                     ->required(),
                 Forms\Components\FileUpload::make('image')
+                    ->label('Imagen del producto')
                     ->image()
                     ->required()
                     ->disk('public')
