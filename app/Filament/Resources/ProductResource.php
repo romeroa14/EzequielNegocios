@@ -108,9 +108,18 @@ class ProductResource extends Resource
                         '4:3',
                         '1:1',
                     ])
-                    ->preserveFilenames()
+                    ->imagePreviewHeight('250')
+                    ->loadingIndicatorPosition('left')
+                    ->panelLayout('integrated')
+                    ->imageResizeMode('cover')
+                    ->imageResizeTargetWidth('1920')
+                    ->imageResizeTargetHeight('1080')
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                    ->maxSize(5120) // 5MB
+                    ->maxSize(5120)
+                    ->downloadable()
+                    ->openable()
+                    ->previewable()
+                    ->preserveFilenames()
                     ->columnSpanFull(),
                 Forms\Components\KeyValue::make('seasonal_info')
                     ->label('Información Estacional')
@@ -141,9 +150,11 @@ class ProductResource extends Resource
                     ->label('Unidad')
                     ->searchable(),
                 Tables\Columns\ImageColumn::make('image')
+                    ->label('Imagen')
                     ->disk('public')
                     ->visibility('public')
-                    ->label('Imagen'),
+                    ->size(100)
+                    ->square(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Activo')
                     ->boolean(),
@@ -156,6 +167,16 @@ class ProductResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('subcategory')
                     ->relationship('subcategory', 'name'),
+                Tables\Filters\SelectFilter::make('category')
+                    ->relationship('category', 'name'),
+                Tables\Filters\SelectFilter::make('unit_type')
+                    ->options([
+                        'kg' => 'Kilogramos',
+                        'ton' => 'Toneladas',
+                        'saco' => 'Sacos',
+                        'caja' => 'Cajas',
+                        'unidad' => 'Unidades',
+                    ]),
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Activo'),
             ])

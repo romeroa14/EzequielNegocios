@@ -12,6 +12,8 @@ class Product extends Model
     use HasFactory;
     use HasProductImage;
 
+    protected $appends = ['image_url'];
+
     protected $fillable = [
         'category_id',
         'subcategory_id',
@@ -28,6 +30,15 @@ class Product extends Model
         'seasonal_info' => 'array',
         'is_active' => 'boolean'
     ];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        return asset('storage/' . $this->image);
+    }
 
     public function category(): BelongsTo
     {
