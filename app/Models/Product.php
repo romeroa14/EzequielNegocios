@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Traits\HasProductImage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Product extends Model
 {
     use HasFactory;
+    use HasProductImage;
 
     protected $fillable = [
+        'category_id',
         'subcategory_id',
         'name',
         'description',
@@ -25,7 +29,12 @@ class Product extends Model
         'is_active' => 'boolean'
     ];
 
-    public function subcategory()
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ProductCategory::class);
+    }
+
+    public function subcategory(): BelongsTo
     {
         return $this->belongsTo(ProductSubcategory::class);
     }

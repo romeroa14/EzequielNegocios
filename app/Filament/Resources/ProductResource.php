@@ -22,21 +22,53 @@ class ProductResource extends Resource
     
     protected static ?string $navigationGroup = 'Catálogo';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationLabel = 'Productos';
+    protected static ?string $pluralNavigationLabel = 'Productos';
+    protected static ?string $pluralModelLabel = 'Productos';
+    protected static ?string $modelLabel = 'Producto';
+
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('subcategory_id')
-                    ->relationship('subcategory', 'name')
+                Forms\Components\Select::make('category_id')
+                    ->relationship('category', 'name')
+                    ->label('Categoría')
                     ->required()
-                    ->preload()
+                    ->live()
+                    ->afterStateUpdated(function ($set) {
+                        $set('subcategory_id', null);
+                    })
                     ->searchable()
+                    ->preload(),
+
+                Forms\Components\Select::make('subcategory_id')
+                    ->label('Subcategoría')
+                    ->options(function (Forms\Get $get) {
+                        $categoryId = $get('category_id');
+                        
+                        if (!$categoryId) {
+                            return [];
+                        }
+                        
+                        return \App\Models\ProductSubcategory::query()
+                            ->where('category_id', $categoryId)
+                            ->where('is_active', true)
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    })
+                    ->required()
+                    ->searchable()
+                    ->preload()
                     ->createOptionForm([
                         Forms\Components\Select::make('category_id')
                             ->relationship('category', 'name')
-                            ->required(),
+                            ->required()
+                            ->default(function (Forms\Get $get) {
+                                return $get('../../category_id');
+                            }),
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
@@ -66,7 +98,20 @@ class ProductResource extends Resource
                     ->required(),
                 Forms\Components\FileUpload::make('image')
                     ->image()
-                    ->required(),
+                    ->required()
+                    ->disk('public')
+                    ->directory('products')
+                    ->visibility('public')
+                    ->imageEditor()
+                    ->imageEditorAspectRatios([
+                        '16:9',
+                        '4:3',
+                        '1:1',
+                    ])
+                    ->preserveFilenames()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->maxSize(5120) // 5MB
+                    ->columnSpanFull(),
                 Forms\Components\KeyValue::make('seasonal_info')
                     ->label('Información Estacional')
                     ->addButtonLabel('Agregar Información')
@@ -96,6 +141,8 @@ class ProductResource extends Resource
                     ->label('Unidad')
                     ->searchable(),
                 Tables\Columns\ImageColumn::make('image')
+                    ->disk('public')
+                    ->visibility('public')
                     ->label('Imagen'),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Activo')

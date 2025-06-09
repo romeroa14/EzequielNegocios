@@ -23,6 +23,12 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             AdminUserSeeder::class,
+            ProductCategorySeeder::class,
+            ProductSubcategorySeeder::class,
+            CountryTableSeeder::class,
+            StateTableSeeder::class,
+            MunicipalityTableSeeder::class,
+            ParishTableSeeder::class,
         ]);
     }
 }

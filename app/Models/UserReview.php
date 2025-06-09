@@ -26,12 +26,12 @@ class UserReview extends Model
 
     public function reviewer()
     {
-        return $this->belongsTo(User::class, 'reviewer_id');
+        return $this->belongsTo(Person::class, 'reviewer_id');
     }
 
-    public function reviewedUser()
+    public function reviewedPerson()
     {
-        return $this->belongsTo(User::class, 'reviewed_id');
+        return $this->belongsTo(Person::class, 'reviewed_id');
     }
 
     public function order()

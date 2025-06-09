@@ -4,14 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'buyer_id',
-        'seller_id',
         'order_number',
         'total_amount',
         'currency',
@@ -29,22 +29,18 @@ class Order extends Model
         'total_amount' => 'decimal:2'
     ];
 
-    public function buyer()
+    public function persons(): BelongsToMany
     {
-        return $this->belongsTo(User::class, 'buyer_id');
+        return $this->belongsToMany(Person::class, 'order_person')
+            ->withTimestamps();
     }
 
-    public function seller()
-    {
-        return $this->belongsTo(User::class, 'seller_id');
-    }
-
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    public function statusHistory()
+    public function statusHistory(): HasMany
     {
         return $this->hasMany(OrderStatusHistory::class);
     }

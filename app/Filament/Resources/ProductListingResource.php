@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Person;
 
 class ProductListingResource extends Resource
 {
@@ -22,21 +24,62 @@ class ProductListingResource extends Resource
     
     protected static ?string $navigationGroup = 'Catálogo';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationLabel = 'Listados';
+    protected static ?string $pluralNavigationLabel = 'Listados';
+    protected static ?string $pluralModelLabel = 'Listados';
+    protected static ?string $modelLabel = 'Listado';
+
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
+        $currentUser = Auth::user();
+        $person = Person::where('user_id', $currentUser->id)->first();
+
+        if (!$person) {
+            throw new \Exception('Debe crear su perfil de vendedor antes de crear listados.');
+        }
+
         return $form
             ->schema([
+                Forms\Components\Hidden::make('seller_id')
+                    ->default($person->id)
+                    ->required(),
                 Forms\Components\Select::make('product_id')
+                    ->label('Producto')
                     ->relationship('product', 'name')
                     ->required()
                     ->preload()
                     ->searchable()
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set, ?ProductListing $record) {
+                        if (!$record || empty($record->images)) {
+                            $product = \App\Models\Product::find($state);
+                            if ($product) {
+                                $set('images', [$product->image]);
+                            }
+                        }
+                    })
                     ->createOptionForm([
+                        Forms\Components\Select::make('category_id')
+                            ->relationship('category', 'name')
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(fn (Forms\Set $set) => $set('subcategory_id', null)),
                         Forms\Components\Select::make('subcategory_id')
                             ->relationship('subcategory', 'name')
-                            ->required(),
+                            ->required()
+                            ->options(function (Forms\Get $get) {
+                                $categoryId = $get('category_id');
+                                if (!$categoryId) {
+                                    return [];
+                                }
+                                return \App\Models\ProductSubcategory::query()
+                                    ->where('category_id', $categoryId)
+                                    ->where('is_active', true)
+                                    ->pluck('name', 'id')
+                                    ->toArray();
+                            }),
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
@@ -44,29 +87,36 @@ class ProductListingResource extends Resource
                             ->maxLength(255),
                     ]),
                 Forms\Components\TextInput::make('title')
+                    ->label('Título')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Textarea::make('description')
+                    ->label('Descripción')
                     ->required()
                     ->maxLength(65535)
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('quantity_available')
+                    ->label('Cantidad Disponible')
                     ->required()
                     ->numeric()
                     ->minValue(0),
                 Forms\Components\TextInput::make('unit_price')
+                    ->label('Precio Unitario')
                     ->required()
                     ->numeric()
                     ->prefix('$'),
                 Forms\Components\TextInput::make('min_quantity_order')
+                    ->label('Cantidad Mínima de Orden')
                     ->required()
                     ->numeric()
                     ->minValue(1),
                 Forms\Components\TextInput::make('max_quantity_order')
+                    ->label('Cantidad Máxima de Orden')
                     ->required()
                     ->numeric()
                     ->minValue(1),
                 Forms\Components\Select::make('quality_grade')
+                    ->label('Calidad')
                     ->options([
                         'premium' => 'Premium',
                         'standard' => 'Estándar',
@@ -74,29 +124,54 @@ class ProductListingResource extends Resource
                     ])
                     ->required(),
                 Forms\Components\DatePicker::make('harvest_date')
+                    ->label('Fecha de Cosecha')
                     ->required(),
                 Forms\Components\DatePicker::make('expiry_date')
+                    ->label('Fecha de Vencimiento')
                     ->required(),
                 Forms\Components\FileUpload::make('images')
+                    ->label('Imágenes')
                     ->image()
                     ->multiple()
                     ->required()
+                    ->disk('public')
+                    ->directory('listings')
+                    ->visibility('public')
+                    ->imageEditor()
+                    ->imageEditorAspectRatios([
+                        '16:9',
+                        '4:3',
+                        '1:1',
+                    ])
+                    ->storeFileNamesIn('original_filenames')
+                    ->getUploadedFileNameForStorageUsing(
+                        fn (Forms\Components\FileUpload $component, string $fileName): string => 
+                            'listing-' . str()->random(8) . '-' . time() . '.' . pathinfo($fileName, PATHINFO_EXTENSION)
+                    )
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->maxSize(5120) // 5MB
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('location_city')
+                    ->label('Ciudad')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('location_state')
+                    ->label('Estado')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Toggle::make('pickup_available')
+                    ->label('Recojo Disponible')
                     ->required(),
                 Forms\Components\Toggle::make('delivery_available')
+                    ->label('Entrega Disponible')
                     ->required(),
                 Forms\Components\TextInput::make('delivery_radius_km')
+                    ->label('Radio de Entrega')
                     ->numeric()
                     ->minValue(0)
                     ->visible(fn (Forms\Get $get): bool => $get('delivery_available')),
                 Forms\Components\Select::make('status')
+                    ->label('Estado')
                     ->options([
                         'active' => 'Activo',
                         'sold_out' => 'Agotado',
@@ -104,7 +179,8 @@ class ProductListingResource extends Resource
                         'expired' => 'Expirado',
                     ])
                     ->required(),
-                Forms\Components\DatePicker::make('featured_until'),
+                Forms\Components\DatePicker::make('featured_until')
+                    ->label('Destacado Hasta'),
             ]);
     }
 

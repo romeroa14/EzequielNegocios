@@ -13,8 +13,6 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('buyer_id')->constrained('users');
-            $table->foreignId('seller_id')->constrained('users');
             $table->string('order_number')->unique();
             $table->decimal('total_amount', 10, 2);
             $table->string('currency')->default('USD');
@@ -26,6 +24,15 @@ return new class extends Migration
             $table->string('notes');
             $table->timestamps();
         });
+
+        Schema::create('order_person', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('person_id')->constrained()->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['order_id', 'person_id']);
+        });
     }
 
     /**
@@ -33,6 +40,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('order_person');
         Schema::dropIfExists('orders');
     }
 };
