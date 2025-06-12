@@ -21,7 +21,6 @@ class InventoryMovement extends Model
         'reference_number',
         'batch_number',
         'expiry_date',
-        'unit_cost',
         'notes'
     ];
 
@@ -29,7 +28,6 @@ class InventoryMovement extends Model
         'quantity' => 'decimal:2',
         'previous_stock' => 'decimal:2',
         'current_stock' => 'decimal:2',
-        'unit_cost' => 'decimal:2',
         'expiry_date' => 'date'
     ];
 

@@ -18,7 +18,14 @@ class CreateInventoryMovement extends CreateRecord
             ->latest()
             ->value('current_stock') ?? 0;
 
-        $data['person_id'] = Auth::user()->person->id;
+        $user = Auth::user();
+        $person = $user->person;
+
+        if (!$person) {
+            throw new \Exception('Debe crear su perfil antes de realizar movimientos de inventario.');
+        }
+
+        $data['person_id'] = $person->id;
         $data['previous_stock'] = $currentStock;
 
         switch ($data['type']) {

@@ -42,7 +42,7 @@ class ProductListingResource extends Resource
 
         return $form
             ->schema([
-                Forms\Components\Hidden::make('seller_id')
+                Forms\Components\Hidden::make('person_id')
                     ->default($person->id)
                     ->required(),
                 Forms\Components\Select::make('product_id')
@@ -105,6 +105,10 @@ class ProductListingResource extends Resource
                     ->required()
                     ->numeric()
                     ->prefix('$'),
+                Forms\Components\TextInput::make('wholesale_price')
+                    ->label('Precio Mayorista')
+                    ->numeric()
+                    ->prefix('$'),
                 Forms\Components\TextInput::make('min_quantity_order')
                     ->label('Cantidad Mínima de Orden')
                     ->required()
@@ -128,6 +132,7 @@ class ProductListingResource extends Resource
                     ->required(),
                 Forms\Components\DatePicker::make('expiry_date')
                     ->label('Fecha de Vencimiento')
+                    ->default(now()->addDays(30))
                     ->required(),
                 Forms\Components\FileUpload::make('images')
                     ->label('Imágenes')
@@ -160,16 +165,19 @@ class ProductListingResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Toggle::make('pickup_available')
-                    ->label('Recojo Disponible')
+                    ->label('Pickup Disponible')
                     ->required(),
                 Forms\Components\Toggle::make('delivery_available')
-                    ->label('Entrega Disponible')
-                    ->required(),
+                    ->label('Delivery Disponible')
+                    ->required()
+                    ->live(),
                 Forms\Components\TextInput::make('delivery_radius_km')
                     ->label('Radio de Entrega')
                     ->numeric()
                     ->minValue(0)
-                    ->visible(fn (Forms\Get $get): bool => $get('delivery_available')),
+                    ->required(fn (Forms\Get $get): bool => $get('delivery_available'))
+                    ->visible(fn (Forms\Get $get): bool => $get('delivery_available'))
+                    ->helperText('Radio de entrega en kilómetros'),
                 Forms\Components\Select::make('status')
                     ->label('Estado')
                     ->options([
@@ -180,7 +188,9 @@ class ProductListingResource extends Resource
                     ])
                     ->required(),
                 Forms\Components\DatePicker::make('featured_until')
-                    ->label('Destacado Hasta'),
+                    ->label('Destacado Hasta')
+                    ->required()
+                    ->default(now()->addDays(30)),
             ]);
     }
 
@@ -188,6 +198,11 @@ class ProductListingResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('images')
+                    ->label('Imagen')
+                    ->square()
+                    ->width(200)
+                    ->height(200),
                 Tables\Columns\TextColumn::make('title')
                     ->label('Título')
                     ->searchable(),
@@ -202,11 +217,35 @@ class ProductListingResource extends Resource
                     ->label('Precio Unitario')
                     ->money()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('wholesale_price')
+                    ->label('Precio Mayorista')
+                    ->money()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('quality_grade')
-                    ->label('Calidad'),
+                    ->label('Calidad')
+                    ->formatStateUsing(fn (string $state): string => match($state) {
+                        'premium' => 'Premium',
+                        'standard' => 'Estándar',
+                        'economic' => 'Económico',
+                        default => ucfirst($state),
+                    })
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'premium' => 'success',
+                        'standard' => 'warning',
+                        'economic' => 'danger',
+                    }),
+
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match($state) {
+                        'active' => 'Activo',
+                        'sold_out' => 'Agotado',
+                        'inactive' => 'Inactivo',
+                        'expired' => 'Expirado',
+                        default => ucfirst($state),
+                    })
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
                         'sold_out' => 'warning',

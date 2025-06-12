@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('reference_number')->nullable();
             $table->string('batch_number')->nullable();
             $table->date('expiry_date')->nullable();
-            $table->decimal('unit_cost', 10, 2)->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('description');
             $table->integer('quantity_available');
             $table->decimal('unit_price', 10, 2);
+            $table->decimal('wholesale_price', 10, 2);
             $table->integer('min_quantity_order');
             $table->integer('max_quantity_order');
             $table->enum('quality_grade', ['premium', 'standard', 'economic']);
@@ -27,9 +28,9 @@ return new class extends Migration
             $table->json('images');
             $table->string('location_city');
             $table->string('location_state');
-            $table->boolean('pickup_available');
-            $table->boolean('delivery_available');
-            $table->integer('delivery_radius_km');
+            $table->boolean('pickup_available')->default(true);
+            $table->boolean('delivery_available')->default(true);
+            $table->integer('delivery_radius_km')->nullable();
             $table->enum('status', ['active', 'sold_out', 'inactive', 'expired']);
             $table->date('featured_until');
             $table->timestamps();

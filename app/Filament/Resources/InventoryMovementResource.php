@@ -35,31 +35,73 @@ class InventoryMovementResource extends Resource
                     ->label('Producto')
                     ->required()
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                        if (!$state) return;
+                        
+                        $listing = \App\Models\ProductListing::where('product_id', $state)
+                            ->latest()
+                            ->first();
+
+                        if ($listing) {
+                            $set('quantity', $listing->quantity_available);
+                            $set('previous_stock', $listing->quantity_available);
+                            $set('current_stock', $listing->quantity_available);
+                        }
+                    }),
                 Forms\Components\Select::make('type')
                     ->label('Tipo de Movimiento')
                     ->options([
                         'entrada' => 'Entrada',
                         'salida' => 'Salida',
                         'ajuste' => 'Ajuste',
-                        'merma' => 'Merma'
                     ])
-                    ->required(),
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                        $quantity = floatval($get('quantity'));
+                        $previousStock = floatval($get('previous_stock'));
+                        
+                        if ($state === 'entrada') {
+                            $set('current_stock', $previousStock + $quantity);
+                        } elseif ($state === 'salida') {
+                            $set('current_stock', $previousStock - $quantity);
+                        } elseif ($state === 'ajuste') {
+                            $set('current_stock', $quantity);
+                        }
+                    }),
+                Forms\Components\TextInput::make('previous_stock')
+                    ->label('Stock Anterior')
+                    ->disabled()
+                    ->numeric(),
                 Forms\Components\TextInput::make('quantity')
                     ->label('Cantidad')
                     ->required()
                     ->numeric()
-                    ->minValue(0.01),
+                    ->minValue(0.01)
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                        $type = $get('type');
+                        $previousStock = floatval($get('previous_stock'));
+                        
+                        if ($type === 'entrada') {
+                            $set('current_stock', $previousStock + floatval($state));
+                        } elseif ($type === 'salida') {
+                            $set('current_stock', $previousStock - floatval($state));
+                        } elseif ($type === 'ajuste') {
+                            $set('current_stock', floatval($state));
+                        }
+                    }),
+                Forms\Components\TextInput::make('current_stock')
+                    ->label('Stock Actual')
+                    ->disabled()
+                    ->numeric(),
                 Forms\Components\TextInput::make('batch_number')
                     ->label('Número de Lote')
                     ->maxLength(255),
                 Forms\Components\DatePicker::make('expiry_date')
                     ->label('Fecha de Vencimiento'),
-                Forms\Components\TextInput::make('unit_cost')
-                    ->label('Costo Unitario')
-                    ->numeric()
-                    ->minValue(0)
-                    ->prefix('$'),
                 Forms\Components\TextInput::make('reference_number')
                     ->label('Número de Referencia')
                     ->maxLength(255),
