@@ -222,4 +222,13 @@ class ProductResource extends Resource
     {
         return static::getModel()::count();
     }
+
+    // public static function getEloquentQuery(): Builder
+    // {
+    //     return parent::getEloquentQuery()
+    //         ->when(
+    //             !auth()->user()->hasRole('admin'),
+    //             fn (Builder $query) => $query->where('seller_id', auth()->id())
+    //         );
+    // }
 }

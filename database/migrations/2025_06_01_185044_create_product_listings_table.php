@@ -13,26 +13,18 @@ return new class extends Migration
     {
         Schema::create('product_listings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('person_id')->on('persons')->constrained()->onDelete('cascade');
-            $table->foreignId('product_id')->on('products')->constrained()->onDelete('cascade');
+            $table->foreignId('person_id')->constrained('people')->onDelete('cascade');
+            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
             $table->string('title');
-            $table->string('description');
-            $table->integer('quantity_available');
+            $table->text('description');
             $table->decimal('unit_price', 10, 2);
-            $table->decimal('wholesale_price', 10, 2);
-            $table->integer('min_quantity_order');
-            $table->integer('max_quantity_order');
+            $table->integer('quantity_available');
             $table->enum('quality_grade', ['premium', 'standard', 'economic']);
             $table->date('harvest_date');
-            $table->date('expiry_date');
-            $table->json('images');
+            $table->json('images')->nullable();
             $table->string('location_city');
             $table->string('location_state');
-            $table->boolean('pickup_available')->default(true);
-            $table->boolean('delivery_available')->default(true);
-            $table->integer('delivery_radius_km')->nullable();
-            $table->enum('status', ['active', 'sold_out', 'inactive', 'expired']);
-            $table->date('featured_until');
+            $table->enum('status', ['active', 'pending', 'sold_out', 'inactive'])->default('pending');
             $table->timestamps();
         });
     }

@@ -14,26 +14,16 @@ class ProductListing extends Model
     use HasProductImage;
 
     protected $fillable = [
-        'person_id',
         'product_id',
-        'title',
-        'description',
-        'quantity_available',
+        'seller_id',
         'unit_price',
-        'wholesale_price',
-        'min_quantity_order',
-        'max_quantity_order',
-        'quality_grade',
+        'quantity_available',
         'harvest_date',
-        'expiry_date',
-        'images',
-        'location_city',
+        'quality_grade',
         'location_state',
-        'pickup_available',
-        'delivery_available',
-        'delivery_radius_km',
-        'status',
-        'featured_until'
+        'location_city',
+        'images',
+        'status' // active, pending, sold_out, etc.
     ];
 
     protected $casts = [
@@ -53,12 +43,12 @@ class ProductListing extends Model
         'featured_until' => 'datetime'
     ];
 
-    public function person(): BelongsTo
+    public function seller()
     {
-        return $this->belongsTo(Person::class, 'person_id');
+        return $this->belongsTo(Person::class, 'seller_id');
     }
 
-    public function product(): BelongsTo
+    public function product()
     {
         return $this->belongsTo(Product::class);
     }

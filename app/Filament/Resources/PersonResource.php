@@ -74,11 +74,7 @@ class PersonResource extends Resource
                     ->label('Rol')
                     ->options([
                         'buyer' => 'Comprador',
-                        'seller' => 'Vendedor',
-                        'technician' => 'Técnico',
-                        'support' => 'Soporte',
-                        'admin' => 'Administrador',
-                        'company' => 'Empresa'
+                        'seller' => 'Vendedor (Productor)',
                     ])
                     ->default('buyer')
                     ->required(),

@@ -17,7 +17,7 @@
 
             <!-- Producers Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                @foreach(App\Models\Person::where('role', 'seller')->with('user')->take(6)->get() as $producer)
+                @foreach(App\Models\Person::where('role', 'seller')->take(6)->get() as $producer)
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
                         <div class="p-6">
                             <div class="flex items-center mb-4">
