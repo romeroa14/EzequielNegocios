@@ -3,23 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Person extends Model
+class Person extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $table = 'people';
 
     protected $fillable = [
-        'user_id',
         'identification_type',
         'identification_number',
         'first_name',
         'last_name',
+        'email',
+        'password',
         'phone',
         'address',
         'country_id',
@@ -35,16 +37,17 @@ class Person extends Model
         'is_active',
     ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
     protected $casts = [
         'is_verified' => 'boolean',
         'is_active' => 'boolean',
         'verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
 
     public function country(): BelongsTo
     {
@@ -111,5 +114,22 @@ class Person extends Model
         ]);
         
         return implode(', ', $parts);
+    }
+
+    // Helpers para roles del frontend
+    public function isBuyer(): bool
+    {
+        return $this->role === 'buyer';
+    }
+    
+    public function isSeller(): bool
+    {
+        return $this->role === 'seller';
+    }
+    
+    // Atributo para el nombre de usuario en autenticación
+    public function getAuthIdentifierName()
+    {
+        return 'email';
     }
 } 

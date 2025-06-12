@@ -25,7 +25,8 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'phone',
         'avatar',
-        'is_active'
+        'is_active',
+        'role'
     ];
 
     /**
@@ -48,20 +49,53 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->profile && ($this->profile->type === 'admin' || $this->profile->type === 'producer');
+        return $this->is_active && in_array($this->role, ['admin', 'producer', 'technician', 'support']);
     }
 
-    // Relationships
+    // Relationships para el sistema admin
     public function profile()
     {
         return $this->hasOne(UserProfile::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(UserReview::class, 'reviewed_user_id');
+    }
+
+    public function givenReviews()
+    {
+        return $this->hasMany(UserReview::class, 'reviewer_id');
+    }
+
+    // Helpers para roles
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+    
+    public function isProducer(): bool
+    {
+        return $this->role === 'producer';
+    }
+    
+    public function isTechnician(): bool
+    {
+        return $this->role === 'technician';
+    }
+    
+    public function isSupport(): bool
+    {
+        return $this->role === 'support';
+    }
+
+    // Relationships
     public function productListings()
     {
         return $this->hasMany(ProductListing::class);
@@ -75,20 +109,5 @@ class User extends Authenticatable implements FilamentUser
     public function sellerOrders()
     {
         return $this->hasMany(Order::class, 'seller_id');
-    }
-
-    public function reviews()
-    {
-        return $this->hasMany(UserReview::class, 'reviewed_user_id');
-    }
-
-    public function givenReviews()
-    {
-        return $this->hasMany(UserReview::class, 'reviewer_id');
-    }
-
-    public function person()
-    {
-        return $this->hasOne(Person::class);
     }
 }

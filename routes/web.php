@@ -28,7 +28,8 @@ Route::get('/productores', function () {
     return view('producers');
 })->name('producers');
 
-// Authentication Routes (Laravel Breeze style)
+// Authentication Routes (Laravel Breeze style) - COMENTADO PARA EVITAR CONFLICTOS CON FILAMENT
+/*
 Route::middleware('guest')->group(function () {
     Route::get('login', function() {
         return view('auth.login');
@@ -47,3 +48,4 @@ Route::middleware('auth')->group(function () {
         return redirect('/');
     })->name('logout');
 });
+*/
