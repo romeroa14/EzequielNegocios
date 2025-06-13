@@ -13,6 +13,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('people', function (Blueprint $table) {
+            // Agregar user_id nullable para la relación opcional con users
+            $table->foreignId('user_id')->nullable()->after('id')->constrained()->nullOnDelete();
+            
             // Solo agregar campos nuevos, no modificar existentes
             $table->timestamp('email_verified_at')->nullable()->after('email');
             $table->string('password')->nullable()->after('email_verified_at');
@@ -27,7 +30,7 @@ return new class extends Migration
         });
         
         // Solo ejecutar migración de datos si existen datos previos
-        if (DB::table('people')->exists() && Schema::hasColumn('people', 'user_id')) {
+        if (DB::table('people')->exists()) {
             $this->migrateExistingData();
         }
     }

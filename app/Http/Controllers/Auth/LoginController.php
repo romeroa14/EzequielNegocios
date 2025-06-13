@@ -25,7 +25,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = RouteServiceProvider::HOME;
 
     /**
      * Create a new controller instance.
@@ -50,13 +50,25 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        // Intentar autenticar como persona (comprador/vendedor)
+        if (Auth::guard('web')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            $user = Auth::user();
-            $welcomeMessage = '¡Bienvenido ' . $user->first_name . '!';
+            $person = Auth::guard('web')->user();
+            $welcomeMessage = '¡Bienvenido ' . $person->first_name . '!';
 
             return redirect()->intended(RouteServiceProvider::HOME)
+                ->with('success', $welcomeMessage);
+        }
+
+        // Si falla, intentar autenticar como usuario admin
+        if (Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+
+            $user = Auth::guard('admin')->user();
+            $welcomeMessage = '¡Bienvenido ' . $user->name . '!';
+
+            return redirect()->intended('/admin')
                 ->with('success', $welcomeMessage);
         }
 
@@ -67,7 +79,7 @@ class LoginController extends Controller
 
     public function destroy(Request $request)
     {
-        Auth::guard('web')->logout();
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

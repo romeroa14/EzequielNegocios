@@ -10,7 +10,7 @@ use App\Http\Controllers\SellerProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductListingController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
@@ -40,97 +40,72 @@ Route::get('/', function () {
 });
 
 // Rutas del catálogo (públicas)
-Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');
-Route::get('/products/{product}', [CatalogController::class, 'show'])->name('products.show');
+Route::get('/catalog', function() {
+    return view('catalog');
+})->name('catalog');
+
+// Rutas de productos (públicas)
+Route::get('/products', function() {
+    return view('products.products');
+})->name('products');
 
 // Rutas de productores (públicas)
-Route::get('/producers', [ProducerController::class, 'index'])->name('producers');
-Route::get('/producers/{producer}', [ProducerController::class, 'show'])->name('producers.show');
+Route::get('/producers', function() {
+    return view('producers.producers');
+})->name('producers');
 
-// Rutas que requieren autenticación
-Route::middleware(['auth'])->group(function () {
-    // Redirigir /home a /catalog
-    Route::get('/catalogo', function() {
-        return view('catalog');
-    })->name('catalog');
-    
-    // Rutas específicas para compradores
-    Route::middleware(['role:buyer'])->group(function () {
-        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-        Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
-    });
-    
-    // Rutas específicas para vendedores
-    Route::middleware(['role:seller'])->group(function () {
-        Route::get('/seller/dashboard', [HomeController::class, 'sellerDashboard'])->name('seller.dashboard');
-        
-        // Gestión de productos
-        Route::resource('seller/listings', ListingController::class)->names([
-            'index' => 'seller.listings.index',
-            'create' => 'seller.listings.create',
-            'store' => 'seller.listings.store',
-            'edit' => 'seller.listings.edit',
-            'update' => 'seller.listings.update',
-            'destroy' => 'seller.listings.destroy',
-        ]);
+Route::get('/producers/{producer}', function() {
+    return view('producers.producer');
+})->name('producers.show');
 
-        // Ventas
-        Route::get('/seller/sales', [SalesController::class, 'index'])->name('seller.sales');
-    });
-});
+// Route::get('/producers', [ProducerController::class, 'index'])->name('producers');
+// Route::get('/producers/{producer}', [ProducerController::class, 'show'])->name('producers.show');
 
-// Authentication Routes
+// Contactar productor (público, puedes hacer que envíe un email o redirija a WhatsApp)
+Route::post('/contact-producer/{producer}', [ProducerController::class, 'contact'])->name('producers.contact');
+
+// Rutas de autenticación
 Route::middleware('guest')->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [LoginController::class, 'login']);
-    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('register', [RegisterController::class, 'register']);
-    Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-    Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-    Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::get('login', [LoginController::class, 'create'])->name('login');
+    Route::post('login', [LoginController::class, 'store']);
 });
 
-Route::middleware('auth')->group(function () {
-    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('email/verify', [VerificationController::class, 'show'])->name('verification.notice');
-    Route::get('email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');
-    Route::post('email/resend', [VerificationController::class, 'resend'])->name('verification.resend');
+// Rutas para compradores/vendedores
+Route::middleware(['auth', 'person'])->group(function () {
+    Route::get('/home', function () {
+        return view('home');
+    })->name('home');
 
-    // Rutas del perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
-// Seller Routes
-Route::middleware(['auth', 'role:seller'])->prefix('seller')->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('seller.dashboard');
-    
-    // // Products Management
-    // Route::resource('products', SellerProductController::class)->names([
-    //     'index' => 'seller.products.index',
-    //     'create' => 'seller.products.create',
-    //     'store' => 'seller.products.store',
-    //     'edit' => 'seller.products.edit',
-    //     'update' => 'seller.products.update',
-    //     'destroy' => 'seller.products.destroy',
-    // ]);
-    // Route::get('categories/{category}/subcategories', [SellerProductController::class, 'getSubcategories'])
-    //     ->name('seller.categories.subcategories');
+// Rutas para administradores
+Route::middleware(['auth:admin', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+});
 
-    // // Product Listings
-    // Route::resource('listings', ListingController::class)->names([
-    //     'index' => 'seller.listings.index',
-    //     'create' => 'seller.listings.create',
-    //     'store' => 'seller.listings.store',
-    //     'edit' => 'seller.listings.edit',
-    //     'update' => 'seller.listings.update',
-    //     'destroy' => 'seller.listings.destroy',
-    // ]);
+// Ruta de logout (accesible para todos los usuarios autenticados)
+Route::post('logout', [LoginController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('logout');
 
-    // Route::get('/sales', [SalesController::class, 'index'])->name('seller.sales');
-    // Route::get('/profile', [SellerProfileController::class, 'edit'])->name('seller.profile');
+// Rutas solo para vendedores
+Route::middleware(['auth', 'person', 'role:seller'])->prefix('seller')->group(function () {
+    Route::resource('listings', ListingController::class);
+    Route::get('/sales', [SalesController::class, 'index'])->name('seller.sales');
+    Route::get('/sales/{sale}', [SalesController::class, 'show'])->name('seller.sales.show');
+    Route::patch('/sales/{sale}', [SalesController::class, 'update'])->name('seller.sales.update');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('email/verify', [VerificationController::class, 'show'])->name('verification.notice');
+    Route::get('email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');
+    Route::post('email/resend', [VerificationController::class, 'resend'])->name('verification.resend');
 });
 
 require __DIR__.'/auth.php';

@@ -64,6 +64,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasOne(UserProfile::class);
     }
 
+    public function person()
+    {
+        return $this->hasOne(Person::class);
+    }
+
     public function reviews()
     {
         return $this->hasMany(UserReview::class, 'reviewed_user_id');

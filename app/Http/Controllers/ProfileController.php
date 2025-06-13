@@ -10,26 +10,46 @@ class ProfileController extends Controller
 {
     public function edit()
     {
-        return view('profile.edit', [
-            'user' => Auth::user()
-        ]);
+        $user = Auth::user();
+        $person = $user->person;
+
+        // Si no existe persona, puedes crearla aquí o mostrar un mensaje en la vista
+        if (!$person) {
+            // Opcional: crear persona automáticamente
+            // $person = $user->person()->create([]);
+        }
+
+        return view('profile.edit', compact('user', 'person'));
     }
 
     public function update(Request $request)
     {
         $user = Auth::user();
+        $person = $user->person;
 
         $validated = $request->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('people')->ignore($user->id)],
-            'phone' => ['required', 'string', 'max:20'],
-            'address' => ['required', 'string', 'max:255'],
-            'sector' => ['required', 'string', 'max:255'],
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
+            'email'      => 'required|email|max:255|unique:users,email,' . $user->id,
+            'phone'      => 'nullable|string|max:20',
+            'address'    => 'nullable|string|max:255',
+            'sector'     => 'nullable|string|max:255',
         ]);
 
-        $user->update($validated);
+        // Actualiza usuario
+        $user->email = $validated['email'];
+        $user->save();
 
-        return redirect()->route('profile.edit')->with('success', 'Perfil actualizado exitosamente.');
+        // Actualiza persona (si existe)
+        if ($person) {
+            $person->first_name = $validated['first_name'];
+            $person->last_name  = $validated['last_name'];
+            $person->phone      = $validated['phone'] ?? null;
+            $person->address    = $validated['address'] ?? null;
+            $person->sector     = $validated['sector'] ?? null;
+            $person->save();
+        }
+
+        return redirect()->route('profile.edit')->with('success', 'Perfil actualizado correctamente.');
     }
 }

@@ -17,6 +17,7 @@ class Person extends Authenticatable
     protected $table = 'people';
 
     protected $fillable = [
+        'user_id',
         'identification_type',
         'identification_number',
         'first_name',
@@ -166,5 +167,10 @@ class Person extends Authenticatable
     public function isSeller(): bool
     {
         return $this->role === 'seller';
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 } 
