@@ -12,7 +12,7 @@ class ProductListingController extends Controller
 {
     public function index()
     {
-        $listings = ProductListing::where('person_id', auth()->user()->person->id)
+        $listings = ProductListing::where('seller_id', auth('admin')->id())
             ->with(['product'])
             ->latest()
             ->paginate(10);
@@ -49,23 +49,14 @@ class ProductListingController extends Controller
             }
         }
 
-        $listing = ProductListing::create([
-            'person_id' => auth()->user()->person->id,
-            'product_id' => $validated['product_id'],
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'unit_price' => $validated['unit_price'],
-            'quantity_available' => $validated['quantity_available'],
-            'quality_grade' => $validated['quality_grade'],
-            'harvest_date' => $validated['harvest_date'],
-            'images' => $images,
-            'location_city' => $validated['location_city'],
-            'location_state' => $validated['location_state'],
-            'status' => 'pending'
-        ]);
+        $validated['seller_id'] = auth('admin')->id();
+        $validated['images'] = $images;
+        $validated['status'] = 'pending';
+
+        $listing = ProductListing::create($validated);
 
         return redirect()->route('seller.listings.index')
-            ->with('success', 'Producto publicado exitosamente y en espera de aprobación.');
+            ->with('success', 'Listing created successfully.');
     }
 
     public function edit(ProductListing $listing)

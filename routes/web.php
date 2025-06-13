@@ -82,18 +82,6 @@ Route::middleware(['auth', 'person'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
-// Rutas para administradores
-Route::middleware(['auth:admin', 'admin'])->prefix('admin')->group(function () {
-    Route::get('/', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
-});
-
-// Ruta de logout (accesible para todos los usuarios autenticados)
-Route::post('logout', [LoginController::class, 'destroy'])
-    ->middleware('auth')
-    ->name('logout');
-
 // Rutas solo para vendedores
 Route::middleware(['auth', 'person', 'role:seller'])->prefix('seller')->group(function () {
     Route::resource('listings', ListingController::class);
@@ -107,5 +95,10 @@ Route::middleware('auth')->group(function () {
     Route::get('email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');
     Route::post('email/resend', [VerificationController::class, 'resend'])->name('verification.resend');
 });
+
+// Ruta de logout (accesible para todos los usuarios autenticados)
+Route::post('logout', [LoginController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('logout');
 
 require __DIR__.'/auth.php';

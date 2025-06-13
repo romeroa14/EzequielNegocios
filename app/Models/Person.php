@@ -12,31 +12,25 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Person extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'people';
 
     protected $fillable = [
-        'user_id',
-        'identification_type',
-        'identification_number',
         'first_name',
         'last_name',
         'email',
         'password',
+        'identification_type',
+        'identification_number',
         'phone',
         'address',
-        'country_id',
-        'state_id',
-        'municipality_id',
-        'parish_id',
         'sector',
         'role',
         'company_name',
         'company_rif',
-        'is_verified',
-        'verified_at',
         'is_active',
+        'is_verified',
     ];
 
     protected $hidden = [
@@ -45,10 +39,9 @@ class Person extends Authenticatable
     ];
 
     protected $casts = [
-        'is_verified' => 'boolean',
+        'email_verified_at' => 'datetime',
         'is_active' => 'boolean',
-        'verified_at' => 'datetime',
-        'password' => 'hashed',
+        'is_verified' => 'boolean',
     ];
 
     /**

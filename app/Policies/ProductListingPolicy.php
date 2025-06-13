@@ -22,16 +22,16 @@ class ProductListingPolicy
 
     public function create(User $user): bool
     {
-        return $user->person && $user->person->role === 'seller';
+        return $user->role === 'producer';
     }
 
     public function update(User $user, ProductListing $listing): bool
     {
-        return $user->person && $user->person->id === $listing->person_id;
+        return $user->role === 'producer' && $user->id === $listing->seller_id;
     }
 
     public function delete(User $user, ProductListing $listing): bool
     {
-        return $user->person && $user->person->id === $listing->person_id;
+        return $user->role === 'producer' && $user->id === $listing->seller_id;
     }
 } 

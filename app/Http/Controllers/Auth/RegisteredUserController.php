@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Person;
-use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -46,18 +45,8 @@ class RegisteredUserController extends Controller
             'company_rif' => ['required_if:role,seller', 'nullable', 'string', 'max:20'],
         ]);
 
-        // Crear usuario base
-        $user = User::create([
-            'name' => $request->first_name . ' ' . $request->last_name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'is_active' => true,
-            'role' => 'producer', // Rol por defecto para el sistema admin
-        ]);
-
-        // Crear persona asociada
+        // Crear persona
         $person = Person::create([
-            'user_id' => $user->id,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
@@ -76,7 +65,7 @@ class RegisteredUserController extends Controller
 
         event(new Registered($person));
 
-        // Autenticar al usuario como persona
+        // Autenticar a la persona
         Auth::guard('web')->login($person);
 
         return redirect(RouteServiceProvider::HOME)

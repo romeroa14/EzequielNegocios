@@ -16,18 +16,20 @@ class ProductListing extends Model
     protected $fillable = [
         'product_id',
         'seller_id',
+        'title',
+        'description',
         'unit_price',
         'quantity_available',
-        'harvest_date',
         'quality_grade',
-        'location_state',
-        'location_city',
+        'harvest_date',
         'images',
-        'status' // active, pending, sold_out, etc.
+        'location_city',
+        'location_state',
+        'status'
     ];
 
     protected $casts = [
-        'person_id' => 'integer',
+        'seller_id' => 'integer',
         'product_id' => 'integer',
         'images' => 'array',
         'quantity_available' => 'decimal:2',
@@ -45,7 +47,7 @@ class ProductListing extends Model
 
     public function seller()
     {
-        return $this->belongsTo(Person::class, 'seller_id');
+        return $this->belongsTo(User::class, 'seller_id');
     }
 
     public function product()

@@ -22,19 +22,15 @@ return new class extends Migration
             $table->foreignId('municipality_id')->nullable()->constrained('municipalities');
             $table->foreignId('parish_id')->nullable()->constrained('parishes');
             $table->string('sector')->nullable(); // sector o urbanización
-            $table->enum('role', [
-                'buyer',
-                'seller',
-                'technician',
-                'support',
-                'admin',
-                'company'
-            ])->default('buyer');
+            $table->enum('role', ['buyer', 'seller'])->default('buyer');
             $table->string('company_name')->nullable();
             $table->string('company_rif')->nullable();
             $table->boolean('is_verified')->default(false);
             $table->timestamp('verified_at')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
             $table->timestamps();
         });
     }

@@ -9,12 +9,6 @@
                     Información del Perfil
                 </h2>
 
-                @if(!$person)
-                    <div class="mb-4 p-4 bg-yellow-100 text-yellow-800 rounded">
-                        No tienes información personal registrada. Por favor, completa tus datos.
-                    </div>
-                @endif
-
                 @if(session('success'))
                     <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">
                         {{ session('success') }}
@@ -27,7 +21,7 @@
 
                     <div>
                         <label for="first_name" class="block text-sm font-medium text-gray-700">Nombre</label>
-                        <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $person->first_name ?? '') }}" required
+                        <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $person->first_name) }}" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         @error('first_name')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -36,7 +30,7 @@
 
                     <div>
                         <label for="last_name" class="block text-sm font-medium text-gray-700">Apellido</label>
-                        <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $person->last_name ?? '') }}" required
+                        <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $person->last_name) }}" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         @error('last_name')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -45,7 +39,7 @@
 
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" required
+                        <input type="email" name="email" id="email" value="{{ old('email', $person->email) }}" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         @error('email')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -54,7 +48,7 @@
 
                     <div>
                         <label for="phone" class="block text-sm font-medium text-gray-700">Teléfono</label>
-                        <input type="text" name="phone" id="phone" value="{{ old('phone', $person->phone ?? '') }}"
+                        <input type="text" name="phone" id="phone" value="{{ old('phone', $person->phone) }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         @error('phone')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -63,7 +57,7 @@
 
                     <div>
                         <label for="address" class="block text-sm font-medium text-gray-700">Dirección</label>
-                        <input type="text" name="address" id="address" value="{{ old('address', $person->address ?? '') }}"
+                        <input type="text" name="address" id="address" value="{{ old('address', $person->address) }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         @error('address')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -72,7 +66,7 @@
 
                     <div>
                         <label for="sector" class="block text-sm font-medium text-gray-700">Sector</label>
-                        <input type="text" name="sector" id="sector" value="{{ old('sector', $person->sector ?? '') }}"
+                        <input type="text" name="sector" id="sector" value="{{ old('sector', $person->sector) }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         @error('sector')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
