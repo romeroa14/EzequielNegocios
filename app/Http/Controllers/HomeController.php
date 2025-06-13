@@ -30,14 +30,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
-        
-        // Redirigir según el rol del usuario
-        if ($user->person && $user->person->role === 'seller') {
-            return redirect()->route('seller.dashboard');
-        }
-
-        return view('home');
+        return view('livewire.product-catalog');
     }
 
     /**
@@ -47,17 +40,6 @@ class HomeController extends Controller
      */
     public function sellerDashboard()
     {
-        $user = Auth::user();
-        $listings = $user->person->listings()
-            ->withCount(['orders' => function($query) {
-                $query->where('status', 'completed');
-            }])
-            ->get();
-            
-        $totalSales = $user->person->orders()
-            ->where('status', 'completed')
-            ->sum('total');
-            
-        return view('seller.dashboard', compact('listings', 'totalSales'));
+        return view('home');
     }
 }

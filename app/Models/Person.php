@@ -8,10 +8,11 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Sanctum\HasApiTokens;
 
 class Person extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     protected $table = 'people';
 
@@ -48,6 +49,46 @@ class Person extends Authenticatable
         'verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * Get the login identifier for the user.
+     *
+     * @return mixed
+     */
+    public function getAuthIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Get the name of the unique identifier for the user.
+     *
+     * @return string
+     */
+    public function getAuthIdentifierName()
+    {
+        return $this->getKeyName();
+    }
+
+    /**
+     * Get the password for the user.
+     *
+     * @return string
+     */
+    public function getAuthPassword()
+    {
+        return $this->password;
+    }
+
+    /**
+     * Get the column name for the "remember me" token.
+     *
+     * @return string
+     */
+    public function getRememberTokenName()
+    {
+        return 'remember_token';
+    }
 
     public function country(): BelongsTo
     {
@@ -125,11 +166,5 @@ class Person extends Authenticatable
     public function isSeller(): bool
     {
         return $this->role === 'seller';
-    }
-    
-    // Atributo para el nombre de usuario en autenticación
-    public function getAuthIdentifierName()
-    {
-        return 'email';
     }
 } 

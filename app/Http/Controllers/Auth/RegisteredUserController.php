@@ -33,10 +33,10 @@ class RegisteredUserController extends Controller
         $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:people'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:people,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'identification_type' => ['required', 'string', 'in:V,E,J,G'],
-            'identification_number' => ['required', 'string', 'max:20', 'unique:people'],
+            'identification_number' => ['required', 'string', 'max:20', 'unique:people,identification_number'],
             'phone' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string', 'max:255'],
             'sector' => ['nullable', 'string', 'max:255'],
@@ -59,12 +59,12 @@ class RegisteredUserController extends Controller
             'company_name' => $request->company_name,
             'company_rif' => $request->company_rif,
             'is_active' => true,
+            'is_verified' => false,
         ]);
 
         event(new Registered($person));
 
-        Auth::login($person);
-
-        return redirect(RouteServiceProvider::HOME);
+        return redirect()->route('login')
+            ->with('success', '¡Cuenta creada exitosamente! Por favor, inicia sesión.');
     }
 } 

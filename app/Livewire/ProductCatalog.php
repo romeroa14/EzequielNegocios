@@ -77,7 +77,7 @@ class ProductCatalog extends Component
         return ProductListing::query()
             ->with(['product.category', 'product.subcategory', 'person.user'])
             ->where('status', 'active')
-            ->where('expiry_date', '>', now())
+            // ->where('expiry_date', '>', now())
             ->when($this->search, function (Builder $query) {
                 $query->where(function (Builder $subQuery) {
                     $subQuery->where('title', 'like', '%' . $this->search . '%')

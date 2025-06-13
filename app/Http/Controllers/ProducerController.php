@@ -13,7 +13,7 @@ class ProducerController extends Controller
             ->with(['user', 'listings'])
             ->paginate(12);
             
-        return view('producers.index', compact('producers'));
+        return view('producers.producers', compact('producers'));
     }
 
     public function show(Person $producer)

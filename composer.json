@@ -8,8 +8,10 @@
     "require": {
         "php": "^8.2",
         "dipeshsukhia/laravel-country-state-city-data": "^2.0",
+        "doctrine/dbal": "^4.2",
         "filament/filament": "^3.0-stable",
         "laravel/framework": "^12.0",
+        "laravel/sanctum": "^4.1",
         "laravel/tinker": "^2.10.1",
         "laravel/ui": "^4.6",
         "livewire/livewire": "^3.6"

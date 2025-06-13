@@ -21,6 +21,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ProducerController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,7 +49,10 @@ Route::get('/producers/{producer}', [ProducerController::class, 'show'])->name('
 
 // Rutas que requieren autenticación
 Route::middleware(['auth'])->group(function () {
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    // Redirigir /home a /catalog
+    Route::get('/catalogo', function() {
+        return view('catalog');
+    })->name('catalog');
     
     // Rutas específicas para compradores
     Route::middleware(['role:buyer'])->group(function () {
@@ -92,6 +96,10 @@ Route::middleware('auth')->group(function () {
     Route::get('email/verify', [VerificationController::class, 'show'])->name('verification.notice');
     Route::get('email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');
     Route::post('email/resend', [VerificationController::class, 'resend'])->name('verification.resend');
+
+    // Rutas del perfil
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
 // Seller Routes
