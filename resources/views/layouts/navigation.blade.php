@@ -5,7 +5,7 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('catalog') }}" class="text-2xl font-bold text-green-600">
+                    <a href="{{ route('catalog') }}" class="text-2xl font-bold text-yellow-600">
                         🌱 AgroMarket
                     </a>
                 </div>
@@ -15,25 +15,16 @@
                     @auth
                         @if(auth()->user()->person && auth()->user()->person->role === 'seller')
                             <x-nav-link :href="route('seller.dashboard')" :active="request()->routeIs('seller.dashboard')">
-                                Dashboard
-                            </x-nav-link>
-                            <x-nav-link :href="route('seller.products.index')" :active="request()->routeIs('seller.products.*')">
-                                Productos
-                            </x-nav-link>
-                            <x-nav-link :href="route('seller.listings.index')" :active="request()->routeIs('seller.listings.*')">
-                                Publicaciones
-                            </x-nav-link>
-                            <x-nav-link :href="route('seller.sales')" :active="request()->routeIs('seller.sales')">
-                                Ventas
+                                {{ __('Dashboard') }}
                             </x-nav-link>
                         @endif
                     @endauth
                     
                     <x-nav-link :href="route('catalog')" :active="request()->routeIs('catalog')">
-                        Catálogo
+                        {{ __('Catálogo') }}
                     </x-nav-link>
                     <x-nav-link :href="route('producers')" :active="request()->routeIs('producers')">
-                        Productores
+                        {{ __('Productores') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -45,8 +36,13 @@
                         <x-slot name="trigger">
                             <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                                 <div>
-                                    {{-- {{ $person->first_name }} {{ $person->last_name }} --}}
-                                    @if (is_null(Auth::user()->email_verified_at))
+                                    @if(auth()->user()->person)
+                                        {{ auth()->user()->person->first_name }} {{ auth()->user()->person->last_name }}
+                                    @else
+                                        {{ auth()->user()->email }}
+                                    @endif
+
+                                    @if (!auth()->user()->email_verified_at)
                                         <span title="Cuenta no verificada" class="ml-2 text-xs text-red-500 font-semibold">
                                             <svg class="inline h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
@@ -65,8 +61,14 @@
                         </x-slot>
 
                         <x-slot name="content">
+                            @if(auth()->user()->person && auth()->user()->person->role === 'seller')
+                                <x-dropdown-link :href="route('seller.dashboard')">
+                                    {{ __('Dashboard') }}
+                                </x-dropdown-link>
+                            @endif
+
                             <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Profile') }}
+                                {{ __('Perfil') }}
                             </x-dropdown-link>
 
                             <!-- Authentication -->
@@ -75,17 +77,17 @@
                                 <x-dropdown-link :href="route('logout')"
                                         onclick="event.preventDefault();
                                                     this.closest('form').submit();">
-                                    {{ __('Log Out') }}
+                                    {{ __('Cerrar Sesión') }}
                                 </x-dropdown-link>
                             </form>
                         </x-slot>
                     </x-dropdown>
                 @else
                     <a href="{{ route('login') }}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                        Iniciar Sesión
+                        {{ __('Iniciar Sesión') }}
                     </a>
-                    <a href="{{ route('register') }}" class="ml-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
-                        Registrarse
+                    <a href="{{ route('register') }}" class="ml-4 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
+                        {{ __('Registrarse') }}
                     </a>
                 @endauth
             </div>
@@ -108,25 +110,16 @@
             @auth
                 @if(auth()->user()->person && auth()->user()->person->role === 'seller')
                     <x-responsive-nav-link :href="route('seller.dashboard')" :active="request()->routeIs('seller.dashboard')">
-                        Dashboard
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('seller.products.index')" :active="request()->routeIs('seller.products.*')">
-                        Productos
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('seller.listings.index')" :active="request()->routeIs('seller.listings.*')">
-                        Publicaciones
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('seller.sales')" :active="request()->routeIs('seller.sales')">
-                        Ventas
+                        {{ __('Dashboard') }}
                     </x-responsive-nav-link>
                 @endif
             @endauth
             
             <x-responsive-nav-link :href="route('catalog')" :active="request()->routeIs('catalog')">
-                Catálogo
+                {{ __('Catálogo') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('producers')" :active="request()->routeIs('producers')">
-                Productores
+                {{ __('Productores') }}
             </x-responsive-nav-link>
         </div>
 
@@ -134,13 +127,27 @@
         @auth
             <div class="pt-4 pb-1 border-t border-gray-200">
                 <div class="px-4">
-                    <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                    <div class="font-medium text-base text-gray-800">
+                        @if(auth()->user()->person)
+                            {{ auth()->user()->person->first_name }} {{ auth()->user()->person->last_name }}
+                        @else
+                            {{ auth()->user()->email }}
+                        @endif
+                    </div>
+                    <div class="font-medium text-sm text-gray-500">
+                        {{ auth()->user()->email }}
+                    </div>
                 </div>
 
                 <div class="mt-3 space-y-1">
+                    @if(auth()->user()->person && auth()->user()->person->role === 'seller')
+                        <x-responsive-nav-link :href="route('seller.dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-responsive-nav-link>
+                    @endif
+
                     <x-responsive-nav-link :href="route('profile.edit')">
-                        {{ __('Profile') }}
+                        {{ __('Perfil') }}
                     </x-responsive-nav-link>
 
                     <!-- Authentication -->
@@ -149,7 +156,7 @@
                         <x-responsive-nav-link :href="route('logout')"
                                 onclick="event.preventDefault();
                                             this.closest('form').submit();">
-                            {{ __('Log Out') }}
+                            {{ __('Cerrar Sesión') }}
                         </x-responsive-nav-link>
                     </form>
                 </div>

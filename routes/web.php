@@ -101,4 +101,25 @@ Route::post('logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 
+// Rutas para vendedores
+Route::middleware(['auth:web', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\Seller\DashboardController::class, 'index'])->name('dashboard');
+    
+    // Gestión de productos
+    Route::resource('products', App\Http\Controllers\Seller\ProductController::class);
+    
+    // Órdenes
+    Route::get('/orders', [App\Http\Controllers\Seller\OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [App\Http\Controllers\Seller\OrderController::class, 'show'])->name('orders.show');
+    Route::patch('/orders/{order}/status', [App\Http\Controllers\Seller\OrderController::class, 'updateStatus'])->name('orders.status.update');
+    
+    // Mensajes
+    Route::get('/messages', [App\Http\Controllers\Seller\MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{conversation}', [App\Http\Controllers\Seller\MessageController::class, 'show'])->name('messages.show');
+    Route::post('/messages/{conversation}/reply', [App\Http\Controllers\Seller\MessageController::class, 'reply'])->name('messages.reply');
+    
+    // Estadísticas
+    Route::get('/statistics', [App\Http\Controllers\Seller\StatisticsController::class, 'index'])->name('statistics.index');
+});
+
 require __DIR__.'/auth.php';

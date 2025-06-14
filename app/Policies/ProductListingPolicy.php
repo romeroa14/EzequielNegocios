@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Person;
 use App\Models\ProductListing;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -25,13 +26,13 @@ class ProductListingPolicy
         return $user->role === 'producer';
     }
 
-    public function update(User $user, ProductListing $listing): bool
+    public function update(Person $person, ProductListing $listing)
     {
-        return $user->role === 'producer' && $user->id === $listing->seller_id;
+        return $person->id === $listing->person_id;
     }
 
-    public function delete(User $user, ProductListing $listing): bool
+    public function delete(Person $person, ProductListing $listing)
     {
-        return $user->role === 'producer' && $user->id === $listing->seller_id;
+        return $person->id === $listing->person_id;
     }
 } 
