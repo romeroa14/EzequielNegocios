@@ -5,33 +5,43 @@ namespace App\Policies;
 use App\Models\Person;
 use App\Models\ProductListing;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Models\User;
 
 class ProductListingPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(Person $person)
+    public function viewAny(User $user)
     {
-        return $person->isSeller();
+        return $user->role === 'seller' || $user->role === 'admin';
     }
 
-    public function view(Person $person, ProductListing $listing)
+    public function view(User $user, ProductListing $listing)
     {
-        return $person->id === $listing->person_id;
+        if ($user->role === 'admin') {
+            return true;
+        }
+        return $user->role === 'seller' && $user->id === $listing->user_id;
     }
 
-    public function create(Person $person)
+    public function create(User $user)
     {
-        return $person->isSeller();
+        return $user->role === 'seller';
     }
 
-    public function update(Person $person, ProductListing $listing)
+    public function update(User $user, ProductListing $listing)
     {
-        return $person->id === $listing->person_id;
+        if ($user->role === 'admin') {
+            return true;
+        }
+        return $user->role === 'seller' && $user->id === $listing->user_id;
     }
 
-    public function delete(Person $person, ProductListing $listing)
+    public function delete(User $user, ProductListing $listing)
     {
-        return $person->id === $listing->person_id;
+        if ($user->role === 'admin') {
+            return true;
+        }
+        return $user->role === 'seller' && $user->id === $listing->user_id;
     }
 } 

@@ -107,7 +107,7 @@
                     <a href="{{ route('login') }}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                         {{ __('Iniciar Sesión') }}
                     </a>
-                    <a href="{{ route('register') }}" class="ml-4 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
+                    <a href="{{ route('register') }}" class="ml-4 bg-yellow-600 hover:bg-yellow-700 text-gray-500 px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
                         {{ __('Registrarse') }}
                     </a>
                 @endauth
