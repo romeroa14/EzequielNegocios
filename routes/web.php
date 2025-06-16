@@ -22,6 +22,7 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ProducerController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Buyer\DashboardController as BuyerDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,14 +67,11 @@ Route::post('/contact-producer/{producer}', [ProducerController::class, 'contact
 
 // Rutas de autenticación
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('register', [RegisteredUserController::class, 'store']);
-    Route::get('login', [LoginController::class, 'create'])->name('login');
-    Route::post('login', [LoginController::class, 'store']);
+    // Las rutas de autenticación se manejan en routes/auth.php
 });
 
-// Rutas para compradores/vendedores
-Route::middleware(['auth', 'person'])->group(function () {
+// Rutas para usuarios autenticados
+Route::middleware(['auth'])->group(function () {
     Route::get('/home', function () {
         return view('home');
     })->name('home');
@@ -82,44 +80,26 @@ Route::middleware(['auth', 'person'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
-// Rutas solo para vendedores
-Route::middleware(['auth', 'person', 'role:seller'])->prefix('seller')->group(function () {
-    Route::resource('listings', ListingController::class);
-    Route::get('/sales', [SalesController::class, 'index'])->name('seller.sales');
-    Route::get('/sales/{sale}', [SalesController::class, 'show'])->name('seller.sales.show');
-    Route::patch('/sales/{sale}', [SalesController::class, 'update'])->name('seller.sales.update');
-});
-
+// Rutas de verificación de email
 Route::middleware('auth')->group(function () {
     Route::get('email/verify', [VerificationController::class, 'show'])->name('verification.notice');
     Route::get('email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');
     Route::post('email/resend', [VerificationController::class, 'resend'])->name('verification.resend');
 });
 
-// Ruta de logout (accesible para todos los usuarios autenticados)
+// Ruta de logout
 Route::post('logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 
+// Rutas para compradores
+Route::middleware(['auth', 'role:buyer'])->group(function () {
+    Route::get('/buyer/dashboard', [BuyerDashboardController::class, 'index'])->name('buyer.dashboard');
+});
+
 // Rutas para vendedores
-Route::middleware(['auth:web', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\Seller\DashboardController::class, 'index'])->name('dashboard');
-    
-    // Gestión de productos
-    Route::resource('products', App\Http\Controllers\Seller\ProductController::class);
-    
-    // Órdenes
-    Route::get('/orders', [App\Http\Controllers\Seller\OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order}', [App\Http\Controllers\Seller\OrderController::class, 'show'])->name('orders.show');
-    Route::patch('/orders/{order}/status', [App\Http\Controllers\Seller\OrderController::class, 'updateStatus'])->name('orders.status.update');
-    
-    // Mensajes
-    Route::get('/messages', [App\Http\Controllers\Seller\MessageController::class, 'index'])->name('messages.index');
-    Route::get('/messages/{conversation}', [App\Http\Controllers\Seller\MessageController::class, 'show'])->name('messages.show');
-    Route::post('/messages/{conversation}/reply', [App\Http\Controllers\Seller\MessageController::class, 'reply'])->name('messages.reply');
-    
-    // Estadísticas
-    Route::get('/statistics', [App\Http\Controllers\Seller\StatisticsController::class, 'index'])->name('statistics.index');
+Route::middleware(['auth', 'role:seller'])->group(function () {
+    Route::get('/seller/dashboard', [\App\Http\Controllers\Seller\DashboardController::class, 'index'])->name('seller.dashboard');
 });
 
 require __DIR__.'/auth.php';

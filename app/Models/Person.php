@@ -14,6 +14,10 @@ class Person extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    // Definición de roles
+    public const ROLE_BUYER = 'buyer';
+    public const ROLE_SELLER = 'seller';
+
     protected $table = 'people';
 
     protected $fillable = [
@@ -151,15 +155,63 @@ class Person extends Authenticatable
         return implode(', ', $parts);
     }
 
-    // Helpers para roles del frontend
+    /**
+     * Verifica si el usuario es un comprador
+     */
     public function isBuyer(): bool
     {
-        return $this->role === 'buyer';
+        return $this->role === self::ROLE_BUYER;
     }
     
+    /**
+     * Verifica si el usuario es un vendedor
+     */
     public function isSeller(): bool
     {
-        return $this->role === 'seller';
+        return $this->role === self::ROLE_SELLER;
+    }
+
+    /**
+     * Obtiene las capacidades del usuario según su rol
+     */
+    public function getCapabilities(): array
+    {
+        return match($this->role) {
+            self::ROLE_BUYER => [
+                'can_buy_products',
+                'can_view_catalog',
+                'can_review_sellers',
+                'can_track_orders',
+            ],
+            self::ROLE_SELLER => [
+                'can_list_products',
+                'can_manage_inventory',
+                'can_process_orders',
+                'can_view_sales_stats',
+                'can_receive_reviews',
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * Verifica si el usuario tiene una capacidad específica
+     */
+    public function hasCapability(string $capability): bool
+    {
+        return in_array($capability, $this->getCapabilities());
+    }
+
+    /**
+     * Obtiene el dashboard correspondiente al rol del usuario
+     */
+    public function getDashboardRoute(): string
+    {
+        return match($this->role) {
+            self::ROLE_BUYER => 'buyer.dashboard',
+            self::ROLE_SELLER => 'seller.dashboard',
+            default => 'home',
+        };
     }
 
     public function user(): BelongsTo

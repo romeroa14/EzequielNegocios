@@ -1,6 +1,21 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Diagnóstico de Autenticación -->
+        {{-- <div class="bg-yellow-100 p-4 text-sm">
+            @auth
+                <p>✅ Usuario autenticado: {{ auth()->user()->email }}</p>
+                @if(auth()->user()->person)
+                    <p>✅ Persona asociada: {{ auth()->user()->person->first_name }} {{ auth()->user()->person->last_name }}</p>
+                    <p>✅ Rol actual: {{ auth()->user()->person->role }}</p>
+                @else
+                    <p>❌ No hay persona asociada al usuario</p>
+                @endif
+            @else
+                <p>❌ Usuario no autenticado</p>
+            @endauth
+        </div> --}}
+        
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
@@ -13,9 +28,15 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     @auth
-                        @if(auth()->user()->person && auth()->user()->person->role === 'seller')
+                        @if(auth()->user()->role === 'seller')
                             <x-nav-link :href="route('seller.dashboard')" :active="request()->routeIs('seller.dashboard')">
-                                {{ __('Dashboard') }}
+                                {{ __('Dashboard de Vendedor') }}
+                            </x-nav-link>
+                        @endif
+                        
+                        @if(auth()->user()->role === 'buyer')
+                            <x-nav-link :href="route('buyer.dashboard')" :active="request()->routeIs('buyer.dashboard')">
+                                {{ __('Dashboard de Comprador') }}
                             </x-nav-link>
                         @endif
                     @endauth
@@ -39,7 +60,7 @@
                                     @if(auth()->user()->person)
                                         {{ auth()->user()->person->first_name }} {{ auth()->user()->person->last_name }}
                                     @else
-                                        {{ auth()->user()->email }}
+                                        {{ auth()->user()->first_name }} {{ auth()->user()->last_name }} 
                                     @endif
 
                                     @if (!auth()->user()->email_verified_at)
@@ -108,9 +129,15 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             @auth
-                @if(auth()->user()->person && auth()->user()->person->role === 'seller')
+                @if(auth()->user()->role === 'seller')
                     <x-responsive-nav-link :href="route('seller.dashboard')" :active="request()->routeIs('seller.dashboard')">
-                        {{ __('Dashboard') }}
+                        {{ __('Dashboard de Vendedor') }}
+                    </x-responsive-nav-link>
+                @endif
+                
+                @if(auth()->user()->role === 'buyer')
+                    <x-responsive-nav-link :href="route('buyer.dashboard')" :active="request()->routeIs('buyer.dashboard')">
+                        {{ __('Dashboard de Comprador') }}
                     </x-responsive-nav-link>
                 @endif
             @endauth

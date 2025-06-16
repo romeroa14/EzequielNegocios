@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Person;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
@@ -32,53 +31,59 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $rules = [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:people'],
             'phone' => ['required', 'string', 'max:20'],
             'identification_type' => ['required', 'string', 'in:V,E,J,G'],
             'identification_number' => ['required', 'string', 'max:20'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', 'string', 'in:buyer,seller'],
-            'company_name' => ['required_if:role,seller', 'string', 'max:255'],
-            'company_rif' => ['required_if:role,seller', 'string', 'max:20'],
-        ]);
+            'address' => ['nullable', 'string', 'max:255'],
+            'sector' => ['nullable', 'string', 'max:255'],
+        ];
+
+        if ($request->role === 'seller') {
+            $rules['company_name'] = ['required', 'string', 'max:255'];
+            $rules['company_rif'] = ['required', 'string', 'max:20'];
+        }
+
+        $request->validate($rules);
 
         try {
             DB::beginTransaction();
 
-            $user = User::create([
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
-
             $person = Person::create([
-                'user_id' => $user->id,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
+                'email' => $request->email,
                 'phone' => $request->phone,
                 'identification_type' => $request->identification_type,
                 'identification_number' => $request->identification_number,
+                'password' => Hash::make($request->password),
                 'role' => $request->role,
+                'address' => $request->address,
+                'sector' => $request->sector,
                 'company_name' => $request->company_name,
                 'company_rif' => $request->company_rif,
+                'is_active' => true,
+                'is_verified' => false,
             ]);
+
+            event(new Registered($person));
+
+            Auth::guard('web')->login($person);
 
             DB::commit();
 
-            event(new Registered($user));
+            return redirect()->route($person->getDashboardRoute());
 
-            Auth::login($user);
-
-            if ($request->role === 'seller') {
-                return redirect()->route('seller.dashboard');
-            }
-
-            return redirect(RouteServiceProvider::HOME);
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->withErrors(['error' => 'Error al crear el usuario. Por favor, intente nuevamente.']);
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Error al registrar el usuario. Por favor, intente nuevamente.']);
         }
     }
 } 

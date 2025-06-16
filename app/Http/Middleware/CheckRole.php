@@ -5,24 +5,31 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Auth;
 
 class CheckRole
 {
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
     public function handle(Request $request, Closure $next, string $role): Response
     {
-        if (!Auth::check()) {
+        if (!$request->user()) {
             return redirect()->route('login');
         }
 
-        $user = Auth::user();
-        
-        if (!$user->person || $user->person->role !== $role) {
+        if ($request->user()->role !== $role) {
             if ($request->wantsJson()) {
-                return response()->json(['message' => 'No tienes permiso para acceder a esta sección.'], 403);
+                return response()->json([
+                    'error' => 'No tienes permiso para acceder a esta sección.',
+                    'required_role' => $role,
+                    'your_role' => $request->user()->role
+                ], 403);
             }
-            
-            return redirect()->route('home')->with('error', 'No tienes permiso para acceder a esta sección. Debes registrarte como vendedor.');
+
+            return redirect()->route($request->user()->getDashboardRoute())
+                ->with('error', 'No tienes permiso para acceder a esa sección.');
         }
 
         return $next($request);
