@@ -15,44 +15,32 @@ class ProductListing extends Model
 
     protected $fillable = [
         'product_id',
-        'seller_id',
-        'title',
-        'description',
-        'unit_price',
-        'quantity_available',
-        'quality_grade',
-        'harvest_date',
-        'images',
-        'location_city',
-        'location_state',
+        'person_id',
+        'price',
+        'available_quantity',
+        'minimum_order_quantity',
+        'maximum_order_quantity',
+        'delivery_time',
+        'is_active',
         'status'
     ];
 
     protected $casts = [
-        'seller_id' => 'integer',
-        'product_id' => 'integer',
-        'images' => 'array',
-        'quantity_available' => 'decimal:2',
-        'unit_price' => 'decimal:2',
-        'wholesale_price' => 'decimal:2',
-        'min_quantity_order' => 'integer',
-        'max_quantity_order' => 'integer',
-        'pickup_available' => 'boolean',
-        'delivery_available' => 'boolean',
-        'delivery_radius_km' => 'decimal:1',
-        'harvest_date' => 'date',
-        'expiry_date' => 'date',
-        'featured_until' => 'datetime'
+        'price' => 'decimal:2',
+        'available_quantity' => 'decimal:2',
+        'minimum_order_quantity' => 'decimal:2',
+        'maximum_order_quantity' => 'decimal:2',
+        'is_active' => 'boolean'
     ];
 
-    public function seller()
-    {
-        return $this->belongsTo(User::class, 'seller_id');
-    }
-
-    public function product()
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function seller(): BelongsTo
+    {
+        return $this->belongsTo(Person::class, 'person_id');
     }
 
     public function orderItems()
@@ -80,4 +68,11 @@ class ProductListing extends Model
     {
         return $this->main_image ? asset(Storage::disk('public')->path($this->main_image)) : null;
     }
+
+    // Estados posibles del listing
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_PAUSED = 'paused';
+    public const STATUS_SOLD_OUT = 'sold_out';
+    public const STATUS_ARCHIVED = 'archived';
 } 

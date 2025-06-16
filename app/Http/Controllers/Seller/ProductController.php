@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
-use App\Models\ProductListing;
 use App\Models\ProductCategory;
+use App\Models\ProductListing;
 use App\Models\ProductSubcategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -15,18 +16,27 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = auth()->user()->person->productListings()
-            ->with(['product', 'product.category', 'product.subcategory'])
+        $listings = auth()->user()->productListings()
+            ->with(['product.category', 'product.subcategory'])
             ->latest()
             ->paginate(10);
 
-        return view('seller.products.index', compact('products'));
+        return view('seller.products.index', compact('listings'));
     }
 
     public function create()
     {
-        $categories = ProductCategory::with('subcategories')->get();
+        $categories = ProductCategory::where('is_active', true)->get();
         return view('seller.products.create', compact('categories'));
+    }
+
+    public function getSubcategories(ProductCategory $category)
+    {
+        return response()->json([
+            'subcategories' => $category->subcategories()
+                ->where('is_active', true)
+                ->get()
+        ]);
     }
 
     public function store(Request $request)
@@ -36,58 +46,76 @@ class ProductController extends Controller
             'description' => 'required|string',
             'category_id' => 'required|exists:product_categories,id',
             'subcategory_id' => 'required|exists:product_subcategories,id',
+            'unit_type' => 'required|string|max:50',
+            'image' => 'nullable|image|max:2048',
             'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:1',
-            'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
-            'condition' => 'required|in:new,used,refurbished',
-            'brand' => 'nullable|string|max:255',
-            'model' => 'nullable|string|max:255',
-            'specifications' => 'nullable|array',
+            'available_quantity' => 'required|numeric|min:0',
+            'minimum_order_quantity' => 'required|numeric|min:1',
+            'maximum_order_quantity' => 'required|numeric|min:1',
+            'delivery_time' => 'required|string|max:100',
         ]);
 
-        // Crear el producto base
-        $product = Product::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'category_id' => $request->category_id,
-            'subcategory_id' => $request->subcategory_id,
-            'brand' => $request->brand,
-            'model' => $request->model,
-            'specifications' => $request->specifications,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        // Crear el listing del producto
-        $listing = ProductListing::create([
-            'product_id' => $product->id,
-            'person_id' => auth()->user()->person->id,
-            'price' => $request->price,
-            'quantity' => $request->quantity,
-            'condition' => $request->condition,
-            'status' => 'pending', // Pendiente de aprobación
-        ]);
+            // Crear o encontrar el producto base
+            $product = Product::firstOrCreate(
+                [
+                    'name' => $request->name,
+                    'category_id' => $request->category_id,
+                    'subcategory_id' => $request->subcategory_id,
+                ],
+                [
+                    'description' => $request->description,
+                    'unit_type' => $request->unit_type,
+                    'is_active' => true,
+                ]
+            );
 
-        // Procesar y guardar las imágenes
-        if ($request->hasFile('images')) {
-            $images = [];
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('products/' . $product->id, 'public');
-                $images[] = $path;
+            // Manejar la imagen si se proporcionó una
+            if ($request->hasFile('image')) {
+                if ($product->image) {
+                    Storage::disk('public')->delete($product->image);
+                }
+                $imagePath = $request->file('image')->store('products', 'public');
+                $product->update(['image' => $imagePath]);
             }
-            $product->update(['images' => $images]);
-        }
 
-        return redirect()->route('seller.products.index')
-            ->with('success', 'Producto creado exitosamente y enviado para aprobación.');
+            // Crear el listing del producto
+            $listing = ProductListing::create([
+                'product_id' => $product->id,
+                'person_id' => auth()->id(),
+                'price' => $request->price,
+                'available_quantity' => $request->available_quantity,
+                'minimum_order_quantity' => $request->minimum_order_quantity,
+                'maximum_order_quantity' => $request->maximum_order_quantity,
+                'delivery_time' => $request->delivery_time,
+                'is_active' => true,
+                'status' => ProductListing::STATUS_ACTIVE,
+            ]);
+
+            DB::commit();
+
+            return redirect()
+                ->route('seller.products.index')
+                ->with('success', '¡Producto creado y publicado exitosamente!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()
+                ->withInput()
+                ->with('error', 'Error al crear el producto. Por favor, intente nuevamente.');
+        }
     }
 
     public function edit(ProductListing $listing)
     {
         $this->authorize('update', $listing);
         
-        $categories = ProductCategory::with('subcategories')->get();
-        $product = $listing->product;
+        $categories = ProductCategory::where('is_active', true)->get();
+        $subcategories = $listing->product->category->subcategories;
         
-        return view('seller.products.edit', compact('listing', 'product', 'categories'));
+        return view('seller.products.edit', compact('listing', 'categories', 'subcategories'));
     }
 
     public function update(Request $request, ProductListing $listing)
@@ -99,76 +127,100 @@ class ProductController extends Controller
             'description' => 'required|string',
             'category_id' => 'required|exists:product_categories,id',
             'subcategory_id' => 'required|exists:product_subcategories,id',
+            'unit_type' => 'required|string|max:50',
+            'image' => 'nullable|image|max:2048',
             'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
-            'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
-            'condition' => 'required|in:new,used,refurbished',
-            'brand' => 'nullable|string|max:255',
-            'model' => 'nullable|string|max:255',
-            'specifications' => 'nullable|array',
+            'available_quantity' => 'required|numeric|min:0',
+            'minimum_order_quantity' => 'required|numeric|min:1',
+            'maximum_order_quantity' => 'required|numeric|min:1',
+            'delivery_time' => 'required|string|max:100',
         ]);
 
-        // Actualizar el producto base
-        $listing->product->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'category_id' => $request->category_id,
-            'subcategory_id' => $request->subcategory_id,
-            'brand' => $request->brand,
-            'model' => $request->model,
-            'specifications' => $request->specifications,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        // Actualizar el listing
-        $listing->update([
-            'price' => $request->price,
-            'quantity' => $request->quantity,
-            'condition' => $request->condition,
-            'status' => 'pending', // Vuelve a pendiente al editar
-        ]);
+            // Actualizar el producto base
+            $listing->product->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'category_id' => $request->category_id,
+                'subcategory_id' => $request->subcategory_id,
+                'unit_type' => $request->unit_type,
+            ]);
 
-        // Procesar nuevas imágenes si se proporcionan
-        if ($request->hasFile('images')) {
-            // Eliminar imágenes anteriores
-            foreach ($listing->product->images ?? [] as $oldImage) {
-                Storage::disk('public')->delete($oldImage);
+            // Manejar la imagen si se proporcionó una nueva
+            if ($request->hasFile('image')) {
+                if ($listing->product->image) {
+                    Storage::disk('public')->delete($listing->product->image);
+                }
+                $imagePath = $request->file('image')->store('products', 'public');
+                $listing->product->update(['image' => $imagePath]);
             }
 
-            $images = [];
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('products/' . $listing->product->id, 'public');
-                $images[] = $path;
-            }
-            $listing->product->update(['images' => $images]);
+            // Actualizar el listing
+            $listing->update([
+                'price' => $request->price,
+                'available_quantity' => $request->available_quantity,
+                'minimum_order_quantity' => $request->minimum_order_quantity,
+                'maximum_order_quantity' => $request->maximum_order_quantity,
+                'delivery_time' => $request->delivery_time,
+            ]);
+
+            DB::commit();
+
+            return redirect()
+                ->route('seller.products.index')
+                ->with('success', '¡Producto actualizado exitosamente!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()
+                ->withInput()
+                ->with('error', 'Error al actualizar el producto. Por favor, intente nuevamente.');
         }
-
-        return redirect()->route('seller.products.index')
-            ->with('success', 'Producto actualizado exitosamente y enviado para aprobación.');
     }
 
     public function destroy(ProductListing $listing)
     {
         $this->authorize('delete', $listing);
 
-        // Eliminar imágenes
-        foreach ($listing->product->images ?? [] as $image) {
-            Storage::disk('public')->delete($image);
+        try {
+            DB::beginTransaction();
+
+            // Si es el último listing de este producto, eliminar también el producto
+            if ($listing->product->productListings()->count() === 1) {
+                if ($listing->product->image) {
+                    Storage::disk('public')->delete($listing->product->image);
+                }
+                $listing->product->delete();
+            }
+
+            $listing->delete();
+
+            DB::commit();
+
+            return redirect()
+                ->route('seller.products.index')
+                ->with('success', '¡Producto eliminado exitosamente!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error al eliminar el producto. Por favor, intente nuevamente.');
         }
-
-        // Eliminar el producto y el listing
-        $listing->product->delete();
-        $listing->delete();
-
-        return redirect()->route('seller.products.index')
-            ->with('success', 'Producto eliminado exitosamente.');
     }
 
-    public function getSubcategories(ProductCategory $category)
+    public function toggleStatus(ProductListing $listing)
     {
-        $subcategories = ProductSubcategory::where('category_id', $category->id)
-            ->where('is_active', true)
-            ->get(['id', 'name']);
+        $this->authorize('update', $listing);
 
-        return response()->json($subcategories);
+        $listing->update([
+            'is_active' => !$listing->is_active
+        ]);
+
+        return back()->with('success', 
+            $listing->is_active 
+                ? '¡Producto activado exitosamente!' 
+                : '¡Producto desactivado exitosamente!'
+        );
     }
 } 

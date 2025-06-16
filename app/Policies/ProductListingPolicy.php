@@ -4,26 +4,25 @@ namespace App\Policies;
 
 use App\Models\Person;
 use App\Models\ProductListing;
-use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProductListingPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(User $user): bool
+    public function viewAny(Person $person)
     {
-        return true; // Cualquier usuario autenticado puede ver listings
+        return $person->isSeller();
     }
 
-    public function view(User $user, ProductListing $listing): bool
+    public function view(Person $person, ProductListing $listing)
     {
-        return true; // Cualquier usuario autenticado puede ver un listing específico
+        return $person->id === $listing->person_id;
     }
 
-    public function create(User $user): bool
+    public function create(Person $person)
     {
-        return $user->role === 'producer';
+        return $person->isSeller();
     }
 
     public function update(Person $person, ProductListing $listing)

@@ -1,126 +1,102 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Mis Productos') }}
+            </h2>
+            <a href="{{ route('seller.products.create') }}" 
+               class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">
+                {{ __('Nuevo Producto') }}
+            </a>
+        </div>
+    </x-slot>
 
-@section('content')
-<div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-semibold text-gray-800">
-                        Mis Productos
-                    </h2>
-                    <a href="{{ route('seller.products.create') }}" 
-                       class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-                        Crear Producto
-                    </a>
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline">{{ session('success') }}</span>
                 </div>
+            @endif
 
-                @if(session('success'))
-                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                        <span class="block sm:inline">{{ session('success') }}</span>
-                    </div>
-                @endif
+            @if(session('error'))
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline">{{ session('error') }}</span>
+                </div>
+            @endif
 
-                @if(session('error'))
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                        <span class="block sm:inline">{{ session('error') }}</span>
-                    </div>
-                @endif
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Imagen
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Nombre
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Categoría
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Subcategoría
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Unidad
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Acciones
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($products as $product)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($product->image)
-                                            <img src="{{ Storage::url($product->image) }}" 
-                                                 alt="{{ $product->name }}"
-                                                 class="h-10 w-10 rounded-full object-cover">
-                                        @else
-                                            <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                                <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    @if($listings->isEmpty())
+                        <div class="text-center py-8">
+                            <p class="text-gray-500 text-lg">No tienes productos publicados aún.</p>
+                            <a href="{{ route('seller.products.create') }}" 
+                               class="mt-4 inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">
+                                {{ __('Publicar mi primer producto') }}
+                            </a>
+                        </div>
+                    @else
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            @foreach($listings as $listing)
+                                <div class="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="aspect-w-16 aspect-h-9">
+                                        <img src="{{ $listing->product->image_url ?? asset('images/placeholder.png') }}" 
+                                             alt="{{ $listing->product->name }}"
+                                             class="object-cover w-full h-48">
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="text-lg font-semibold text-gray-900">
+                                            {{ $listing->product->name }}
+                                        </h3>
+                                        <p class="text-sm text-gray-600 mt-1">
+                                            {{ $listing->product->category->name }} > 
+                                            {{ $listing->product->subcategory->name }}
+                                        </p>
+                                        <div class="mt-2 flex justify-between items-center">
+                                            <span class="text-lg font-bold text-gray-900">
+                                                ${{ number_format($listing->price, 2) }}
+                                            </span>
+                                            <span class="text-sm text-gray-600">
+                                                {{ $listing->available_quantity }} disponibles
+                                            </span>
+                                        </div>
+                                        <div class="mt-4 flex justify-between items-center">
+                                            <div class="flex space-x-2">
+                                                <a href="{{ route('seller.products.edit', $listing) }}" 
+                                                   class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-2 px-3 rounded">
+                                                    {{ __('Editar') }}
+                                                </a>
+                                                <form action="{{ route('seller.products.destroy', $listing) }}" 
+                                                      method="POST" 
+                                                      onsubmit="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" 
+                                                            class="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-3 rounded">
+                                                        {{ __('Eliminar') }}
+                                                    </button>
+                                                </form>
                                             </div>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">
-                                            {{ $product->name }}
+                                            <form action="{{ route('seller.products.toggle-status', $listing) }}" method="POST">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" 
+                                                        class="{{ $listing->is_active ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600' }} text-white text-sm font-bold py-2 px-3 rounded">
+                                                    {{ $listing->is_active ? 'Activo' : 'Inactivo' }}
+                                                </button>
+                                            </form>
                                         </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-500">
-                                            {{ $product->category->name }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-500">
-                                            {{ $product->subcategory->name }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-500">
-                                            {{ $product->unit_type }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="{{ route('seller.products.edit', $product) }}" 
-                                           class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                            Editar
-                                        </a>
-                                        <form action="{{ route('seller.products.destroy', $product) }}" 
-                                              method="POST" 
-                                              class="inline"
-                                              onsubmit="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" 
-                                                    class="text-red-600 hover:text-red-900">
-                                                Eliminar
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
-                                        No hay productos registrados.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
 
-                <div class="mt-4">
-                    {{ $products->links() }}
+                        <div class="mt-6">
+                            {{ $listings->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-</div>
-@endsection 
+</x-app-layout> 
