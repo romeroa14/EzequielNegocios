@@ -2,7 +2,7 @@
     <!-- Header y botón de nuevo producto -->
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">Mis Productos</h2>
-        <button wire:click="openModal" class="bg-yellow-500 hover:bg-yellow-600 text-gray-500 font-bold py-2 px-4 rounded shadow">
+        <button wire:click="openModal" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow">
             + Nuevo Producto
         </button>
     </div>
@@ -28,7 +28,7 @@
         @endforelse
     </div>
 
-    <div x-data="{ show: @entangle('showModal') }">
+    {{-- <div x-data="{ show: @entangle('showModal') }">
         <button @click="show = true">Abrir modal</button>
         <div x-show="show" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div class="bg-white p-6 rounded shadow">
@@ -36,10 +36,10 @@
                 <button @click="show = false">Cerrar</button>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <!-- Modal para crear/editar producto -->
-    {{-- <div x-data="{ show: @entangle('showModal') }" x-show="show" class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40" style="display: none;">
+    <div x-data="{ show: $wire.entangle('showModal') }" x-show="show" x-cloak class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
             <button @click="show = false; $wire.closeModal()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -107,5 +107,5 @@
                 </div>
             </form>
         </div>
-    </div> --}}
+    </div>
 </div>
