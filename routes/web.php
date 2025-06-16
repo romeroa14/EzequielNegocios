@@ -101,16 +101,19 @@ Route::middleware(['auth', 'role:buyer'])->group(function () {
 Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::get('/seller/dashboard', [\App\Http\Controllers\Seller\DashboardController::class, 'index'])->name('seller.dashboard');
     
-    // Rutas de gestión de productos
-    Route::get('/seller/products', [\App\Http\Controllers\Seller\ProductController::class, 'index'])->name('seller.products.index');
-    Route::get('/seller/products/create', [\App\Http\Controllers\Seller\ProductController::class, 'create'])->name('seller.products.create');
-    Route::post('/seller/products', [\App\Http\Controllers\Seller\ProductController::class, 'store'])->name('seller.products.store');
-    Route::get('/seller/products/{listing}/edit', [\App\Http\Controllers\Seller\ProductController::class, 'edit'])->name('seller.products.edit');
-    Route::put('/seller/products/{listing}', [\App\Http\Controllers\Seller\ProductController::class, 'update'])->name('seller.products.update');
-    Route::delete('/seller/products/{listing}', [\App\Http\Controllers\Seller\ProductController::class, 'destroy'])->name('seller.products.destroy');
-    Route::patch('/seller/products/{listing}/toggle-status', [\App\Http\Controllers\Seller\ProductController::class, 'toggleStatus'])->name('seller.products.toggle-status');
+    // Nueva ruta Livewire para gestión de productos
+    Route::view('/seller/products', 'seller.products')->name('seller.products.index');
     
-    // Ruta para obtener subcategorías
+    // Rutas antiguas de productos (comentadas porque ahora se usa Livewire)
+    // Route::get('/seller/products', [\App\Http\Controllers\Seller\ProductController::class, 'index'])->name('seller.products.index');
+    // Route::get('/seller/products/create', [\App\Http\Controllers\Seller\ProductController::class, 'create'])->name('seller.products.create');
+    // Route::post('/seller/products', [\App\Http\Controllers\Seller\ProductController::class, 'store'])->name('seller.products.store');
+    // Route::get('/seller/products/{listing}/edit', [\App\Http\Controllers\Seller\ProductController::class, 'edit'])->name('seller.products.edit');
+    // Route::put('/seller/products/{listing}', [\App\Http\Controllers\Seller\ProductController::class, 'update'])->name('seller.products.update');
+    // Route::delete('/seller/products/{listing}', [\App\Http\Controllers\Seller\ProductController::class, 'destroy'])->name('seller.products.destroy');
+    // Route::patch('/seller/products/{listing}/toggle-status', [\App\Http\Controllers\Seller\ProductController::class, 'toggleStatus'])->name('seller.products.toggle-status');
+    
+    // Ruta para obtener subcategorías (puede mantenerse si la usas vía AJAX)
     Route::get('/seller/categories/{category}/subcategories', [\App\Http\Controllers\Seller\ProductController::class, 'getSubcategories'])
         ->name('seller.categories.subcategories');
 });
