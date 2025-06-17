@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductSubcategory;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 class ProductsCrud extends Component
@@ -27,6 +28,7 @@ class ProductsCrud extends Component
         'seasonal_info' => '',
         'is_active' => true,
     ];
+    public $changeImage = false;
 
     protected $listeners = ['refreshComponent' => '$refresh'];
 
@@ -37,23 +39,33 @@ class ProductsCrud extends Component
 
     public function loadProducts()
     {
-        $person = Auth::user()->person;
-        if (!$person) {
-            $this->products = collect();
-            return;
-        }
-
-        $this->products = Product::where('is_active', true)
-            ->whereHas('listings', function($q) use ($person) {
-                $q->where('person_id', $person->id);
-            })
+        // $person = Auth::user()->person;
+        // if (!$person) {
+            $this->products = Product::where('is_active', true)
             ->with(['category', 'subcategory'])
+            ->orderBy('id', 'asc')
             ->get();
+            // return;
+        // }
+
+        // $this->products = Product::where('is_active', true)
+        //     ->whereHas('listings', function($q) use ($person) {
+        //         $q->where('person_id', $person->id);
+        //     })
+        //     ->with(['category', 'subcategory'])
+        //     ->get();
+
+        // $this->products = Product::where('is_active', true)
+        //     ->with(['category', 'subcategory'])
+        //     ->get();
+
+        // dd($this->products);
     }
 
     public function openModal($productId = null)
     {
         $this->resetForm();
+        $this->changeImage = false;
         if ($productId) {
             $this->editingProduct = Product::findOrFail($productId);
             $this->form = [
@@ -103,14 +115,8 @@ class ProductsCrud extends Component
 
     public function saveProduct()
     {
-        // Aquí va la lógica para guardar el producto
-        // Ejemplo mínimo:
-        // Validar datos
-        // Guardar imagen si existe
-        // Crear el producto
-        // Cerrar el modal y recargar productos
+        $formImageRule = is_string($this->form['image']) ? 'nullable|string' : 'nullable|image|max:2048';
 
-        // Ejemplo básico:
         $this->validate([
             'form.category_id' => 'required|exists:product_categories,id',
             'form.subcategory_id' => 'required|exists:product_subcategories,id',
@@ -118,33 +124,62 @@ class ProductsCrud extends Component
             'form.description' => 'nullable|string',
             'form.sku_base' => 'nullable|string|max:255',
             'form.unit_type' => 'required|string',
-            'form.image' => 'nullable|image|max:2048',
+            'form.image' => $formImageRule,
             'form.seasonal_info' => 'nullable|string',
             'form.is_active' => 'boolean',
         ]);
 
         $imagePath = null;
-        if ($this->form['image']) {
-            $imagePath = $this->form['image']->store('products', 'public');
-        }
 
-        $product = Product::create([
-            'category_id' => $this->form['category_id'],
-            'subcategory_id' => $this->form['subcategory_id'],
-            'name' => $this->form['name'],
-            'description' => $this->form['description'],
-            'sku_base' => $this->form['sku_base'],
-            'unit_type' => $this->form['unit_type'],
-            'image' => $imagePath,
-            'seasonal_info' => $this->form['seasonal_info'],
-            'is_active' => $this->form['is_active'],
-        ]);
+        // Si es edición y no se sube nueva imagen, conserva la anterior
+        if ($this->editingProduct) {
+            $product = $this->editingProduct;
+            if ($this->form['image'] instanceof TemporaryUploadedFile) {
+                $imagePath = $this->form['image']->store('products', 'public');
+            } else {
+                $imagePath = $product->image;
+            }
+            $product->update([
+                'category_id' => $this->form['category_id'],
+                'subcategory_id' => $this->form['subcategory_id'],
+                'name' => $this->form['name'],
+                'description' => $this->form['description'],
+                'sku_base' => $this->form['sku_base'],
+                'unit_type' => $this->form['unit_type'],
+                'image' => $imagePath,
+                'seasonal_info' => $this->form['seasonal_info'],
+                'is_active' => $this->form['is_active'],
+            ]);
+        } else {
+            // Crear nuevo producto
+            if ($this->form['image'] instanceof TemporaryUploadedFile) {
+                $imagePath = $this->form['image']->store('products', 'public');
+            }
+            Product::create([
+                'category_id' => $this->form['category_id'],
+                'subcategory_id' => $this->form['subcategory_id'],
+                'name' => $this->form['name'],
+                'description' => $this->form['description'],
+                'sku_base' => $this->form['sku_base'],
+                'unit_type' => $this->form['unit_type'],
+                'image' => $imagePath,
+                'seasonal_info' => $this->form['seasonal_info'],
+                'is_active' => $this->form['is_active'],
+            ]);
+        }
 
         $this->closeModal();
         $this->loadProducts();
-        // dd('Producto creado correctamente.', $product);
-        session()->flash('success', 'Producto creado correctamente.');
+        session()->flash('success', $this->editingProduct ? 'Producto actualizado correctamente.' : 'Producto creado correctamente.');
         $this->dispatch('product-added');
+        $this->dispatch('product-updated');
+        // $this->dispatch('product-deleted');
+    }
+
+    public function enableImageChange()
+    {
+        $this->changeImage = true;
+        $this->form['image'] = null;
     }
 
     public function render()
@@ -153,7 +188,6 @@ class ProductsCrud extends Component
         $subcategories = $this->form['category_id']
             ? ProductSubcategory::where('category_id', (int)$this->form['category_id'])->where('is_active', 't')->get()
             : collect();
-        $products = Product::where('is_active', true)->get();
 
         logger('Categoria seleccionada: ' . $this->form['category_id']);
         logger('Subcategorias encontradas: ' . $subcategories->pluck('name')->join(', '));
@@ -164,7 +198,7 @@ class ProductsCrud extends Component
         return view('livewire.seller.products-crud', [
             'categories' => $categories,
             'subcategories' => $subcategories,
-            'products' => $products,
+            'products' => $this->products,
         ]);
     }
 }

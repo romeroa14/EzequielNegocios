@@ -17,8 +17,7 @@
                 <p class="text-gray-700 text-sm flex-1">{{ $product->description }}</p>
                 <div class="flex justify-between mt-4">
                     <button wire:click="openModal({{ $product->id }})" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded">Editar</button>
-                    <!-- Botón de eliminar (lógica a implementar) -->
-                    <button class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded" disabled>Eliminar</button>
+                    <button wire:click="deleteProduct({{ $product->id }})" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded">Eliminar</button>
                 </div>
             </div>
         @empty
@@ -91,8 +90,16 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="block text-sm font-medium mb-1">Imagen</label>
-                        <input type="file" wire:model="form.image" class="w-full border rounded px-3 py-2" />
+                        @if($editingProduct && $editingProduct->image && !$changeImage)
+                            <div class="mt-2">
+                                <img src="{{ asset('storage/' . $editingProduct->image) }}" alt="Imagen actual" class="h-24 rounded shadow">
+                                <p class="text-xs text-gray-500">Imagen actual</p>
+                                <button type="button" wire:click="enableImageChange" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded">Cambiar imagen</button>
+                            </div>
+                        @else
+                            <label class="block text-sm font-medium mb-1">Imagen</label>
+                            <input type="file" wire:model="form.image" class="w-full border rounded px-3 py-2" />
+                        @endif
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Información estacional</label>
@@ -119,6 +126,24 @@
                 icon: 'success',
                 title: '¡Producto agregado!',
                 text: 'El producto se ha creado correctamente.',
+                confirmButtonColor: '#f59e42'
+            });
+        });
+
+        window.addEventListener('product-updated', event => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Producto actualizado!',
+                text: 'El producto se ha actualizado correctamente.',
+                confirmButtonColor: '#f59e42'
+            });
+        });
+
+        window.addEventListener('product-deleted', event => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Producto eliminado!',
+                text: 'El producto se ha eliminado correctamente.',
                 confirmButtonColor: '#f59e42'
             });
         });
