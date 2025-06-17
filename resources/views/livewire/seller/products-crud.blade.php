@@ -1,4 +1,4 @@
-<div>
+<div class="bg-white rounded-xl shadow-lg p-8 mb-8">
     <!-- Header y botón de nuevo producto -->
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">Mis Productos</h2>

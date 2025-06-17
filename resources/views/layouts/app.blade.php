@@ -16,7 +16,7 @@
     @livewireStyles
 </head>
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-50">
+    <div class="justify-center bg-gray-50">
         @include('layouts.navigation')
 
         <!-- Notificaciones Flotantes -->
@@ -58,7 +58,9 @@
 
         <!-- Page Content -->
         <main>
-            @yield('content')
+            <div class="max-w-6xl mx-auto px-4">
+                @yield('content')
+            </div>
         </main>
     </div>
 
