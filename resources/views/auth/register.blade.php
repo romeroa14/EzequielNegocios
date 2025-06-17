@@ -22,8 +22,8 @@
             <div>
                 <x-input-label for="role" :value="__('Tipo de Usuario')" />
                 <select id="role" name="role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                    <option value="buyer">Comprador</option>
-                    <option value="seller">Vendedor</option>
+                    <option value="buyer" {{ old('role') == 'buyer' ? 'selected' : '' }}>Comprador</option>
+                    <option value="seller" {{ old('role') == 'seller' ? 'selected' : '' }}>Vendedor</option>
                 </select>
                 <x-input-error :messages="$errors->get('role')" class="mt-2" />
             </div>
@@ -146,17 +146,29 @@
 
 @push('scripts')
 <script>
-    document.getElementById('role').addEventListener('change', function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleSelect = document.getElementById('role');
         const companyInfo = document.getElementById('company-info');
-        if (this.value === 'seller') {
-            companyInfo.classList.remove('hidden');
-            document.getElementById('company_name').required = true;
-            document.getElementById('company_rif').required = true;
+        const companyName = document.getElementById('company_name');
+        const companyRif = document.getElementById('company_rif');
+
+        function toggleCompanyFields() {
+            if (roleSelect.value === 'seller') {
+                companyInfo.classList.remove('hidden');
+                companyName.required = true;
+                companyRif.required = true;
             } else {
-            companyInfo.classList.add('hidden');
-            document.getElementById('company_name').required = false;
-            document.getElementById('company_rif').required = false;
+                companyInfo.classList.add('hidden');
+                companyName.required = false;
+                companyRif.required = false;
+            }
         }
+
+        // Ejecutar al cargar la página
+        toggleCompanyFields();
+
+        // Ejecutar al cambiar el select
+        roleSelect.addEventListener('change', toggleCompanyFields);
     });
 </script>
 @endpush

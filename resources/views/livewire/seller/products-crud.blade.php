@@ -60,13 +60,11 @@
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Subcategoría</label>
-                        <select wire:model="form.subcategory_id" class="w-full border rounded px-3 py-2">
-                            <option value="">Selecciona una subcategoría</option>
-                            @forelse($subcategories as $subcategory)
+                        <select wire:model="form.subcategory_id" class="w-full border rounded px-3 py-2" required>
+                            <option value="" disabled>Selecciona una subcategoría</option>
+                            @foreach($subcategories as $subcategory)
                                 <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
-                            @empty
-                                <option value="">No hay subcategorías disponibles</option>
-                            @endforelse
+                            @endforeach
                         </select>
                     </div>
                     <div class="mb-3">
@@ -113,3 +111,16 @@
         </div>
     @endif
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        window.addEventListener('product-added', event => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Producto agregado!',
+                text: 'El producto se ha creado correctamente.',
+                confirmButtonColor: '#f59e42'
+            });
+        });
+    });
+</script>
