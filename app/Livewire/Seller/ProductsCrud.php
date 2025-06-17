@@ -25,6 +25,8 @@ class ProductsCrud extends Component
         'is_active' => true,
     ];
 
+    protected $listeners = ['refreshComponent' => '$refresh'];
+
     public function mount()
     {
         $this->loadProducts();
@@ -90,12 +92,25 @@ class ProductsCrud extends Component
         ];
     }
 
+    public function categoryChanged($value)
+    {
+        $this->form['category_id'] = $value;
+        $this->form['subcategory_id'] = '';
+    }
+
     public function render()
     {
         $categories = ProductCategory::where('is_active', true)->get();
         $subcategories = $this->form['category_id']
-            ? ProductSubcategory::where('category_id', $this->form['category_id'])->where('is_active', true)->get()
+            ? ProductSubcategory::where('category_id', (int)$this->form['category_id'])->where('is_active', 't')->get()
             : collect();
+
+        logger('Categoria seleccionada: ' . $this->form['category_id']);
+        logger('Subcategorias encontradas: ' . $subcategories->pluck('name')->join(', '));
+
+        // Debug temporal
+        // dd($this->form['category_id'], $subcategories);
+
         return view('livewire.seller.products-crud', [
             'categories' => $categories,
             'subcategories' => $subcategories,

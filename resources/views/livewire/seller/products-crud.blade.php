@@ -39,73 +39,77 @@
     </div> --}}
 
     <!-- Modal para crear/editar producto -->
-    <div x-data="{ show: $wire.entangle('showModal') }" x-show="show" x-cloak class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
-            <button @click="show = false; $wire.closeModal()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-            <h2 class="text-xl font-bold mb-4">{{ $editingProduct ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
-            <form wire:submit.prevent="saveProduct">
-                <div class="mb-3">
-                    <label class="block text-sm font-medium mb-1">Categoría</label>
-                    <select wire:model="form.category_id" class="w-full border rounded px-3 py-2">
-                        <option value="">Selecciona una categoría</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-sm font-medium mb-1">Subcategoría</label>
-                    <select wire:model="form.subcategory_id" class="w-full border rounded px-3 py-2">
-                        <option value="">Selecciona una subcategoría</option>
-                        @foreach($subcategories as $subcategory)
-                            <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-sm font-medium mb-1">Nombre</label>
-                    <input type="text" wire:model="form.name" class="w-full border rounded px-3 py-2" />
-                </div>
-                <div class="mb-3">
-                    <label class="block text-sm font-medium mb-1">Descripción</label>
-                    <textarea wire:model="form.description" class="w-full border rounded px-3 py-2"></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-sm font-medium mb-1">SKU Base</label>
-                    <input type="text" wire:model="form.sku_base" class="w-full border rounded px-3 py-2" />
-                </div>
-                <div class="mb-3">
-                    <label class="block text-sm font-medium mb-1">Tipo de Unidad</label>
-                    <select wire:model="form.unit_type" class="w-full border rounded px-3 py-2">
-                        <option value="">Selecciona un tipo</option>
-                        <option value="kg">Kilogramo</option>
-                        <option value="ton">Tonelada</option>
-                        <option value="saco">Saco</option>
-                        <option value="caja">Caja</option>
-                        <option value="unidad">Unidad</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-sm font-medium mb-1">Imagen</label>
-                    <input type="file" wire:model="form.image" class="w-full border rounded px-3 py-2" />
-                </div>
-                <div class="mb-3">
-                    <label class="block text-sm font-medium mb-1">Información estacional</label>
-                    <input type="text" wire:model="form.seasonal_info" class="w-full border rounded px-3 py-2" placeholder="Ej: Primavera, Verano..." />
-                </div>
-                <div class="mb-3 flex items-center">
-                    <input type="checkbox" wire:model="form.is_active" class="mr-2" />
-                    <span class="text-sm">Activo</span>
-                </div>
-                <div class="flex justify-end mt-4">
-                    <button type="button" @click="show = false; $wire.closeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">Cancelar</button>
-                    <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">Guardar</button>
-                </div>
-            </form>
+    @if($showModal)
+        <div class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+                <button wire:click="closeModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h2 class="text-xl font-bold mb-4">{{ $editingProduct ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
+                <form wire:submit.prevent="saveProduct">
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">Categoría</label>
+                        <select wire:model="form.category_id" wire:change="categoryChanged($event.target.value)" class="w-full border rounded px-3 py-2">
+                            <option value="">Selecciona una categoría</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">Subcategoría</label>
+                        <select wire:model="form.subcategory_id" class="w-full border rounded px-3 py-2">
+                            <option value="">Selecciona una subcategoría</option>
+                            @forelse($subcategories as $subcategory)
+                                <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
+                            @empty
+                                <option value="">No hay subcategorías disponibles</option>
+                            @endforelse
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">Nombre</label>
+                        <input type="text" wire:model="form.name" class="w-full border rounded px-3 py-2" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">Descripción</label>
+                        <textarea wire:model="form.description" class="w-full border rounded px-3 py-2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">SKU Base</label>
+                        <input type="text" wire:model="form.sku_base" class="w-full border rounded px-3 py-2" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">Tipo de Unidad</label>
+                        <select wire:model="form.unit_type" class="w-full border rounded px-3 py-2">
+                            <option value="">Selecciona un tipo</option>
+                            <option value="kg">Kilogramo</option>
+                            <option value="ton">Tonelada</option>
+                            <option value="saco">Saco</option>
+                            <option value="caja">Caja</option>
+                            <option value="unidad">Unidad</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">Imagen</label>
+                        <input type="file" wire:model="form.image" class="w-full border rounded px-3 py-2" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">Información estacional</label>
+                        <input type="text" wire:model="form.seasonal_info" class="w-full border rounded px-3 py-2" placeholder="Ej: Primavera, Verano..." />
+                    </div>
+                    <div class="mb-3 flex items-center">
+                        <input type="checkbox" wire:model="form.is_active" class="mr-2" />
+                        <span class="text-sm">Activo</span>
+                    </div>
+                    <div class="flex justify-end mt-4">
+                        <button type="button" @click="closeModal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">Cancelar</button>
+                        <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">Guardar</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+    @endif
 </div>
