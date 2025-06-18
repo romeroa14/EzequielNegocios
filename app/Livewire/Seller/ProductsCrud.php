@@ -29,8 +29,12 @@ class ProductsCrud extends Component
         'is_active' => true,
     ];
     public $changeImage = false;
+    public $productIdToDelete = null;
 
-    protected $listeners = ['refreshComponent' => '$refresh'];
+    protected $listeners = [
+        'refreshComponent' => '$refresh',
+        'deleteProduct'
+    ];
 
     public function mount()
     {
@@ -43,7 +47,7 @@ class ProductsCrud extends Component
         // if (!$person) {
             $this->products = Product::where('is_active', true)
             ->with(['category', 'subcategory'])
-            ->orderBy('id', 'asc')
+            ->orderBy('id', 'desc')
             ->get();
             // return;
         // }
@@ -113,6 +117,15 @@ class ProductsCrud extends Component
         $this->form['subcategory_id'] = '';
     }
 
+    public function deleteProduct($productId)
+    {
+        $product = Product::findOrFail($productId);
+        $product->delete();
+        $this->loadProducts();
+        session()->flash('success', 'Producto eliminado correctamente.');
+        $this->dispatch('product-deleted');
+    }
+
     public function saveProduct()
     {
         $formImageRule = is_string($this->form['image']) ? 'nullable|string' : 'nullable|image|max:2048';
@@ -131,7 +144,6 @@ class ProductsCrud extends Component
 
         $imagePath = null;
 
-        // Si es edición y no se sube nueva imagen, conserva la anterior
         if ($this->editingProduct) {
             $product = $this->editingProduct;
             if ($this->form['image'] instanceof TemporaryUploadedFile) {
@@ -150,8 +162,8 @@ class ProductsCrud extends Component
                 'seasonal_info' => $this->form['seasonal_info'],
                 'is_active' => $this->form['is_active'],
             ]);
+            $this->dispatch('product-updated');
         } else {
-            // Crear nuevo producto
             if ($this->form['image'] instanceof TemporaryUploadedFile) {
                 $imagePath = $this->form['image']->store('products', 'public');
             }
@@ -166,20 +178,24 @@ class ProductsCrud extends Component
                 'seasonal_info' => $this->form['seasonal_info'],
                 'is_active' => $this->form['is_active'],
             ]);
+            $this->dispatch('product-added');
         }
 
         $this->closeModal();
         $this->loadProducts();
         session()->flash('success', $this->editingProduct ? 'Producto actualizado correctamente.' : 'Producto creado correctamente.');
-        $this->dispatch('product-added');
-        $this->dispatch('product-updated');
-        // $this->dispatch('product-deleted');
     }
 
     public function enableImageChange()
     {
         $this->changeImage = true;
         $this->form['image'] = null;
+    }
+
+    public function confirmDelete($productId)
+    {
+        $this->productIdToDelete = $productId;
+        $this->dispatch('show-delete-confirmation');
     }
 
     public function render()

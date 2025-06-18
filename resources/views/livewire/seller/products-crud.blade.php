@@ -17,7 +17,7 @@
                 <p class="text-gray-700 text-sm flex-1">{{ $product->description }}</p>
                 <div class="flex justify-between mt-4">
                     <button wire:click="openModal({{ $product->id }})" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded">Editar</button>
-                    <button wire:click="deleteProduct({{ $product->id }})" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded">Eliminar</button>
+                    <button wire:click="confirmDelete({{ $product->id }})" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded">Eliminar</button>
                 </div>
             </div>
         @empty
@@ -145,6 +145,23 @@
                 title: '¡Producto eliminado!',
                 text: 'El producto se ha eliminado correctamente.',
                 confirmButtonColor: '#f59e42'
+            });
+        });
+
+        window.addEventListener('show-delete-confirmation', event => {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: '¡No podrás revertir esto!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Livewire.dispatch('deleteProduct', [@this.productIdToDelete]);
+                }
             });
         });
     });
