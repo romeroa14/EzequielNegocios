@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\HasProductImage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,26 +10,27 @@ use Illuminate\Support\Facades\Storage;
 class ProductListing extends Model
 {
     use HasFactory;
-    use HasProductImage;
 
     protected $fillable = [
         'product_id',
         'person_id',
-        'price',
-        'available_quantity',
-        'minimum_order_quantity',
-        'maximum_order_quantity',
-        'delivery_time',
-        'is_active',
-        'status'
+        'title',
+        'description',
+        'unit_price',
+        'quantity_available',
+        'quality_grade',
+        'harvest_date',
+        'images',
+        'location_city',
+        'location_state',
+        'status',
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
-        'available_quantity' => 'decimal:2',
-        'minimum_order_quantity' => 'decimal:2',
-        'maximum_order_quantity' => 'decimal:2',
-        'is_active' => 'boolean'
+        'unit_price' => 'decimal:2',
+        'quantity_available' => 'integer',
+        'harvest_date' => 'date',
+        'images' => 'array',
     ];
 
     public function product(): BelongsTo
@@ -42,37 +42,4 @@ class ProductListing extends Model
     {
         return $this->belongsTo(Person::class, 'person_id');
     }
-
-    public function orderItems()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($listing) {
-            if (empty($listing->images) && $listing->product && $listing->product->image) {
-                $listing->images = [$listing->product->image];
-            }
-        });
-    }
-
-    public function getMainImageAttribute()
-    {
-        return $this->images[0] ?? null;
-    }
-
-    public function getMainImageUrlAttribute()
-    {
-        return $this->main_image ? asset(Storage::disk('public')->path($this->main_image)) : null;
-    }
-
-    // Estados posibles del listing
-    public const STATUS_DRAFT = 'draft';
-    public const STATUS_ACTIVE = 'active';
-    public const STATUS_PAUSED = 'paused';
-    public const STATUS_SOLD_OUT = 'sold_out';
-    public const STATUS_ARCHIVED = 'archived';
-} 
+}
