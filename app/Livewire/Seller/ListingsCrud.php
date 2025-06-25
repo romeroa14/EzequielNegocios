@@ -99,7 +99,7 @@ class ListingsCrud extends Component
             'form.status' => 'required|in:active,pending,sold_out,inactive',
         ]);
 
-        $person = Auth::user()->person;
+        $person = Auth::user();
         if (!$person) {
             session()->flash('error', 'No tienes un perfil de vendedor asociado. Contacta al administrador.');
             return;

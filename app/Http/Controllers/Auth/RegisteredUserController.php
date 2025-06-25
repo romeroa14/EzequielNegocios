@@ -70,6 +70,7 @@ class RegisteredUserController extends Controller
                 'is_active' => true,
                 'is_verified' => false,
             ]);
+            
 
             event(new Registered($person));
 

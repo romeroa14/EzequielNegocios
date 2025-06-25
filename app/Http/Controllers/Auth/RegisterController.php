@@ -9,8 +9,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Registered;
+// use Illuminate\Container\Attributes\Log;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
@@ -86,6 +88,10 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        // Log::info('Entrando al método create de RegisterController', $data);
+        // o
+        dd('creando usuario', $data);
+
         try {
             DB::beginTransaction();
 
@@ -117,6 +123,7 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
+        Log::info('Datos recibidos en register', $request->all());
         $this->validator($request->all())->validate();
 
         try {
