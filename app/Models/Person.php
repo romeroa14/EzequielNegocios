@@ -108,6 +108,11 @@ class Person extends Authenticatable
         return $this->belongsTo(Parish::class);
     }
 
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class, 'person_id');
+    }
+
     public function productListings(): HasMany
     {
         return $this->hasMany(ProductListing::class, 'person_id');

@@ -31,6 +31,8 @@ class ListingsCrud extends Component
         $this->loadListings();
     }
 
+ 
+
     public function loadListings()
     {
         $this->listings = ProductListing::with('product')->orderBy('id', 'desc')->get();

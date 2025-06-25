@@ -15,6 +15,7 @@ class Product extends Model
     protected $appends = ['image_url'];
 
     protected $fillable = [
+        'person_id',
         'category_id',
         'subcategory_id',
         'name',
@@ -38,6 +39,11 @@ class Product extends Model
         }
 
         return asset('storage/' . $this->image);
+    }
+
+    public function person(): BelongsTo
+    {
+        return $this->belongsTo(Person::class);
     }
 
     public function category(): BelongsTo

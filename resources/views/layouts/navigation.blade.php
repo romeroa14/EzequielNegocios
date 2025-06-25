@@ -21,7 +21,10 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('catalog') }}" class="text-2xl font-bold text-yellow-600">
-                        🌱 AgroMarket
+                        🌱 EzequielNegocios
+                        <span class="text-xs text-gray-500">
+                            Beta
+                        </span>
                     </a>
                 </div>
 

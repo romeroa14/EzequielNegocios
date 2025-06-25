@@ -10,22 +10,24 @@
     <!-- Listado de publicaciones -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($listings as $listing)
-            <div class="bg-white rounded-lg shadow p-4 flex flex-col">
-                <h3 class="text-lg font-semibold mb-1">{{ $listing->title }}</h3>
-                <p class="text-sm text-gray-500 mb-1">Producto: {{ $listing->product->name ?? '-' }}</p>
-                <p class="text-gray-700 text-sm mb-1">Precio: ${{ number_format($listing->unit_price, 2) }}</p>
-                <p class="text-gray-700 text-sm mb-1">Cantidad: {{ $listing->quantity_available }}</p>
-                <p class="text-gray-700 text-sm mb-1">Calidad: {{ ucfirst($listing->quality_grade) }}</p>
-                <p class="text-gray-700 text-sm mb-1">Cosecha: {{ $listing->harvest_date ? $listing->harvest_date->format('Y-m-d') : '-' }}</p>
-                <p class="text-gray-700 text-sm mb-1">Ciudad: {{ $listing->location_city }}</p>
-                <p class="text-gray-700 text-sm mb-1">Estado: {{ $listing->location_state }}</p>
-                <p class="text-gray-700 text-sm mb-1">Estatus: {{ ucfirst($listing->status) }}</p>
+            <div class="bg-white rounded-lg shadow p-4 flex flex-col min-h-[350px] min-w-[250px] justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold mb-1">{{ $listing->title }}</h3>
+                    <p class="text-base text-gray-500 mb-1">Producto: {{ $listing->product->name ?? '-' }}</p>
+                    <p class="text-base text-gray-700 mb-1">Precio: ${{ number_format($listing->unit_price, 2) }}</p>
+                    <p class="text-base text-gray-700 mb-1">Cantidad: {{ $listing->quantity_available }}</p>
+                    <p class="text-base text-gray-700 mb-1">Calidad: {{ ucfirst($listing->quality_grade) }}</p>
+                    <p class="text-base text-gray-700 mb-1">Cosecha: {{ $listing->harvest_date ? $listing->harvest_date->format('Y-m-d') : '-' }}</p>
+                    <p class="text-base text-gray-700 mb-1">Ciudad: {{ $listing->location_city }}</p>
+                    <p class="text-base text-gray-700 mb-1">Estado: {{ $listing->location_state }}</p>
+                    <p class="text-base text-gray-700 mb-1">Estatus: {{ ucfirst($listing->status) }}</p>
+                </div>
                 @if($listing->images && count($listing->images))
-                    <img src="{{ asset('storage/' . $listing->images[0]) }}" alt="Imagen" class="h-24 rounded shadow my-2">
+                    <img src="{{ asset('storage/' . $listing->images[0]) }}" alt="Imagen" class="w-full h-80 rounded shadow my-2">
                 @endif
                 <div class="flex justify-between mt-4">
-                    <button wire:click="openModal({{ $listing->id }})" class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-bold py-1 px-3 rounded">Editar</button>
-                    <button wire:click="deleteListing({{ $listing->id }})" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded">Eliminar</button>
+                    <button wire:click="openModal({{ $listing->id }})" class="bg-yellow-500 hover:bg-yellow-600 text-white text-base font-bold py-1 px-3 rounded">Editar</button>
+                    <button wire:click="deleteListing({{ $listing->id }})" class="bg-red-500 hover:bg-red-600 text-white text-base font-bold py-1 px-3 rounded">Eliminar</button>
                 </div>
             </div>
         @empty

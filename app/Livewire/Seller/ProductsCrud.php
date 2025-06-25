@@ -73,6 +73,7 @@ class ProductsCrud extends Component
         if ($productId) {
             $this->editingProduct = Product::findOrFail($productId);
             $this->form = [
+                
                 'category_id' => $this->editingProduct->category_id,
                 'subcategory_id' => $this->editingProduct->subcategory_id,
                 'name' => $this->editingProduct->name,
@@ -168,6 +169,7 @@ class ProductsCrud extends Component
                 $imagePath = $this->form['image']->store('products', 'public');
             }
             Product::create([
+                'person_id' => Auth::id(),
                 'category_id' => $this->form['category_id'],
                 'subcategory_id' => $this->form['subcategory_id'],
                 'name' => $this->form['name'],

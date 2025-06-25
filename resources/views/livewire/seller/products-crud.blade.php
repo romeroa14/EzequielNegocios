@@ -11,10 +11,10 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($products as $product)
             <div class="bg-white rounded-lg shadow p-4 flex flex-col">
-                <img src="{{ $product->image_url ?? asset('images/placeholder.png') }}" alt="{{ $product->name }}" class="w-full h-40 object-cover rounded mb-2">
                 <h3 class="text-lg font-semibold">{{ $product->name }}</h3>
                 <p class="text-sm text-gray-500 mb-1">{{ $product->category->name ?? '-' }} > {{ $product->subcategory->name ?? '-' }}</p>
                 <p class="text-gray-700 text-sm flex-1">{{ $product->description }}</p>
+                <img src="{{ $product->image_url ?? asset('images/placeholder.png') }}" alt="{{ $product->name }}" class="w-full h-80 rounded mb-2">
                 <div class="flex justify-between mt-4">
                     <button wire:click="openModal({{ $product->id }})" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded">Editar</button>
                     <button wire:click="confirmDelete({{ $product->id }})" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded">Eliminar</button>
