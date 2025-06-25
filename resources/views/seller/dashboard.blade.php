@@ -26,9 +26,7 @@
                     </div>
                 </div>
                 <div class="flex gap-4">
-                    <a href="{{ route('seller.products.index') }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow">Gestionar Productos</a>
-                    <a href="{{ route('seller.listings.index') }}" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded shadow">Mis Publicaciones</a>
-                    <a href="{{ route('seller.dashboard') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow">Ver Estadísticas</a>
+                    <a href="{{ route('seller.products.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded shadow text-lg font-bold">Ir al Panel</a>
                 </div>
             </div>
         </div>
