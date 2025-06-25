@@ -33,6 +33,11 @@ class ProductListing extends Model
         'images' => 'array',
     ];
 
+    public function person(): BelongsTo
+    {
+        return $this->belongsTo(Person::class);
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
