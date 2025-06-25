@@ -193,12 +193,16 @@
                         </div>
 
                         <!-- Action Button -->
-                        <button 
-                            wire:click="$dispatch('contactProducer', { productId: {{ $product->id }} })"
-                            class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out"
-                        >
-                            Contactar Productor
-                        </button>
+                        @if(Auth::check())
+                            <button 
+                                wire:click="$dispatch('contactProducer', { productId: {{ $product->id }} })"
+                                class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out"
+                            >
+                                Contactar Productor
+                            </button>
+                        @else
+                            <a href="{{ route('register') }}" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">Regístrate para contactar</a>
+                        @endif
                     </div>
                 </div>
             @empty

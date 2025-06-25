@@ -37,11 +37,11 @@
                             </x-nav-link>
                         @endif
                         
-                        @if(auth()->user()->role === 'buyer')
+                        {{-- @if(auth()->user()->role === 'buyer')
                             <x-nav-link :href="route('buyer.dashboard')" :active="request()->routeIs('buyer.dashboard')">
                                 {{ __('Dashboard de Comprador') }}
                             </x-nav-link>
-                        @endif
+                        @endif --}}
                     @endauth
                     
                     <x-nav-link :href="route('catalog')" :active="request()->routeIs('catalog')">

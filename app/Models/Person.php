@@ -213,7 +213,7 @@ class Person extends Authenticatable
     public function getDashboardRoute(): string
     {
         return match($this->role) {
-            self::ROLE_BUYER => 'buyer.dashboard',
+            self::ROLE_BUYER => 'catalog',
             self::ROLE_SELLER => 'seller.dashboard',
             default => 'home',
         };
