@@ -35,7 +35,11 @@ class ListingsCrud extends Component
 
     public function loadListings()
     {
-        $this->listings = ProductListing::with('product')->orderBy('id', 'desc')->get();
+        $personId = Auth::id();
+        $this->listings = ProductListing::with('product')
+            ->where('person_id', $personId)
+            ->orderBy('id', 'desc')
+            ->get();
     }
 
     public function openModal($listingId = null)
@@ -157,7 +161,7 @@ class ListingsCrud extends Component
 
     public function render()
     {
-        $products = Product::all();
+        $products = Product::where('person_id', Auth::id())->get();
         $selectedProduct = $products->where('id', $this->form['product_id'])->first();
         return view('livewire.seller.listings-crud', [
             'listings' => $this->listings,

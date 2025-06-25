@@ -22,6 +22,7 @@ class ProductCatalog extends Component
     public $sortBy = 'created_at';
     public $sortDirection = 'desc';
     public $showFilters = false;
+    public $producer = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -33,6 +34,11 @@ class ProductCatalog extends Component
         'sortBy' => ['except' => 'created_at'],
         'sortDirection' => ['except' => 'desc'],
     ];
+
+    public function mount()
+    {
+        $this->producer = request()->query('producer');
+    }
 
     public function updatedSearch()
     {
@@ -106,6 +112,9 @@ class ProductCatalog extends Component
             ->when($this->maxPrice, function (Builder $query) {
                 $query->where('unit_price', '<=', $this->maxPrice);
             })
+            ->when($this->producer, function (Builder $query) {
+                $query->where('person_id', $this->producer);
+            })
             ->orderBy($this->sortBy, $this->sortDirection)
             ->paginate(12);
     }
@@ -127,12 +136,21 @@ class ProductCatalog extends Component
             ->get();
     }
 
+    public function getSellersProperty()
+    {
+        return \App\Models\Person::whereHas('productListings', function($q) {
+            $q->where('status', 'active');
+        })->get();
+    }
+
     public function render()
     {
         return view('livewire.product-catalog', [
             'products' => $this->products,
             'categories' => $this->categories,
             'subcategories' => $this->subcategories,
+            // 'producer' => $this->producer,
+            'sellers' => $this->sellers,
         ]);
     }
 }

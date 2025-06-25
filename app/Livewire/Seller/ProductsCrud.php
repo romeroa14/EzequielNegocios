@@ -9,6 +9,7 @@ use App\Models\ProductSubcategory;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use App\Models\ProductListing;
 
 class ProductsCrud extends Component
 {
@@ -43,27 +44,12 @@ class ProductsCrud extends Component
 
     public function loadProducts()
     {
-        // $person = Auth::user()->person;
-        // if (!$person) {
-            $this->products = Product::where('is_active', true)
+        $personId = Auth::id();
+        $this->products = Product::where('person_id', $personId)
+            ->where('is_active', true)
             ->with(['category', 'subcategory'])
             ->orderBy('id', 'desc')
             ->get();
-            // return;
-        // }
-
-        // $this->products = Product::where('is_active', true)
-        //     ->whereHas('listings', function($q) use ($person) {
-        //         $q->where('person_id', $person->id);
-        //     })
-        //     ->with(['category', 'subcategory'])
-        //     ->get();
-
-        // $this->products = Product::where('is_active', true)
-        //     ->with(['category', 'subcategory'])
-        //     ->get();
-
-        // dd($this->products);
     }
 
     public function openModal($productId = null)
@@ -71,7 +57,7 @@ class ProductsCrud extends Component
         $this->resetForm();
         $this->changeImage = false;
         if ($productId) {
-            $this->editingProduct = Product::findOrFail($productId);
+            $this->editingProduct = Product::where('id', $productId)->where('person_id', Auth::id())->firstOrFail();
             $this->form = [
                 
                 'category_id' => $this->editingProduct->category_id,
@@ -120,7 +106,7 @@ class ProductsCrud extends Component
 
     public function deleteProduct($productId)
     {
-        $product = Product::findOrFail($productId);
+        $product = Product::where('id', $productId)->where('person_id', Auth::id())->firstOrFail();
         $product->delete();
         $this->loadProducts();
         session()->flash('success', 'Producto eliminado correctamente.');

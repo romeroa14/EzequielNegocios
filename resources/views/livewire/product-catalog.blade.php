@@ -117,6 +117,15 @@
                                 >
                             </div>
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Vendedor</label>
+                            <select wire:model.live="producer" class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                                <option value="">Todos los productores</option>
+                                @foreach($sellers as $seller)
+                                    <option value="{{ $seller->id }}">{{ $seller->first_name }} {{ $seller->last_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Clear Filters Button -->
