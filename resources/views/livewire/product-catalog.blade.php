@@ -142,7 +142,7 @@
                             <img 
                                 src="{{ Storage::url($product->images[0]) }}" 
                                 alt="{{ $product->title }}"
-                                class="w-full h-48 object-cover"
+                                class="w-full h-90 object-cover"
                             >
                         @else
                             <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
