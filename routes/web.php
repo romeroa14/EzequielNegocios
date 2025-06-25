@@ -38,7 +38,7 @@ use App\Http\Controllers\Buyer\DashboardController as BuyerDashboardController;
 // Rutas públicas
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
 // Rutas del catálogo (públicas)
 Route::get('/catalog', function() {
@@ -70,11 +70,11 @@ Route::middleware('guest')->group(function () {
     // Las rutas de autenticación se manejan en routes/auth.php
 });
 
+
+
 // Rutas para usuarios autenticados
 Route::middleware(['auth'])->group(function () {
-    Route::get('/home', function () {
-        return view('home');
-    })->name('home');
+        
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
