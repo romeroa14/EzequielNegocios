@@ -97,6 +97,26 @@ class ListingsCrud extends Component
             'form.location_city' => 'required|string|max:255',
             'form.location_state' => 'required|string|max:255',
             'form.status' => 'required|in:active,pending,sold_out,inactive',
+            
+        ], [
+            'form.product_id.required' => 'El producto es obligatorio.',
+            'form.product_id.exists' => 'El producto seleccionado no existe.',
+            'form.title.required' => 'El título es obligatorio.',
+            'form.title.max' => 'El título no puede tener más de 255 caracteres.',
+            'form.description.required' => 'La descripción es obligatoria.',
+            'form.description.string' => 'La descripción debe ser una cadena de texto.',
+            'form.unit_price.required' => 'El precio unitario es obligatorio.',
+            'form.unit_price.numeric' => 'El precio unitario debe ser un número.',
+            'form.unit_price.min' => 'El precio unitario debe ser mayor o igual a 0.',
+            'form.quantity_available.required' => 'La cantidad disponible es obligatoria.',
+            'form.quantity_available.integer' => 'La cantidad disponible debe ser un número entero.',
+            'form.quantity_available.min' => 'La cantidad disponible debe ser mayor o igual a 0.',
+            'form.quality_grade.required' => 'La calidad es obligatoria.',
+            'form.quality_grade.in' => 'La calidad debe ser premium, standard o economic.',
+            'form.harvest_date.required' => 'La fecha de cosecha es obligatoria.',
+            'form.harvest_date.date' => 'La fecha de cosecha debe ser una fecha válida.',
+            'form.location_city.required' => 'La ciudad es obligatoria.',
+            'form.location_city.string' => 'La ciudad debe ser una cadena de texto.',
         ]);
 
         $person = Auth::user();

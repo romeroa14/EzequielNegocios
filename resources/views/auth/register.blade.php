@@ -154,14 +154,14 @@
 
         function toggleCompanyFields() {
             if (roleSelect.value === 'seller') {
-                companyInfo.classList.remove('hidden');
+            companyInfo.classList.remove('hidden');
                 companyName.required = true;
                 companyRif.required = true;
             } else {
-                companyInfo.classList.add('hidden');
+            companyInfo.classList.add('hidden');
                 companyName.required = false;
                 companyRif.required = false;
-            }
+        }
         }
 
         // Ejecutar al cargar la página

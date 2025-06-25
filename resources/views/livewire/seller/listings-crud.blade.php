@@ -64,6 +64,9 @@
                                 <option value="{{ $product->id }}">{{ $product->name }}</option>
                             @endforeach
                         </select>
+                        @error('form.product_id')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                         <template x-if="img">
                             <img :src="img && {{ Js::from($products->pluck('image', 'id')) }}[img] ? '/storage/' + {{ Js::from($products->pluck('image', 'id')) }}[img] : ''" class="h-24 rounded shadow mt-2" x-show="img && {{ Js::from($products->pluck('image', 'id')) }}[img]">
                         </template>
@@ -74,18 +77,30 @@
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Título</label>
                         <input type="text" wire:model="form.title" class="w-full border rounded px-3 py-2" />
+                        @error('form.title')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Descripción</label>
                         <textarea wire:model="form.description" class="w-full border rounded px-3 py-2"></textarea>
+                        @error('form.description')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Precio Unitario</label>
                         <input type="number" step="0.01" wire:model="form.unit_price" class="w-full border rounded px-3 py-2" />
+                        @error('form.unit_price')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Cantidad Disponible</label>
                         <input type="number" wire:model="form.quantity_available" class="w-full border rounded px-3 py-2" />
+                        @error('form.quantity_available')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Calidad</label>
@@ -95,18 +110,30 @@
                             <option value="standard">Estándar</option>
                             <option value="economic">Económico</option>
                         </select>
+                        @error('form.quality_grade')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Fecha de Cosecha</label>
                         <input type="date" wire:model="form.harvest_date" class="w-full border rounded px-3 py-2" />
+                        @error('form.harvest_date')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Ciudad</label>
                         <input type="text" wire:model="form.location_city" class="w-full border rounded px-3 py-2" />
+                        @error('form.location_city')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Estado</label>
                         <input type="text" wire:model="form.location_state" class="w-full border rounded px-3 py-2" />
+                        @error('form.location_state')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Estatus</label>
@@ -116,6 +143,9 @@
                             <option value="sold_out">Agotado</option>
                             <option value="inactive">Inactivo</option>
                         </select>
+                        @error('form.status')
+                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="flex justify-end mt-4">
                         <button type="button" wire:click="closeModal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">Cancelar</button>
