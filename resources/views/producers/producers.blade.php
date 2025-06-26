@@ -63,21 +63,14 @@
                             </div>
 
                             <div class="mt-6">
-                                @auth
+                                
                                     <a href="/catalog?producer={{ $producer->id }}" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md text-sm transition duration-150 ease-in-out inline-flex items-center justify-center">
-                                        Ver Productos
+                                        Ver Publicaciones
                                         <svg class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                         </svg>
                                     </a>
-                                @else
-                                    <a href="{{ route('register') }}" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md text-sm transition duration-150 ease-in-out inline-flex items-center justify-center">
-                                        Regístrate para ver productos
-                                        <svg class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </a>
-                                @endauth
+                                
                             </div>
                         </div>
                     </div>
