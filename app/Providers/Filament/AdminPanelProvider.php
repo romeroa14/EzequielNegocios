@@ -55,6 +55,7 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->authGuard('admin')
+            ->favicon(asset('images/favicon.png'))
             ->registration(false)
             ->passwordReset(false)
             ->emailVerification(false)

@@ -12,27 +12,34 @@ class ProductPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->role === 'producer';
+        return $user->role === 'seller' || $user->role === 'admin';
     }
 
     public function view(User $user, Product $product): bool
     {
-        return $user->role === 'producer';
+        return $user->role === 'seller' || $user->role === 'admin';
     }
 
     public function create(User $user): bool
     {
-        return $user->role === 'producer';
+        return $user->role === 'seller' || $user->role === 'admin';
     }
 
     public function update(User $user, Product $product): bool
     {
-        return $user->role === 'producer';
+        if ($user->role === 'admin') {
+            return true;
+        }
+        return $user->role === 'seller' && $user->id === $product->person->user_id;
     }
 
     public function delete(User $user, Product $product): bool
     {
-        if ($user->role !== 'producer') {
+        if ($user->role === 'admin') {
+            return true;
+        }
+        
+        if ($user->role !== 'seller' || $user->id !== $product->person->user_id) {
             return false;
         }
 

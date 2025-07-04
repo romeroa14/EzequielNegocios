@@ -21,12 +21,12 @@ class ProductListingPolicy
         if ($user->role === 'admin') {
             return true;
         }
-        return $user->role === 'seller' && $user->id === $listing->user_id;
+        return $user->role === 'seller' && $user->id === $listing->person->user_id;
     }
 
     public function create(User $user)
     {
-        return $user->role === 'seller';
+        return $user->role === 'seller' || $user->role === 'admin';
     }
 
     public function update(User $user, ProductListing $listing)
@@ -34,7 +34,7 @@ class ProductListingPolicy
         if ($user->role === 'admin') {
             return true;
         }
-        return $user->role === 'seller' && $user->id === $listing->user_id;
+        return $user->role === 'seller' && $user->id === $listing->person->user_id;
     }
 
     public function delete(User $user, ProductListing $listing)
@@ -42,6 +42,6 @@ class ProductListingPolicy
         if ($user->role === 'admin') {
             return true;
         }
-        return $user->role === 'seller' && $user->id === $listing->user_id;
+        return $user->role === 'seller' && $user->id === $listing->person->user_id;
     }
 } 
