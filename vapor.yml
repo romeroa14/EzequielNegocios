@@ -11,6 +11,7 @@ environments:
             - 'npm install'
             - 'npm run build'
             - 'rm -rf node_modules'
+            - 'cd public/build && ln -sf .vite/manifest.json manifest.json'
         deploy:
             - 'php artisan migrate --force'
         domain: tu-dominio.com

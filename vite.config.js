@@ -11,6 +11,8 @@ export default defineConfig({
             refresh: true,
             // Asegurarse de que los assets se sirvan desde la URL correcta en producción
             buildDirectory: 'build',
+            // Ensure manifest is generated in the correct location
+            manifestFilePath: 'public/build/manifest.json'
         }),
     ],
     build: {
