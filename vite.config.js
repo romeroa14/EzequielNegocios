@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import path from 'path';
 
 export default defineConfig({
     plugins: [
@@ -10,15 +11,12 @@ export default defineConfig({
             ],
             refresh: true,
             // Asegurarse de que los assets se sirvan desde la URL correcta en producción
-            buildDirectory: 'build',
-            // Ensure manifest is generated in the correct location
-            manifestFilePath: 'public/build/manifest.json'
+            buildDirectory: 'build'
         }),
     ],
     build: {
         outDir: 'public/build',
-        // Asegurarse de que los assets se compilen correctamente
-        manifest: true,
+        manifest: 'manifest.json',
         rollupOptions: {
             output: {
                 manualChunks: undefined,
