@@ -5,10 +5,20 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                'resources/sass/app.scss',
+                'resources/css/app.css',
                 'resources/js/app.js',
             ],
             refresh: true,
         }),
     ],
+    build: {
+        outDir: 'public/build',
+        // Asegurarse de que los assets se compilen correctamente
+        manifest: true,
+        rollupOptions: {
+            output: {
+                manualChunks: undefined,
+            },
+        },
+    },
 });
