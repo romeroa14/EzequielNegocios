@@ -9,6 +9,8 @@ export default defineConfig({
                 'resources/js/app.js',
             ],
             refresh: true,
+            // Asegurarse de que los assets se sirvan desde la URL correcta en producción
+            buildDirectory: 'build',
         }),
     ],
     build: {
@@ -19,6 +21,12 @@ export default defineConfig({
             output: {
                 manualChunks: undefined,
             },
+        },
+    },
+    // Configuración específica para Vapor
+    server: {
+        hmr: {
+            host: 'localhost',
         },
     },
 });

@@ -8,7 +8,8 @@ environments:
         build:
             - 'composer install --no-dev'
             - 'php artisan event:cache'
-            - 'npm install && npm run build'
+            - 'npm install'
+            - 'npm run build'
             - 'rm -rf node_modules'
         deploy:
             - 'php artisan migrate --force'
@@ -21,5 +22,14 @@ environments:
         warm: 5
         timeout: 30
         build-env:
-            - 'VITE_APP_URL="${APP_URL}"'
-            - 'ASSET_URL="${ASSET_URL}"' 
+            - 'ASSET_URL=${ASSET_URL}'
+            - 'VITE_APP_URL=${APP_URL}'
+        directories:
+            - 'storage/app/public'
+            - 'storage/framework/cache'
+            - 'storage/framework/sessions'
+            - 'storage/framework/views'
+            - 'storage/logs'
+            - 'public/build'
+        assets:
+            - 'public/build' 

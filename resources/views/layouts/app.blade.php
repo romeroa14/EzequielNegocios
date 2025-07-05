@@ -61,7 +61,7 @@
         <!-- Page Content -->
         <main>
             <div class="max-w-full mx-auto px-4">
-                {{ $slot }}
+                @yield('content')
             </div>
         </main>
     </div>
