@@ -13,14 +13,7 @@ environments:
             - 'rm -rf node_modules'
         deploy:
             - 'php artisan migrate --force'
-            # Solo ejecutar seeders si las tablas están vacías
-            - '[ $(php artisan db:table-count countries) -eq 0 ] && php artisan db:seed --class=CountryTableSeeder --force || echo "Countries table not empty, skipping seed"'
-            - '[ $(php artisan db:table-count states) -eq 0 ] && php artisan db:seed --class=StateTableSeeder --force || echo "States table not empty, skipping seed"'
-            - '[ $(php artisan db:table-count municipalities) -eq 0 ] && php artisan db:seed --class=MunicipalityTableSeeder --force || echo "Municipalities table not empty, skipping seed"'
-            - '[ $(php artisan db:table-count parishes) -eq 0 ] && php artisan db:seed --class=ParishTableSeeder --force || echo "Parishes table not empty, skipping seed"'
-            - '[ $(php artisan db:table-count product_categories) -eq 0 ] && php artisan db:seed --class=ProductCategorySeeder --force || echo "Product categories table not empty, skipping seed"'
-            - '[ $(php artisan db:table-count product_subcategories) -eq 0 ] && php artisan db:seed --class=ProductSubcategorySeeder --force || echo "Product subcategories table not empty, skipping seed"'
-            - '[ $(php artisan db:table-count users) -eq 0 ] && php artisan db:seed --class=AdminUserSeeder --force || echo "Users table not empty, skipping seed"'
+            - 'php artisan db:seed --force'
         domain: tu-dominio.com
         database: vapor
         cache: vapor
