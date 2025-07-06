@@ -12,11 +12,8 @@ trait HasProductImage
             return null;
         }
 
-        // Para Cloudflare R2, usamos el endpoint directamente
-        $baseUrl = config('filesystems.disks.s3.endpoint');
-        
-        // Construir la URL completa
-        return "{$baseUrl}/{$this->image}";
+        // Usar Storage::disk('s3')->url() para generar la URL correcta
+        return Storage::disk('s3')->url($this->image);
     }
 
     public function deleteImage(): void

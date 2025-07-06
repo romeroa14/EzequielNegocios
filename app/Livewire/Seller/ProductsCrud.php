@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use App\Models\ProductListing;
+use Illuminate\Support\Facades\Storage;
 
 class ProductsCrud extends Component
 {
@@ -123,10 +124,17 @@ class ProductsCrud extends Component
                 'size' => $image->getSize()
             ]);
 
-            $path = $image->storePublicly('products', 's3');
+            // Almacenar en el disco s3 y obtener la ruta
+            $path = $image->store('products', 's3');
             
+            // Verificar que el archivo se haya subido correctamente
+            if (!Storage::disk('s3')->exists($path)) {
+                throw new \Exception('El archivo no se pudo almacenar en S3');
+            }
+
             Log::info('Imagen almacenada correctamente', [
-                'path' => $path
+                'path' => $path,
+                'url' => Storage::disk('s3')->url($path)
             ]);
 
             return $path;
