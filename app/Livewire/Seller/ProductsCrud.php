@@ -121,30 +121,64 @@ class ProductsCrud extends Component
             Log::info('Intentando almacenar imagen', [
                 'original_name' => $image->getClientOriginalName(),
                 'mime_type' => $image->getMimeType(),
-                'size' => $image->getSize()
+                'size' => $image->getSize(),
+                'ambiente' => app()->environment(),
+                'r2_config' => [
+                    'url' => config('filesystems.disks.r2.url'),
+                    'bucket' => config('filesystems.disks.r2.bucket'),
+                    'endpoint' => config('filesystems.disks.r2.endpoint'),
+                ]
             ]);
 
             // Generar un nombre único para el archivo
             $extension = $image->getClientOriginalExtension();
             $fileName = uniqid() . '_' . time() . '.' . $extension;
+            $path = 'products/' . $fileName;
 
-            // Almacenar el archivo en el disco público
-            $path = $image->storeAs(
-                'products',
-                $fileName,
-                'public'
-            );
+            // Determinar el disco a usar
+            $disk = app()->environment('production') ? 'r2' : 'public';
+
+            Log::info('Configuración de almacenamiento', [
+                'disk' => $disk,
+                'path' => $path,
+                'fileName' => $fileName
+            ]);
+
+            // Almacenar el archivo
+            if ($disk === 'r2') {
+                // Para R2 en producción
+                $path = $image->storePublicly($path, ['disk' => $disk]);
+                Log::info('Imagen almacenada en R2', [
+                    'path_resultado' => $path,
+                    'disk_config' => config('filesystems.disks.r2')
+                ]);
+            } else {
+                // Para almacenamiento local en desarrollo
+                $path = $image->storeAs('products', $fileName, 'public');
+                Log::info('Imagen almacenada localmente', [
+                    'path_resultado' => $path
+                ]);
+            }
+            
+            // Generar la URL según el disco
+            $url = $disk === 'r2' 
+                ? rtrim(config('filesystems.disks.r2.url'), '/') . '/' . ltrim($path, '/')
+                : url('storage/' . $path);
             
             Log::info('Imagen almacenada correctamente', [
                 'path' => $path,
-                'url' => url('storage/' . $path)
+                'disk' => $disk,
+                'url' => $url,
+                'storage_exists' => Storage::disk($disk)->exists($path)
             ]);
 
             return $path;
         } catch (\Exception $e) {
             Log::error('Error al almacenar imagen', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'disk' => $disk ?? 'unknown',
+                'path' => $path ?? 'unknown'
             ]);
             
             throw $e;
