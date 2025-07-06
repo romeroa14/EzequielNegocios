@@ -121,28 +121,32 @@ class ProductsCrud extends Component
             Log::info('Intentando almacenar imagen', [
                 'original_name' => $image->getClientOriginalName(),
                 'mime_type' => $image->getMimeType(),
-                'size' => $image->getSize()
+                'size' => $image->getSize(),
+                'environment' => app()->environment()
             ]);
 
             // Generar un nombre único para el archivo
             $extension = $image->getClientOriginalExtension();
             $fileName = uniqid() . '_' . time() . '.' . $extension;
+            $path = 'products/' . $fileName;
 
-            // Almacenar el archivo en el disco público
-            $path = $image->storeAs(
-                'products',
-                $fileName,
-                'public'
-            );
+            // En producción, usar el disco configurado en vapor.yml
+            $disk = app()->environment('production') ? 's3' : 'public';
             
-            // Verificar que el archivo se haya subido correctamente
-            if (!Storage::disk('public')->exists($path)) {
-                throw new \Exception('El archivo no se pudo almacenar');
+            // Almacenar el archivo
+            if ($disk === 's3') {
+                // Para S3/R2 en producción
+                $path = $image->storePublicly($path, ['disk' => $disk]);
+            } else {
+                // Para almacenamiento local en desarrollo
+                $path = $image->storeAs('products', $fileName, 'public');
             }
-
+            
             Log::info('Imagen almacenada correctamente', [
                 'path' => $path,
-                'full_url' => asset('storage/' . $path)
+                'disk' => $disk,
+                'environment' => app()->environment(),
+                'full_url' => Storage::disk($disk)->url($path)
             ]);
 
             return $path;

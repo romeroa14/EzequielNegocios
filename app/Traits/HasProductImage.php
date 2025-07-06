@@ -12,6 +12,15 @@ trait HasProductImage
             return null;
         }
 
+        // En producción usar el disco configurado en vapor.yml (s3)
+        $disk = app()->environment('production') ? 's3' : 'public';
+        
+        // Si estamos en producción, usar la URL de S3
+        if ($disk === 's3') {
+            return Storage::disk($disk)->url($this->image);
+        }
+        
+        // En desarrollo, usar la URL local
         return asset('storage/' . $this->image);
     }
 
@@ -21,7 +30,8 @@ trait HasProductImage
             return;
         }
         
-        Storage::disk('public')->delete($this->image);
+        $disk = app()->environment('production') ? 's3' : 'public';
+        Storage::disk($disk)->delete($this->image);
     }
 
     protected static function bootHasProductImage(): void
@@ -32,7 +42,8 @@ trait HasProductImage
 
         static::updating(function ($model) {
             if ($model->isDirty('image') && $model->getOriginal('image')) {
-                Storage::disk('public')->delete($model->getOriginal('image'));
+                $disk = app()->environment('production') ? 's3' : 'public';
+                Storage::disk($disk)->delete($model->getOriginal('image'));
             }
         });
     }

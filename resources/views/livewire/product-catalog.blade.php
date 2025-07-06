@@ -150,7 +150,7 @@
                         
                         @if($product->product->image && Storage::disk('public')->exists($product->product->image))
                             <img 
-                                src="{{ asset('storage/' . $product->product->image) }}"
+                                src="{{ $product->product->image_url }}"
                                 alt="{{ $product->product->name }}"
                                 class="w-full h-80 object-cover rounded"
                             >
