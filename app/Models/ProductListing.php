@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\HasListingImages;
 
 class ProductListing extends Model
 {
-    use HasFactory;
+    use HasFactory, HasListingImages;
 
     protected $fillable = [
         'product_id',
@@ -29,7 +30,7 @@ class ProductListing extends Model
     protected $casts = [
         'unit_price' => 'decimal:2',
         'quantity_available' => 'integer',
-        'harvest_date' => 'date',
+        'harvest_date' => 'datetime',
         'images' => 'array',
     ];
 

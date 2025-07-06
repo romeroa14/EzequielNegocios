@@ -23,7 +23,7 @@
                     <p class="text-base text-gray-700 mb-1">Estatus: {{ ucfirst($listing->status) }}</p>
                 </div>
                 @if($listing->images && count($listing->images))
-                    <img src="{{ asset('storage/' . $listing->images[0]) }}" alt="Imagen" class="w-full h-80 rounded shadow my-2">
+                    <img src="{{ $listing->images_url[0] }}" alt="Imagen" class="w-full h-80 rounded shadow my-2">
                 @endif
                 <div class="flex justify-between mt-4">
                     <button wire:click="openModal({{ $listing->id }})" class="bg-yellow-500 hover:bg-yellow-600 text-white text-base font-bold py-1 px-3 rounded">Editar</button>
@@ -70,9 +70,9 @@
                             <span class="text-red-600 text-xs">{{ $message }}</span>
                         @enderror
                         <template x-if="img">
-                            <img :src="img && {{ Js::from($products->pluck('image', 'id')) }}[img] ? '/storage/' + {{ Js::from($products->pluck('image', 'id')) }}[img] : ''" class="h-24 rounded shadow mt-2" x-show="img && {{ Js::from($products->pluck('image', 'id')) }}[img]">
+                            <img :src="img && {{ Js::from($products->pluck('image_url', 'id')) }}[img] ? {{ Js::from($products->pluck('image_url', 'id')) }}[img] : ''" class="h-24 rounded shadow mt-2" x-show="img && {{ Js::from($products->pluck('image_url', 'id')) }}[img]">
                         </template>
-                        <template x-if="img && !{{ Js::from($products->pluck('image', 'id')) }}[img]">
+                        <template x-if="img && !{{ Js::from($products->pluck('image_url', 'id')) }}[img]">
                             <p class="text-xs text-gray-500 mt-2">Este producto no tiene imagen</p>
                         </template>
                     </div>
