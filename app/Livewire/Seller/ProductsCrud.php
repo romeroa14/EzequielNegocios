@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductSubcategory;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use App\Models\ProductListing;
@@ -114,7 +115,29 @@ class ProductsCrud extends Component
 
     private function storeImage($image)
     {
-        return $image->storePublicly('products', 's3');
+        try {
+            Log::info('Intentando almacenar imagen', [
+                'disk' => 's3',
+                'original_name' => $image->getClientOriginalName(),
+                'mime_type' => $image->getMimeType(),
+                'size' => $image->getSize()
+            ]);
+
+            $path = $image->storePublicly('products', 's3');
+            
+            Log::info('Imagen almacenada correctamente', [
+                'path' => $path
+            ]);
+
+            return $path;
+        } catch (\Exception $e) {
+            Log::error('Error al almacenar imagen', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            throw $e;
+        }
     }
 
     public function saveProduct()
