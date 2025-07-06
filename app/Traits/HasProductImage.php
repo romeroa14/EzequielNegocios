@@ -12,12 +12,11 @@ trait HasProductImage
             return null;
         }
 
-        // Obtener la URL del bucket de Laravel Cloud
-        $s3Url = config('filesystems.disks.s3.url');
-        $bucket = config('filesystems.disks.s3.bucket');
+        // Para Cloudflare R2 en Laravel Cloud, usamos directamente la URL configurada
+        $baseUrl = config('filesystems.disks.s3.url');
         
         // Construir la URL completa
-        return "{$s3Url}/{$bucket}/{$this->image}";
+        return "{$baseUrl}/{$this->image}";
     }
 
     public function deleteImage(): void
