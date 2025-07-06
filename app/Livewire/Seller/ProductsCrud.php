@@ -118,23 +118,30 @@ class ProductsCrud extends Component
     {
         try {
             Log::info('Intentando almacenar imagen', [
-                'disk' => 's3',
                 'original_name' => $image->getClientOriginalName(),
                 'mime_type' => $image->getMimeType(),
                 'size' => $image->getSize()
             ]);
 
-            // Almacenar en el disco s3 y obtener la ruta
-            $path = $image->store('products', 's3');
+            // Generar un nombre único para el archivo
+            $extension = $image->getClientOriginalExtension();
+            $fileName = uniqid() . '_' . time() . '.' . $extension;
+
+            // Almacenar el archivo en el disco público
+            $path = $image->storeAs(
+                'products',
+                $fileName,
+                'public'
+            );
             
             // Verificar que el archivo se haya subido correctamente
-            if (!Storage::disk('s3')->exists($path)) {
-                throw new \Exception('El archivo no se pudo almacenar en S3');
+            if (!Storage::disk('public')->exists($path)) {
+                throw new \Exception('El archivo no se pudo almacenar');
             }
 
             Log::info('Imagen almacenada correctamente', [
                 'path' => $path,
-                'url' => Storage::disk('s3')->url($path)
+                'full_url' => asset('storage/' . $path)
             ]);
 
             return $path;

@@ -149,7 +149,7 @@
                     <div class="aspect-w-4 aspect-h-3 bg-gray-200">
                         @if($product->image)
                             <img 
-                                src="{{ $product->image_url }}"
+                                src="{{ asset('storage/' . $product->image) }}"
                                 alt="{{ $product->name }}"
                                 class="w-full h-90 object-cover"
                             >

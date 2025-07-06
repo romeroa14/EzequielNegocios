@@ -12,8 +12,7 @@ trait HasProductImage
             return null;
         }
 
-        // Usar Storage::disk('s3')->url() para generar la URL correcta
-        return Storage::disk('s3')->url($this->image);
+        return asset('storage/' . $this->image);
     }
 
     public function deleteImage(): void
@@ -22,7 +21,7 @@ trait HasProductImage
             return;
         }
         
-        Storage::disk('s3')->delete($this->image);
+        Storage::disk('public')->delete($this->image);
     }
 
     protected static function bootHasProductImage(): void
@@ -33,7 +32,7 @@ trait HasProductImage
 
         static::updating(function ($model) {
             if ($model->isDirty('image') && $model->getOriginal('image')) {
-                Storage::disk('s3')->delete($model->getOriginal('image'));
+                Storage::disk('public')->delete($model->getOriginal('image'));
             }
         });
     }
