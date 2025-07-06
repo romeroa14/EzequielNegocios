@@ -25,7 +25,7 @@ return [
     |
     */
 
-    'storage_driver' => env('VAPOR_STORAGE_DRIVER', 'public'),
+    'storage_driver' => env('VAPOR_STORAGE_DRIVER', 'local'),
 
     /*
     |--------------------------------------------------------------------------

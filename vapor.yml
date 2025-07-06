@@ -12,12 +12,13 @@ environments:
             - 'npm run build'
             - 'rm -rf node_modules'
         deploy:
+            - 'php artisan storage:link'
             - 'php artisan migrate --force'
             - 'php artisan db:seed --class=Database\\Seeders\\BaseDataSeeder --force'
         domain: tu-dominio.com
         database: vapor
         cache: vapor
-        storage: s3
+        storage: ${VAPOR_STORAGE_DRIVER}
         queues:
             - default
         warm: 5
