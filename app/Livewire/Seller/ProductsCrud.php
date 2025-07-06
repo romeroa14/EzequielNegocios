@@ -113,6 +113,12 @@ class ProductsCrud extends Component
         $this->dispatch('product-deleted');
     }
 
+    private function storeImage($image)
+    {
+        $disk = app()->environment('production') ? 's3' : 'public';
+        return $image->store('products', $disk);
+    }
+
     public function saveProduct()
     {
         $formImageRule = is_string($this->form['image']) ? 'nullable|string' : 'nullable|image|max:2048';
@@ -134,7 +140,7 @@ class ProductsCrud extends Component
         if ($this->editingProduct) {
             $product = $this->editingProduct;
             if ($this->form['image'] instanceof TemporaryUploadedFile) {
-                $imagePath = $this->form['image']->store('products', 'public');
+                $imagePath = $this->storeImage($this->form['image']);
             } else {
                 $imagePath = $product->image;
             }
@@ -152,7 +158,7 @@ class ProductsCrud extends Component
             $this->dispatch('product-updated');
         } else {
             if ($this->form['image'] instanceof TemporaryUploadedFile) {
-                $imagePath = $this->form['image']->store('products', 'public');
+                $imagePath = $this->storeImage($this->form['image']);
             }
             Product::create([
                 'person_id' => Auth::id(),

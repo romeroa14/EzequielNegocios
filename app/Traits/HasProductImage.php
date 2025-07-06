@@ -12,13 +12,25 @@ trait HasProductImage
             return null;
         }
         
+        // En producción (Laravel Cloud), usar S3
+        if (app()->environment('production')) {
+            return Storage::disk('s3')->url($this->image);
+        }
+        
+        // En local, usar storage
         return asset('storage/' . $this->image);
     }
 
     public function deleteImage(): void
     {
-        if ($this->image && Storage::disk('public')->exists($this->image)) {
-            Storage::disk('public')->delete($this->image);
+        if (!$this->image) {
+            return;
+        }
+
+        $disk = app()->environment('production') ? 's3' : 'public';
+        
+        if (Storage::disk($disk)->exists($this->image)) {
+            Storage::disk($disk)->delete($this->image);
         }
     }
 
@@ -30,7 +42,8 @@ trait HasProductImage
 
         static::updating(function ($model) {
             if ($model->isDirty('image') && $model->getOriginal('image')) {
-                Storage::disk('public')->delete($model->getOriginal('image'));
+                $disk = app()->environment('production') ? 's3' : 'public';
+                Storage::disk($disk)->delete($model->getOriginal('image'));
             }
         });
     }
