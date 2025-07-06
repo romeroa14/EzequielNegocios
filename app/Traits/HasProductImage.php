@@ -11,14 +11,12 @@ trait HasProductImage
         if (!$this->image) {
             return null;
         }
+
+        // Obtener la URL base del bucket S3
+        $s3BaseUrl = config('filesystems.disks.s3.url', 'https://sistemacompraventa-master-mrqu8y.laravel.cloud/storage');
         
-        // En producción (Laravel Cloud)
-        if (app()->environment('production')) {
-            return url('storage/' . $this->image);
-        }
-        
-        // En local
-        return asset('storage/' . $this->image);
+        // Construir la URL completa
+        return $s3BaseUrl . '/' . $this->image;
     }
 
     public function deleteImage(): void
@@ -26,12 +24,8 @@ trait HasProductImage
         if (!$this->image) {
             return;
         }
-
-        $disk = app()->environment('production') ? 's3' : 'public';
         
-        if (Storage::disk($disk)->exists($this->image)) {
-            Storage::disk($disk)->delete($this->image);
-        }
+        Storage::disk('s3')->delete($this->image);
     }
 
     protected static function bootHasProductImage(): void
@@ -42,8 +36,7 @@ trait HasProductImage
 
         static::updating(function ($model) {
             if ($model->isDirty('image') && $model->getOriginal('image')) {
-                $disk = app()->environment('production') ? 's3' : 'public';
-                Storage::disk($disk)->delete($model->getOriginal('image'));
+                Storage::disk('s3')->delete($model->getOriginal('image'));
             }
         });
     }

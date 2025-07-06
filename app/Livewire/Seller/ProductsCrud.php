@@ -115,8 +115,7 @@ class ProductsCrud extends Component
 
     private function storeImage($image)
     {
-        $disk = app()->environment('production') ? 's3' : 'public';
-        return $image->store('products', $disk);
+        return $image->storePublicly('products', 's3');
     }
 
     public function saveProduct()
