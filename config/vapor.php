@@ -25,11 +25,11 @@ return [
     |
     */
 
-    'storage_driver' => env('VAPOR_STORAGE_DRIVER', 's3'),
+    'storage_driver' => env('VAPOR_STORAGE_DRIVER', 'public'),
 
     /*
     |--------------------------------------------------------------------------
-    | Vapor Storage Bucket
+    | Vapor Storage Bucketublic
     |--------------------------------------------------------------------------
     |
     | This option controls the default storage bucket that will be used by your

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 's3'),
+    'default' => env('FILESYSTEM_DISK', 'public'),
 
     /*
     |--------------------------------------------------------------------------
@@ -47,26 +47,26 @@ return [
             'report' => false,
         ],
 
-        's3' => [
-            'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => 'us-east-1',
-            'bucket' => env('AWS_BUCKET', 'fls-9f526ee0-34c3-4f0f-aa96-c34b31bf7b1f'),
-            'url' => rtrim(env('AWS_URL', 'https://fls-9f526ee0-34c3-4f0f-aa96-c34b31bf7b1f.laravel.cloud'), '/'),
-            'endpoint' => rtrim(env('AWS_ENDPOINT', 'https://367be3a2035528943240074d0096e0cd.r2.cloudflarestorage.com'), '/'),
-            'use_path_style_endpoint' => true,
-            'throw' => true,
-            'report' => true,
-            'visibility' => 'public',
-            'bucket_endpoint' => false,
-            'scheme' => 'https',
-            'credentials' => [
-                'key' => env('AWS_ACCESS_KEY_ID'),
-                'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            ],
-            'use_aws_shared_config_files' => false,
-        ],
+        // 's3' => [
+        //     'driver' => 's3',
+        //     'key' => env('AWS_ACCESS_KEY_ID'),
+        //     'secret' => env('AWS_SECRET_ACCESS_KEY'),
+        //     'region' => 'us-east-1',
+        //     'bucket' => env('AWS_BUCKET', 'fls-9f526ee0-34c3-4f0f-aa96-c34b31bf7b1f'),
+        //     'url' => rtrim(env('AWS_URL', 'https://fls-9f526ee0-34c3-4f0f-aa96-c34b31bf7b1f.laravel.cloud'), '/'),
+        //     'endpoint' => rtrim(env('AWS_ENDPOINT', 'https://367be3a2035528943240074d0096e0cd.r2.cloudflarestorage.com'), '/'),
+        //     'use_path_style_endpoint' => true,
+        //     'throw' => true,
+        //     'report' => true,
+        //     'visibility' => 'public',
+        //     'bucket_endpoint' => false,
+        //     'scheme' => 'https',
+        //     'credentials' => [
+        //         'key' => env('AWS_ACCESS_KEY_ID'),
+        //         'secret' => env('AWS_SECRET_ACCESS_KEY'),
+        //     ],
+        //     'use_aws_shared_config_files' => false,
+        // ],
 
     ],
 
