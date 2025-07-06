@@ -25,6 +25,8 @@ environments:
         build-env:
             - 'ASSET_URL=${ASSET_URL}'
             - 'VITE_APP_URL=${APP_URL}'
+            - 'FILESYSTEM_DISK=s3'
+            - 'AWS_URL=${AWS_URL}'
         directories:
             - 'storage/app/public'
             - 'storage/framework/cache'
