@@ -59,7 +59,6 @@ class ProductsCrud extends Component
         if ($productId) {
             $this->editingProduct = Product::where('id', $productId)->where('person_id', Auth::id())->firstOrFail();
             $this->form = [
-                
                 'category_id' => $this->editingProduct->category_id,
                 'subcategory_id' => $this->editingProduct->subcategory_id,
                 'name' => $this->editingProduct->name,
@@ -137,13 +136,14 @@ class ProductsCrud extends Component
         $imagePath = null;
 
         if ($this->editingProduct) {
-            $product = $this->editingProduct;
+            // Actualizar producto existente
             if ($this->form['image'] instanceof TemporaryUploadedFile) {
                 $imagePath = $this->storeImage($this->form['image']);
             } else {
-                $imagePath = $product->image;
+                $imagePath = $this->editingProduct->image;
             }
-            $product->update([
+
+            $this->editingProduct->update([
                 'category_id' => $this->form['category_id'],
                 'subcategory_id' => $this->form['subcategory_id'],
                 'name' => $this->form['name'],
@@ -154,11 +154,14 @@ class ProductsCrud extends Component
                 'seasonal_info' => $this->form['seasonal_info'],
                 'is_active' => $this->form['is_active'],
             ]);
+
             $this->dispatch('product-updated');
         } else {
+            // Crear nuevo producto
             if ($this->form['image'] instanceof TemporaryUploadedFile) {
                 $imagePath = $this->storeImage($this->form['image']);
             }
+
             Product::create([
                 'person_id' => Auth::id(),
                 'category_id' => $this->form['category_id'],
@@ -171,6 +174,7 @@ class ProductsCrud extends Component
                 'seasonal_info' => $this->form['seasonal_info'],
                 'is_active' => $this->form['is_active'],
             ]);
+
             $this->dispatch('product-added');
         }
 
