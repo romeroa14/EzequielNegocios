@@ -12,11 +12,12 @@ trait HasProductImage
             return null;
         }
 
-        // Obtener la URL base del bucket S3
-        $s3BaseUrl = config('filesystems.disks.s3.url', 'https://sistemacompraventa-master-mrqu8y.laravel.cloud/storage');
+        // Obtener la URL del bucket de Laravel Cloud
+        $s3Url = config('filesystems.disks.s3.url');
+        $bucket = config('filesystems.disks.s3.bucket');
         
         // Construir la URL completa
-        return $s3BaseUrl . '/' . $this->image;
+        return "{$s3Url}/{$bucket}/{$this->image}";
     }
 
     public function deleteImage(): void

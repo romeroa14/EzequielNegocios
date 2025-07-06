@@ -147,10 +147,10 @@
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
                     <!-- Product Image -->
                     <div class="aspect-w-4 aspect-h-3 bg-gray-200">
-                        @if($product->images && count($product->images) > 0)
+                        @if($product->image)
                             <img 
-                                src="{{ Storage::url($product->images[0]) }}" 
-                                alt="{{ $product->title }}"
+                                src="{{ $product->image_url }}"
+                                alt="{{ $product->name }}"
                                 class="w-full h-90 object-cover"
                             >
                         @else
