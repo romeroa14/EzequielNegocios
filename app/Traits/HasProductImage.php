@@ -20,7 +20,7 @@ trait HasProductImage
             Log::info('Generando URL de imagen', [
                 'ambiente' => app()->environment(),
                 'disco' => $disk,
-                'imagen' => $this->image,
+                'imagen_path' => $this->image,
                 'r2_config' => [
                     'url' => config('filesystems.disks.r2.url'),
                     'bucket' => config('filesystems.disks.r2.bucket'),
@@ -29,10 +29,36 @@ trait HasProductImage
             ]);
 
             if ($disk === 'r2') {
-                // Para R2, construir la URL usando el endpoint configurado
-                $url = rtrim(config('filesystems.disks.r2.url'), '/') . '/' . ltrim($this->image, '/');
-                Log::info('URL generada para R2', ['url' => $url]);
-                return $url;
+                // Para R2, intentar obtener la URL directamente del Storage primero
+                try {
+                    $url = Storage::disk('r2')->url($this->image);
+                    Log::info('URL generada por Storage', ['url' => $url]);
+                    return $url;
+                } catch (\Exception $e) {
+                    Log::warning('No se pudo generar URL con Storage::url, usando URL manual', [
+                        'error' => $e->getMessage()
+                    ]);
+                    
+                    // Fallback: construir la URL manualmente
+                    $baseUrl = rtrim(config('filesystems.disks.r2.url'), '/');
+                    $path = ltrim($this->image, '/');
+                    $url = "{$baseUrl}/{$path}";
+                    
+                    Log::info('URL generada manualmente', [
+                        'base_url' => $baseUrl,
+                        'path' => $path,
+                        'url_final' => $url
+                    ]);
+                    
+                    // Verificar si el archivo existe
+                    $exists = Storage::disk('r2')->exists($this->image);
+                    Log::info('Verificación de existencia de archivo', [
+                        'exists' => $exists,
+                        'path' => $this->image
+                    ]);
+                    
+                    return $url;
+                }
             }
             
             // Para desarrollo, usar la URL pública local
@@ -42,6 +68,7 @@ trait HasProductImage
         } catch (\Exception $e) {
             Log::error('Error generando URL de imagen', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'image' => $this->image,
                 'disk' => $disk ?? 'unknown'
             ]);
@@ -56,7 +83,25 @@ trait HasProductImage
         }
         
         $disk = app()->environment('production') ? 'r2' : 'public';
-        Storage::disk($disk)->delete($this->image);
+        try {
+            $exists = Storage::disk($disk)->exists($this->image);
+            Log::info('Intentando eliminar imagen', [
+                'disk' => $disk,
+                'path' => $this->image,
+                'exists' => $exists
+            ]);
+            
+            if ($exists) {
+                Storage::disk($disk)->delete($this->image);
+                Log::info('Imagen eliminada correctamente');
+            }
+        } catch (\Exception $e) {
+            Log::error('Error eliminando imagen', [
+                'error' => $e->getMessage(),
+                'disk' => $disk,
+                'path' => $this->image
+            ]);
+        }
     }
 
     protected static function bootHasProductImage(): void
@@ -68,7 +113,26 @@ trait HasProductImage
         static::updating(function ($model) {
             if ($model->isDirty('image') && $model->getOriginal('image')) {
                 $disk = app()->environment('production') ? 'r2' : 'public';
-                Storage::disk($disk)->delete($model->getOriginal('image'));
+                try {
+                    $oldImage = $model->getOriginal('image');
+                    $exists = Storage::disk($disk)->exists($oldImage);
+                    Log::info('Verificando imagen anterior antes de actualizar', [
+                        'disk' => $disk,
+                        'old_image' => $oldImage,
+                        'exists' => $exists
+                    ]);
+                    
+                    if ($exists) {
+                        Storage::disk($disk)->delete($oldImage);
+                        Log::info('Imagen anterior eliminada correctamente');
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error eliminando imagen anterior', [
+                        'error' => $e->getMessage(),
+                        'disk' => $disk,
+                        'old_image' => $oldImage
+                    ]);
+                }
             }
         });
     }

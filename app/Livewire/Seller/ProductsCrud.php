@@ -147,11 +147,56 @@ class ProductsCrud extends Component
             // Almacenar el archivo
             if ($disk === 'r2') {
                 // Para R2 en producción
-                $path = $image->storePublicly($path, ['disk' => $disk]);
-                Log::info('Imagen almacenada en R2', [
-                    'path_resultado' => $path,
-                    'disk_config' => config('filesystems.disks.r2')
-                ]);
+                try {
+                    // Intentar almacenar con visibilidad pública
+                    $path = $image->storePublicly($path, ['disk' => $disk]);
+                    
+                    // Verificar si el archivo se guardó correctamente
+                    $exists = Storage::disk($disk)->exists($path);
+                    Log::info('Verificación de almacenamiento en R2', [
+                        'path' => $path,
+                        'exists' => $exists
+                    ]);
+
+                    if (!$exists) {
+                        throw new \Exception('El archivo no se guardó correctamente en R2');
+                    }
+
+                    // Intentar obtener la URL del archivo
+                    try {
+                        $url = Storage::disk($disk)->url($path);
+                        Log::info('URL del archivo en R2', ['url' => $url]);
+                    } catch (\Exception $e) {
+                        Log::warning('No se pudo obtener URL directa', [
+                            'error' => $e->getMessage()
+                        ]);
+                        $url = rtrim(config('filesystems.disks.r2.url'), '/') . '/' . ltrim($path, '/');
+                    }
+
+                    // Verificar si la URL es accesible
+                    try {
+                        $ch = curl_init($url);
+                        curl_setopt($ch, CURLOPT_NOBODY, true);
+                        curl_exec($ch);
+                        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                        curl_close($ch);
+
+                        Log::info('Verificación de accesibilidad de URL', [
+                            'url' => $url,
+                            'http_code' => $httpCode
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::warning('No se pudo verificar la URL', [
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error al almacenar en R2', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    throw $e;
+                }
             } else {
                 // Para almacenamiento local en desarrollo
                 $path = $image->storeAs('products', $fileName, 'public');
