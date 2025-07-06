@@ -12,8 +12,8 @@ trait HasProductImage
             return null;
         }
 
-        // Para Cloudflare R2 en Laravel Cloud, usamos directamente la URL configurada
-        $baseUrl = config('filesystems.disks.s3.url');
+        // Para Cloudflare R2, usamos el endpoint directamente
+        $baseUrl = config('filesystems.disks.s3.endpoint');
         
         // Construir la URL completa
         return "{$baseUrl}/{$this->image}";
