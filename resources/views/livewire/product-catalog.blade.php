@@ -148,7 +148,7 @@
                     <!-- Product Image -->
                     <div class="aspect-w-4 aspect-h-3 bg-gray-200">
                         
-                        @if($product->product->image && Storage::disk('public')->exists($product->product->image))
+                        @if($product->product->image)
                             <img 
                                 src="{{ $product->product->image_url }}"
                                 alt="{{ $product->product->name }}"

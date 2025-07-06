@@ -29,36 +29,22 @@ trait HasProductImage
             ]);
 
             if ($disk === 'r2') {
-                // Para R2, intentar obtener la URL directamente del Storage primero
-                try {
-                    $url = Storage::disk('r2')->url($this->image);
-                    Log::info('URL generada por Storage', ['url' => $url]);
-                    return $url;
-                } catch (\Exception $e) {
-                    Log::warning('No se pudo generar URL con Storage::url, usando URL manual', [
-                        'error' => $e->getMessage()
-                    ]);
-                    
-                    // Fallback: construir la URL manualmente
-                    $baseUrl = rtrim(config('filesystems.disks.r2.url'), '/');
-                    $path = ltrim($this->image, '/');
-                    $url = "{$baseUrl}/{$path}";
-                    
-                    Log::info('URL generada manualmente', [
-                        'base_url' => $baseUrl,
-                        'path' => $path,
-                        'url_final' => $url
-                    ]);
-                    
-                    // Verificar si el archivo existe
-                    $exists = Storage::disk('r2')->exists($this->image);
-                    Log::info('Verificación de existencia de archivo', [
-                        'exists' => $exists,
-                        'path' => $this->image
-                    ]);
-                    
-                    return $url;
-                }
+                // Para R2, construir la URL usando el endpoint configurado
+                $baseUrl = rtrim(config('filesystems.disks.r2.endpoint'), '/');
+                $bucket = config('filesystems.disks.r2.bucket');
+                $path = ltrim($this->image, '/');
+                
+                // Construir la URL en el formato correcto para R2
+                $url = "{$baseUrl}/{$bucket}/{$path}";
+                
+                Log::info('URL generada para R2', [
+                    'base_url' => $baseUrl,
+                    'bucket' => $bucket,
+                    'path' => $path,
+                    'url_final' => $url
+                ]);
+                
+                return $url;
             }
             
             // Para desarrollo, usar la URL pública local

@@ -15,8 +15,7 @@
                 <p class="text-sm text-gray-500 mb-1">{{ $product->category->name ?? '-' }} > {{ $product->subcategory->name ?? '-' }}</p>
                 <p class="text-gray-700 text-sm flex-1">{{ $product->description }}</p>
                 @if($product->image)
-
-                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-80 rounded mb-2">
+                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-80 rounded mb-2">
                 @else
                     <img src="{{ asset('images/placeholder.png') }}" alt="{{ $product->name }}" class="w-full h-80 rounded mb-2">
                 @endif
@@ -97,7 +96,7 @@
                     <div class="mb-3">
                         @if($editingProduct && $editingProduct->image && !$changeImage)
                             <div class="mt-2">
-                                <img src="{{ Storage::disk('s3')->url($editingProduct->image) }}" alt="Imagen actual" class="h-24 rounded shadow">
+                                <img src="{{ $editingProduct->image_url }}" alt="Imagen actual" class="h-24 rounded shadow">
                                 <p class="text-xs text-gray-500">Imagen actual</p>
                                 <button type="button" wire:click="enableImageChange" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded">Cambiar imagen</button>
                             </div>
