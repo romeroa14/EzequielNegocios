@@ -12,12 +12,10 @@ trait HasProductImage
             return null;
         }
         
-        // En producción (Laravel Cloud), usar S3
         if (app()->environment('production')) {
-            return Storage::disk('s3')->url($this->image);
+            return config('filesystems.disks.s3.url') . '/' . $this->image;
         }
         
-        // En local, usar storage
         return asset('storage/' . $this->image);
     }
 

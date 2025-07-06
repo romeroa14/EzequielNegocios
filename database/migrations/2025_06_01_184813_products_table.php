@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('description');
             $table->string('sku_base');
             $table->enum('unit_type', ['kg', 'ton', 'saco', 'caja', 'unidad']);
-            $table->string('image');
+            $table->string('image')->nullable();
             $table->json('seasonal_info');
             $table->boolean('is_active');
             $table->timestamps();

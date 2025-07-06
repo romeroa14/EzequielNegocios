@@ -13,7 +13,7 @@ environments:
             - 'rm -rf node_modules'
         deploy:
             - 'php artisan migrate --force'
-            - 'php artisan db:seed --force'
+            - 'php artisan db:seed --class=Database\\Seeders\\BaseDataSeeder --force'
         domain: tu-dominio.com
         database: vapor
         cache: vapor
