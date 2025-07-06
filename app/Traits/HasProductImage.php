@@ -12,7 +12,7 @@ trait HasProductImage
         if (!$this->image) {
             return null;
         }
-
+        
         try {
             // Determinar el disco a usar
             $disk = app()->environment('production') ? 'r2' : 'public';
@@ -29,17 +29,18 @@ trait HasProductImage
             ]);
 
             if ($disk === 'r2') {
-                // Para R2, construir la URL usando el endpoint configurado
-                $baseUrl = rtrim(config('filesystems.disks.r2.endpoint'), '/');
-                $bucket = config('filesystems.disks.r2.bucket');
-                $path = ltrim($this->image, '/');
+                // Para R2, usar la URL pública del bucket
+                $publicUrl = config('filesystems.disks.r2.url');
+                if (empty($publicUrl)) {
+                    Log::error('URL pública de R2 no configurada');
+                    return null;
+                }
                 
-                // Construir la URL en el formato correcto para R2
-                $url = "{$baseUrl}/{$bucket}/{$path}";
+                $path = ltrim($this->image, '/');
+                $url = rtrim($publicUrl, '/') . '/' . $path;
                 
                 Log::info('URL generada para R2', [
-                    'base_url' => $baseUrl,
-                    'bucket' => $bucket,
+                    'public_url' => $publicUrl,
                     'path' => $path,
                     'url_final' => $url
                 ]);
