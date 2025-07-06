@@ -15,6 +15,10 @@ environments:
             - 'php artisan storage:link'
             - 'php artisan migrate --force'
             - 'php artisan db:seed --class=Database\\Seeders\\BaseDataSeeder --force'
+            - 'chmod -R 775 storage'
+            - 'chmod -R 775 storage/app/public'
+            - 'chown -R www-data:www-data storage'
+            - 'chown -R www-data:www-data storage/app/public'
         domain: tu-dominio.com
         database: vapor
         cache: vapor
