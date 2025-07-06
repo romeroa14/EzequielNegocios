@@ -32,15 +32,6 @@ class Product extends Model
         'is_active' => 'boolean'
     ];
 
-    public function getImageUrlAttribute(): ?string
-    {
-        if (!$this->image) {
-            return null;
-        }
-
-        return asset('storage/' . $this->image);
-    }
-
     public function person(): BelongsTo
     {
         return $this->belongsTo(Person::class);

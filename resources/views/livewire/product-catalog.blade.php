@@ -147,11 +147,12 @@
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
                     <!-- Product Image -->
                     <div class="aspect-w-4 aspect-h-3 bg-gray-200">
-                        @if($product->image)
+                        
+                        @if($product->product->image && Storage::disk('public')->exists($product->product->image))
                             <img 
-                                src="{{ asset('storage/' . $product->image) }}"
-                                alt="{{ $product->name }}"
-                                class="w-full h-90 object-cover"
+                                src="{{ asset('storage/' . $product->product->image) }}"
+                                alt="{{ $product->product->name }}"
+                                class="w-full h-80 object-cover rounded"
                             >
                         @else
                             <div class="w-full h-48 bg-gray-200 flex items-center justify-center">

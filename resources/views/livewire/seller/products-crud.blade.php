@@ -15,7 +15,8 @@
                 <p class="text-sm text-gray-500 mb-1">{{ $product->category->name ?? '-' }} > {{ $product->subcategory->name ?? '-' }}</p>
                 <p class="text-gray-700 text-sm flex-1">{{ $product->description }}</p>
                 @if($product->image)
-                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-80 rounded mb-2">
+
+                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-80 rounded mb-2">
                 @else
                     <img src="{{ asset('images/placeholder.png') }}" alt="{{ $product->name }}" class="w-full h-80 rounded mb-2">
                 @endif

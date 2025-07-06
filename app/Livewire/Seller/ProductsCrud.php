@@ -12,6 +12,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use App\Models\ProductListing;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class ProductsCrud extends Component
 {
@@ -171,54 +172,63 @@ class ProductsCrud extends Component
             'form.is_active' => 'boolean',
         ]);
 
-        $imagePath = null;
+        try {
+            DB::beginTransaction();
+            
+            $imagePath = null;
 
-        if ($this->editingProduct) {
-            // Actualizar producto existente
+            // Manejar la imagen si se proporciona una nueva
             if ($this->form['image'] instanceof TemporaryUploadedFile) {
                 $imagePath = $this->storeImage($this->form['image']);
-            } else {
+                Log::info('Nueva imagen almacenada', ['path' => $imagePath]);
+            } elseif ($this->editingProduct) {
+                // Mantener la imagen existente si no se proporciona una nueva
                 $imagePath = $this->editingProduct->image;
+                Log::info('Manteniendo imagen existente', ['path' => $imagePath]);
             }
 
-            $this->editingProduct->update([
+            $productData = [
                 'category_id' => $this->form['category_id'],
                 'subcategory_id' => $this->form['subcategory_id'],
                 'name' => $this->form['name'],
                 'description' => $this->form['description'],
                 'sku_base' => $this->form['sku_base'],
                 'unit_type' => $this->form['unit_type'],
-                'image' => $imagePath,
                 'seasonal_info' => $this->form['seasonal_info'],
                 'is_active' => $this->form['is_active'],
-            ]);
+            ];
 
-            $this->dispatch('product-updated');
-        } else {
-            // Crear nuevo producto
-            if ($this->form['image'] instanceof TemporaryUploadedFile) {
-                $imagePath = $this->storeImage($this->form['image']);
+            // Solo actualizar la imagen si tenemos una
+            if ($imagePath !== null) {
+                $productData['image'] = $imagePath;
             }
 
-            Product::create([
-                'person_id' => Auth::id(),
-                'category_id' => $this->form['category_id'],
-                'subcategory_id' => $this->form['subcategory_id'],
-                'name' => $this->form['name'],
-                'description' => $this->form['description'],
-                'sku_base' => $this->form['sku_base'],
-                'unit_type' => $this->form['unit_type'],
-                'image' => $imagePath,
-                'seasonal_info' => $this->form['seasonal_info'],
-                'is_active' => $this->form['is_active'],
-            ]);
+            if ($this->editingProduct) {
+                // Actualizar producto existente
+                $this->editingProduct->update($productData);
+                $this->dispatch('product-updated');
+                Log::info('Producto actualizado', ['id' => $this->editingProduct->id, 'image' => $imagePath]);
+            } else {
+                // Crear nuevo producto
+                $productData['person_id'] = Auth::id();
+                $product = Product::create($productData);
+                $this->dispatch('product-added');
+                Log::info('Producto creado', ['id' => $product->id, 'image' => $imagePath]);
+            }
 
-            $this->dispatch('product-added');
+            DB::commit();
+            $this->closeModal();
+            $this->loadProducts();
+            session()->flash('success', $this->editingProduct ? 'Producto actualizado correctamente.' : 'Producto creado correctamente.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al guardar producto', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            session()->flash('error', 'Error al guardar el producto: ' . $e->getMessage());
         }
-
-        $this->closeModal();
-        $this->loadProducts();
-        session()->flash('success', $this->editingProduct ? 'Producto actualizado correctamente.' : 'Producto creado correctamente.');
     }
 
     public function enableImageChange()
