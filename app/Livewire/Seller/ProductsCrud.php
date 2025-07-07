@@ -324,8 +324,8 @@ class ProductsCrud extends Component
             ? ProductSubcategory::where('category_id', (int)$this->form['category_id'])->where('is_active', 't')->get()
             : collect();
 
-        logger('Categoria seleccionada: ' . $this->form['category_id']);
-        logger('Subcategorias encontradas: ' . $subcategories->pluck('name')->join(', '));
+        // logger('Categoria seleccionada: ' . $this->form['category_id']);
+        // logger('Subcategorias encontradas: ' . $subcategories->pluck('name')->join(', '));
 
         // Debug temporal
         // dd($this->form['category_id'], $subcategories);

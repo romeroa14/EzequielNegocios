@@ -17,11 +17,7 @@ trait HasListingImages
             // Determinar el disco a usar
             $disk = app()->environment('production') ? 'r2' : 'public';
             
-            Log::info('Generando URLs de imágenes para listing', [
-                'ambiente' => app()->environment(),
-                'disco' => $disk,
-                'imagenes' => $this->images
-            ]);
+            
 
             $urls = [];
             foreach ($this->images as $image) {
@@ -52,12 +48,7 @@ trait HasListingImages
             Log::info('URLs generadas para listing', ['urls' => $urls]);
             return $urls;
         } catch (\Exception $e) {
-            Log::error('Error generando URLs de imágenes', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'images' => $this->images,
-                'disk' => $disk ?? 'unknown'
-            ]);
+            
             return [];
         }
     }

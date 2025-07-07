@@ -17,16 +17,7 @@ trait HasProductImage
             // Determinar el disco a usar
             $disk = app()->environment('production') ? 'r2' : 'public';
             
-            Log::info('Generando URL de imagen', [
-                'ambiente' => app()->environment(),
-                'disco' => $disk,
-                'imagen_path' => $this->image,
-                'r2_config' => [
-                    'url' => config('filesystems.disks.r2.url'),
-                    'bucket' => config('filesystems.disks.r2.bucket'),
-                    'endpoint' => config('filesystems.disks.r2.endpoint'),
-                ]
-            ]);
+            
 
             if ($disk === 'r2') {
                 // Para R2, usar la URL pública del bucket
@@ -53,12 +44,7 @@ trait HasProductImage
             Log::info('URL generada para local', ['url' => $url]);
             return $url;
         } catch (\Exception $e) {
-            Log::error('Error generando URL de imagen', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'image' => $this->image,
-                'disk' => $disk ?? 'unknown'
-            ]);
+            
             return null;
         }
     }

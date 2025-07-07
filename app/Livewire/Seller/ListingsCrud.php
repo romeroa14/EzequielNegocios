@@ -12,6 +12,7 @@ class ListingsCrud extends Component
     public $listings;
     public $showModal = false;
     public $editingListing = null;
+    public $listingIdToDelete = null;
     public $form = [
         'product_id' => '',
         'title' => '',
@@ -30,8 +31,6 @@ class ListingsCrud extends Component
     {
         $this->loadListings();
     }
-
- 
 
     public function loadListings()
     {
@@ -103,7 +102,6 @@ class ListingsCrud extends Component
             'form.location_city' => 'required|string|max:255',
             'form.location_state' => 'required|string|max:255',
             'form.status' => 'required|in:active,pending,sold_out,inactive',
-            
         ], [
             'form.product_id.required' => 'El producto es obligatorio.',
             'form.product_id.exists' => 'El producto seleccionado no existe.',
@@ -127,7 +125,7 @@ class ListingsCrud extends Component
 
         $person = Auth::user();
         if (!$person) {
-            session()->flash('error', 'No tienes un perfil de vendedor asociado. Contacta al administrador.');
+            $this->dispatch('error', 'No tienes un perfil de vendedor asociado. Contacta al administrador.');
             return;
         }
         $personId = $person->id;
@@ -138,31 +136,52 @@ class ListingsCrud extends Component
             $imageArray[] = $product->image;
         }
 
-        if ($this->editingListing) {
-            $this->editingListing->update($this->form);
-        } else {
-            ProductListing::create(array_merge($this->form, [
-                'person_id' => $personId,
-                'images' => $imageArray,
-            ]));
+        try {
+            if ($this->editingListing) {
+                $this->editingListing->update($this->form);
+                $this->dispatch('listing-updated');
+            } else {
+                ProductListing::create(array_merge($this->form, [
+                    'person_id' => $personId,
+                    'images' => $imageArray,
+                ]));
+                $this->dispatch('listing-added');
+            }
+            $this->closeModal();
+            $this->loadListings();
+        } catch (\Exception $e) {
+            $this->dispatch('error', 'Hubo un error al guardar la publicación. Por favor, intenta de nuevo.');
         }
-        $this->closeModal();
-        $this->loadListings();
-        session()->flash('success', $this->editingListing ? 'Publicación actualizada correctamente.' : 'Publicación creada correctamente.');
+    }
+
+    public function confirmDelete($listingId)
+    {
+        $this->listingIdToDelete = $listingId;
+        $this->dispatch('show-delete-confirmation');
     }
 
     public function deleteListing($listingId)
     {
+        $listingId = $listingId ?? $this->listingIdToDelete;
+    
+    if (!$listingId) {
+        $this->dispatch('error', 'No se encontró la publicación a eliminar.');
+        return;
+    }
+
+    try {
         $listing = ProductListing::findOrFail($listingId);
         $listing->delete();
         $this->loadListings();
-        session()->flash('success', 'Publicación eliminada correctamente.');
+        $this->dispatch('listing-deleted');
+    } catch (\Exception $e) {
+        $this->dispatch('error', 'Hubo un error al eliminar la publicación.');
+    }
     }
 
     public function render()
     {
         $products = Product::where('person_id', Auth::id())->get();
-        $selectedProduct = $products->where('id', $this->form['product_id'])->first();
         return view('livewire.seller.listings-crud', [
             'listings' => $this->listings,
             'products' => $products,

@@ -49,6 +49,33 @@ class User extends Authenticatable implements FilamentUser
         'is_active' => 'boolean',
     ];
 
+    public static function rules($id = null)
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'password' => $id ? 'nullable|min:8' : 'required|min:8',
+            'role' => 'required|in:admin,producer,technician,support',
+            'is_active' => 'boolean',
+        ];
+    }
+
+    public static function validationMessages()
+    {
+        return [
+            'name.required' => 'El nombre es obligatorio.',
+            'name.max' => 'El nombre no puede tener más de 255 caracteres.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El correo electrónico debe ser válido.',
+            'email.unique' => 'Este correo electrónico ya está registrado.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'role.required' => 'El rol es obligatorio.',
+            'role.in' => 'El rol debe ser admin, producer, technician o support.',
+            'is_active.boolean' => 'El estado debe ser verdadero o falso.',
+        ];
+    }
+
     /**
      * Determine if the user can access the Filament admin panel.
      */
