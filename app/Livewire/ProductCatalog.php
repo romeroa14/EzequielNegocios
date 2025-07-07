@@ -35,9 +35,65 @@ class ProductCatalog extends Component
         'sortDirection' => ['except' => 'desc'],
     ];
 
+    protected function rules()
+    {
+        return [
+            'search' => 'nullable|string|max:255',
+            'selectedCategory' => 'nullable|exists:product_categories,id',
+            'selectedSubcategory' => 'nullable|exists:product_subcategories,id',
+            'selectedQuality' => 'nullable|in:premium,standard,economic',
+            'minPrice' => 'nullable|numeric|min:0',
+            'maxPrice' => 'nullable|numeric|min:0|gte:minPrice',
+            'sortBy' => 'required|in:created_at,unit_price,title,harvest_date',
+            'sortDirection' => 'required|in:asc,desc',
+            'producer' => 'nullable|exists:people,id',
+        ];
+    }
+
+    protected function messages()
+    {
+        return [
+            'search.max' => 'La búsqueda no puede exceder los 255 caracteres.',
+            'selectedCategory.exists' => 'La categoría seleccionada no existe.',
+            'selectedSubcategory.exists' => 'La subcategoría seleccionada no existe.',
+            'selectedQuality.in' => 'La calidad seleccionada no es válida.',
+            'minPrice.numeric' => 'El precio mínimo debe ser un número.',
+            'minPrice.min' => 'El precio mínimo no puede ser negativo.',
+            'maxPrice.numeric' => 'El precio máximo debe ser un número.',
+            'maxPrice.min' => 'El precio máximo no puede ser negativo.',
+            'maxPrice.gte' => 'El precio máximo debe ser mayor o igual al precio mínimo.',
+            'sortBy.required' => 'El campo de ordenamiento es obligatorio.',
+            'sortBy.in' => 'El campo de ordenamiento no es válido.',
+            'sortDirection.required' => 'La dirección de ordenamiento es obligatoria.',
+            'sortDirection.in' => 'La dirección de ordenamiento no es válida.',
+            'producer.exists' => 'El productor seleccionado no existe.',
+        ];
+    }
+
+    public function updated($propertyName)
+    {
+        $this->validateOnly($propertyName);
+        
+        if ($propertyName === 'search') {
+            $this->resetPage();
+        }
+
+        if ($propertyName === 'selectedCategory') {
+            $this->selectedSubcategory = '';
+            $this->resetPage();
+        }
+
+        if (in_array($propertyName, ['minPrice', 'maxPrice'])) {
+            if ($this->minPrice && $this->maxPrice && $this->maxPrice < $this->minPrice) {
+                $this->addError('maxPrice', 'El precio máximo debe ser mayor o igual al precio mínimo.');
+            }
+        }
+    }
+
     public function mount()
     {
         $this->producer = request()->query('producer');
+        $this->validate();
     }
 
     public function updatedSearch()

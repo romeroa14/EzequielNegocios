@@ -61,38 +61,78 @@
                 <form wire:submit.prevent="saveProduct">
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Categoría</label>
-                        <select wire:model="form.category_id" wire:change="categoryChanged($event.target.value)"
-                            class="w-full border rounded px-3 py-2">
+                        <select 
+                            wire:model="form.category_id" 
+                            wire:change="categoryChanged($event.target.value)"
+                            class="w-full border rounded px-3 py-2 @error('form.category_id') border-red-500 @enderror"
+                        >
                             <option value="">Selecciona una categoría</option>
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
                         </select>
+                        @error('form.category_id')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
                     </div>
+
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Subcategoría</label>
-                        <select wire:model="form.subcategory_id" class="w-full border rounded px-3 py-2" required>
-                            <option value="" disabled>Selecciona una subcategoría</option>
+                        <select 
+                            wire:model="form.subcategory_id" 
+                            class="w-full border rounded px-3 py-2 @error('form.subcategory_id') border-red-500 @enderror"
+                        >
+                            <option value="">Selecciona una subcategoría</option>
                             @foreach ($subcategories as $subcategory)
                                 <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
                             @endforeach
                         </select>
+                        @error('form.subcategory_id')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
                     </div>
+
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Nombre</label>
-                        <input type="text" wire:model="form.name" class="w-full border rounded px-3 py-2" />
+                        <input 
+                            type="text" 
+                            wire:model="form.name" 
+                            class="w-full border rounded px-3 py-2 @error('form.name') border-red-500 @enderror" 
+                        />
+                        @error('form.name')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
                     </div>
+
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Descripción</label>
-                        <textarea wire:model="form.description" class="w-full border rounded px-3 py-2"></textarea>
+                        <textarea 
+                            wire:model="form.description" 
+                            class="w-full border rounded px-3 py-2 @error('form.description') border-red-500 @enderror"
+                        ></textarea>
+                        @error('form.description')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
                     </div>
+
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">SKU Base</label>
-                        <input type="text" wire:model="form.sku_base" class="w-full border rounded px-3 py-2" />
+                        <input 
+                            type="text" 
+                            wire:model="form.sku_base" 
+                            class="w-full border rounded px-3 py-2 @error('form.sku_base') border-red-500 @enderror" 
+                        />
+                        @error('form.sku_base')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
                     </div>
+
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Tipo de Unidad</label>
-                        <select wire:model="form.unit_type" class="w-full border rounded px-3 py-2">
+                        <select 
+                            wire:model="form.unit_type" 
+                            class="w-full border rounded px-3 py-2 @error('form.unit_type') border-red-500 @enderror"
+                        >
                             <option value="">Selecciona un tipo</option>
                             <option value="kg">Kilogramo</option>
                             <option value="ton">Tonelada</option>
@@ -100,36 +140,76 @@
                             <option value="caja">Caja</option>
                             <option value="unidad">Unidad</option>
                         </select>
+                        @error('form.unit_type')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
                     </div>
+
                     <div class="mb-3">
                         @if ($editingProduct && $editingProduct->image && !$changeImage)
                             <div class="mt-2">
-                                <img src="{{ $editingProduct->image_url }}" alt="Imagen actual"
-                                    class="h-24 rounded shadow">
+                                <img src="{{ $editingProduct->image_url }}" alt="Imagen actual" class="h-24 rounded shadow">
                                 <p class="text-xs text-gray-500">Imagen actual</p>
-                                <button type="button" wire:click="enableImageChange"
-                                    class="mt-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded">Cambiar
-                                    imagen</button>
+                                <button 
+                                    type="button" 
+                                    wire:click="enableImageChange"
+                                    class="mt-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded"
+                                >
+                                    Cambiar imagen
+                                </button>
                             </div>
                         @else
                             <label class="block text-sm font-medium mb-1">Imagen</label>
-                            <input type="file" wire:model="form.image" class="w-full border rounded px-3 py-2" />
+                            <input 
+                                type="file" 
+                                wire:model="form.image" 
+                                class="w-full border rounded px-3 py-2 @error('form.image') border-red-500 @enderror" 
+                            />
+                            @error('form.image')
+                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                            @enderror
                         @endif
                     </div>
+
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Información estacional</label>
-                        <input type="text" wire:model="form.seasonal_info" class="w-full border rounded px-3 py-2"
-                            placeholder="Ej: Primavera, Verano..." />
+                        <input 
+                            type="text" 
+                            wire:model="form.seasonal_info" 
+                            class="w-full border rounded px-3 py-2 @error('form.seasonal_info') border-red-500 @enderror"
+                            placeholder="Ej: Primavera, Verano..." 
+                        />
+                        @error('form.seasonal_info')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
                     </div>
+
                     <div class="mb-3 flex items-center">
-                        <input type="checkbox" wire:model="form.is_active" class="mr-2" />
+                        <input 
+                            type="checkbox" 
+                            wire:model="form.is_active" 
+                            class="mr-2 @error('form.is_active') border-red-500 @enderror" 
+                        />
                         <span class="text-sm">Activo</span>
+                        @error('form.is_active')
+                            <span class="text-red-500 text-xs mt-1 ml-2">{{ $message }}</span>
+                        @enderror
                     </div>
+
                     <div class="flex justify-end mt-4">
-                        <button type="button" @click="closeModal"
-                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">Cancelar</button>
-                        <button type="submit"
-                            class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">Guardar</button>
+                        <button 
+                            type="button" 
+                            @click="closeModal"
+                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2"
+                        >
+                            Cancelar
+                        </button>
+                        <button 
+                            type="submit"
+                            class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded"
+                        >
+                            Guardar
+                        </button>
                     </div>
                 </form>
             </div>

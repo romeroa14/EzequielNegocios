@@ -40,6 +40,70 @@ class ProductsCrud extends Component
         'deleteProduct'
     ];
 
+    protected function rules()
+    {
+        $productId = $this->editingProduct ? $this->editingProduct->id : null;
+        
+        $rules = [
+            'form.category_id' => 'required|exists:product_categories,id',
+            'form.subcategory_id' => 'required|exists:product_subcategories,id',
+            'form.name' => 'required|string|max:255',
+            'form.description' => 'required|string',
+            'form.unit_type' => 'required|in:kg,ton,saco,caja,unidad',
+            'form.seasonal_info' => 'nullable|string',
+            'form.is_active' => 'boolean',
+        ];
+
+        // Agregar regla de SKU con validación condicional
+        if ($productId) {
+            $rules['form.sku_base'] = "required|string|max:50|unique:products,sku_base,{$productId}";
+        } else {
+            $rules['form.sku_base'] = 'required|string|max:50|unique:products,sku_base';
+        }
+
+        // Agregar regla de imagen con validación condicional
+        if ($productId) {
+            $rules['form.image'] = 'nullable|image|max:2048';
+        } else {
+            $rules['form.image'] = 'required|image|max:2048';
+        }
+
+        return $rules;
+    }
+
+    protected function messages()
+    {
+        return [
+            'form.category_id.required' => 'La categoría es obligatoria.',
+            'form.category_id.exists' => 'La categoría seleccionada no existe.',
+            'form.subcategory_id.required' => 'La subcategoría es obligatoria.',
+            'form.subcategory_id.exists' => 'La subcategoría seleccionada no existe.',
+            'form.name.required' => 'El nombre es obligatorio.',
+            'form.name.max' => 'El nombre no puede tener más de 255 caracteres.',
+            'form.description.required' => 'La descripción es obligatoria.',
+            'form.sku_base.required' => 'El SKU base es obligatorio.',
+            'form.sku_base.max' => 'El SKU base no puede tener más de 50 caracteres.',
+            'form.sku_base.unique' => 'Este SKU base ya está en uso.',
+            'form.unit_type.required' => 'El tipo de unidad es obligatorio.',
+            'form.unit_type.in' => 'El tipo de unidad debe ser kg, ton, saco, caja o unidad.',
+            'form.image.required' => 'La imagen es obligatoria.',
+            'form.image.image' => 'El archivo debe ser una imagen.',
+            'form.image.max' => 'La imagen no puede ser mayor a 2MB.',
+            'form.seasonal_info.string' => 'La información estacional debe ser texto.',
+            'form.is_active.boolean' => 'El estado debe ser verdadero o falso.',
+        ];
+    }
+
+    public function updated($propertyName)
+    {
+        $this->validateOnly($propertyName);
+
+        if ($propertyName === 'form.category_id') {
+            $this->form['subcategory_id'] = '';
+            // Las subcategorías se cargarán automáticamente en el render()
+        }
+    }
+
     public function mount()
     {
         $this->loadProducts();
@@ -123,11 +187,6 @@ class ProductsCrud extends Component
                 'mime_type' => $image->getMimeType(),
                 'size' => $image->getSize(),
                 'ambiente' => app()->environment(),
-                'r2_config' => [
-                    'url' => config('filesystems.disks.r2.url'),
-                    'bucket' => config('filesystems.disks.r2.bucket'),
-                    'endpoint' => config('filesystems.disks.r2.endpoint'),
-                ]
             ]);
 
             // Generar un nombre único para el archivo
@@ -146,9 +205,8 @@ class ProductsCrud extends Component
 
             // Almacenar el archivo
             if ($disk === 'r2') {
-                // Para R2 en producción
                 try {
-                    // Intentar almacenar con visibilidad pública
+                    // Para R2 en producción
                     $path = $image->storePublicly($path, ['disk' => $disk]);
                     
                     // Verificar si el archivo se guardó correctamente
@@ -162,34 +220,10 @@ class ProductsCrud extends Component
                         throw new \Exception('El archivo no se guardó correctamente en R2');
                     }
 
-                    // Intentar obtener la URL del archivo
-                    try {
-                        $url = Storage::disk($disk)->url($path);
-                        Log::info('URL del archivo en R2', ['url' => $url]);
-                    } catch (\Exception $e) {
-                        Log::warning('No se pudo obtener URL directa', [
-                            'error' => $e->getMessage()
-                        ]);
-                        $url = rtrim(config('filesystems.disks.r2.url'), '/') . '/' . ltrim($path, '/');
-                    }
+                    // Construir la URL directamente para R2
+                    $url = rtrim(config('filesystems.disks.r2.url'), '/') . '/' . ltrim($path, '/');
+                    Log::info('URL del archivo en R2', ['url' => $url]);
 
-                    // Verificar si la URL es accesible
-                    try {
-                        $ch = curl_init($url);
-                        curl_setopt($ch, CURLOPT_NOBODY, true);
-                        curl_exec($ch);
-                        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                        curl_close($ch);
-
-                        Log::info('Verificación de accesibilidad de URL', [
-                            'url' => $url,
-                            'http_code' => $httpCode
-                        ]);
-                    } catch (\Exception $e) {
-                        Log::warning('No se pudo verificar la URL', [
-                            'error' => $e->getMessage()
-                        ]);
-                    }
                 } catch (\Exception $e) {
                     Log::error('Error al almacenar en R2', [
                         'error' => $e->getMessage(),
@@ -200,16 +234,13 @@ class ProductsCrud extends Component
             } else {
                 // Para almacenamiento local en desarrollo
                 $path = $image->storeAs('products', $fileName, 'public');
+                $url = url('storage/' . $path);
                 Log::info('Imagen almacenada localmente', [
-                    'path_resultado' => $path
+                    'path_resultado' => $path,
+                    'url' => $url
                 ]);
             }
-            
-            // Generar la URL según el disco
-            $url = $disk === 'r2' 
-                ? rtrim(config('filesystems.disks.r2.url'), '/') . '/' . ltrim($path, '/')
-                : url('storage/' . $path);
-            
+
             Log::info('Imagen almacenada correctamente', [
                 'path' => $path,
                 'disk' => $disk,
@@ -233,18 +264,27 @@ class ProductsCrud extends Component
     public function saveProduct()
     {
         $formImageRule = is_string($this->form['image']) ? 'nullable|string' : 'nullable|image|max:2048';
+        $productId = $this->editingProduct ? $this->editingProduct->id : null;
 
-        $this->validate([
+        $validationRules = [
             'form.category_id' => 'required|exists:product_categories,id',
             'form.subcategory_id' => 'required|exists:product_subcategories,id',
             'form.name' => 'required|string|max:255',
-            'form.description' => 'nullable|string',
-            'form.sku_base' => 'nullable|string|max:255',
-            'form.unit_type' => 'required|string',
+            'form.description' => 'required|string',
+            'form.unit_type' => 'required|in:kg,ton,saco,caja,unidad',
             'form.image' => $formImageRule,
             'form.seasonal_info' => 'nullable|string',
             'form.is_active' => 'boolean',
-        ]);
+        ];
+
+        // Agregar regla de SKU con validación condicional
+        if ($productId) {
+            $validationRules['form.sku_base'] = "required|string|max:50|unique:products,sku_base,{$productId}";
+        } else {
+            $validationRules['form.sku_base'] = 'required|string|max:50|unique:products,sku_base';
+        }
+
+        $this->validate($validationRules);
 
         try {
             DB::beginTransaction();
@@ -320,15 +360,14 @@ class ProductsCrud extends Component
     public function render()
     {
         $categories = ProductCategory::where('is_active', true)->get();
-        $subcategories = $this->form['category_id']
-            ? ProductSubcategory::where('category_id', (int)$this->form['category_id'])->where('is_active', 't')->get()
-            : collect();
-
-        // logger('Categoria seleccionada: ' . $this->form['category_id']);
-        // logger('Subcategorias encontradas: ' . $subcategories->pluck('name')->join(', '));
-
-        // Debug temporal
-        // dd($this->form['category_id'], $subcategories);
+        
+        // Cargar subcategorías solo si hay una categoría seleccionada
+        $subcategories = [];
+        if (!empty($this->form['category_id'])) {
+            $subcategories = ProductSubcategory::where('category_id', $this->form['category_id'])
+                ->where('is_active', true)
+                ->get();
+        }
 
         return view('livewire.seller.products-crud', [
             'categories' => $categories,

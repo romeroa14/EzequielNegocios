@@ -23,10 +23,13 @@
                     <input 
                         type="text" 
                         wire:model.live.debounce.300ms="search"
-                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-green-500 focus:border-green-500 @error('search') border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500 @enderror"
                         placeholder="Buscar productos..."
                     >
                 </div>
+                @error('search')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- Filter Toggle Button -->
@@ -53,12 +56,18 @@
                 </div>
                 <div class="flex items-center space-x-2">
                     <label class="text-sm text-gray-500 whitespace-nowrap">Ordenar por:</label>
-                    <select wire:model.live="sortBy" class="w-full sm:w-auto border border-gray-300 rounded-md text-sm py-1 px-2">
+                    <select 
+                        wire:model.live="sortBy" 
+                        class="w-full sm:w-auto border border-gray-300 rounded-md text-sm py-1 px-2 @error('sortBy') border-red-300 text-red-900 @enderror"
+                    >
                         <option value="created_at">Más recientes</option>
                         <option value="unit_price">Precio</option>
                         <option value="title">Nombre</option>
                         <option value="harvest_date">Fecha de cosecha</option>
                     </select>
+                    @error('sortBy')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -69,62 +78,98 @@
                         <!-- Category Filter -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                            <select wire:model.live="selectedCategory" class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500">
+                            <select 
+                                wire:model.live="selectedCategory" 
+                                class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 @error('selectedCategory') border-red-300 text-red-900 @enderror"
+                            >
                                 <option value="">Todas las categorías</option>
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
                             </select>
+                            @error('selectedCategory')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Subcategory Filter -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Subcategoría</label>
-                            <select wire:model.live="selectedSubcategory" class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500">
+                            <select 
+                                wire:model.live="selectedSubcategory" 
+                                class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 @error('selectedSubcategory') border-red-300 text-red-900 @enderror"
+                            >
                                 <option value="">Todas las subcategorías</option>
                                 @foreach($subcategories as $subcategory)
                                     <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
                                 @endforeach
                             </select>
+                            @error('selectedSubcategory')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Quality Filter -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Calidad</label>
-                            <select wire:model.live="selectedQuality" class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500">
+                            <select 
+                                wire:model.live="selectedQuality" 
+                                class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 @error('selectedQuality') border-red-300 text-red-900 @enderror"
+                            >
                                 <option value="">Todas las calidades</option>
                                 <option value="premium">Premium</option>
                                 <option value="standard">Estándar</option>
                                 <option value="economic">Económico</option>
                             </select>
+                            @error('selectedQuality')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Price Range -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Rango de Precio</label>
                             <div class="flex space-x-2">
-                                <input 
-                                    type="number" 
-                                    wire:model.live.debounce.500ms="minPrice"
-                                    placeholder="Min"
-                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
-                                >
-                                <input 
-                                    type="number" 
-                                    wire:model.live.debounce.500ms="maxPrice"
-                                    placeholder="Max"
-                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
-                                >
+                                <div class="flex-1">
+                                    <input 
+                                        type="number" 
+                                        wire:model.live.debounce.500ms="minPrice"
+                                        placeholder="Min"
+                                        class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 @error('minPrice') border-red-300 text-red-900 @enderror"
+                                    >
+                                    @error('minPrice')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div class="flex-1">
+                                    <input 
+                                        type="number" 
+                                        wire:model.live.debounce.500ms="maxPrice"
+                                        placeholder="Max"
+                                        class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 @error('maxPrice') border-red-300 text-red-900 @enderror"
+                                    >
+                                    @error('maxPrice')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
+
+                        <!-- Seller Filter -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Vendedor</label>
-                            <select wire:model.live="producer" class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                            <select 
+                                wire:model.live="producer" 
+                                class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 @error('producer') border-red-300 text-red-900 @enderror"
+                            >
                                 <option value="">Todos los productores</option>
                                 @foreach($sellers as $seller)
                                     <option value="{{ $seller->id }}">{{ $seller->first_name }} {{ $seller->last_name }}</option>
                                 @endforeach
                             </select>
+                            @error('producer')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
