@@ -107,12 +107,14 @@
                         </x-slot>
                     </x-dropdown>
                 @else
-                    <a href="{{ route('login') }}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                        {{ __('Iniciar Sesión') }}
-                    </a>
-                    <a href="{{ route('register') }}" class="ml-4 bg-yellow-600 hover:bg-yellow-700 text-gray-500 px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
-                        {{ __('Registrarse') }}
-                    </a>
+                    <div class="hidden sm:flex sm:items-center">
+                        <a href="{{ route('login') }}" class="text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
+                            {{ __('Iniciar Sesión') }}
+                        </a>
+                        <a href="{{ route('register') }}" class="ml-4 text-white bg-yellow-500 hover:bg-yellow-600 px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
+                            {{ __('Registrarse') }}
+                        </a>
+                    </div>
                 @endauth
             </div>
 
@@ -151,6 +153,17 @@
             <x-responsive-nav-link :href="route('producers')" :active="request()->routeIs('producers')">
                 {{ __('Productores') }}
             </x-responsive-nav-link>
+
+            @guest
+                <div class="pt-2 border-t border-gray-200">
+                    <x-responsive-nav-link :href="route('login')" class="text-green-600 hover:text-green-800 hover:bg-green-50">
+                        {{ __('Iniciar Sesión') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('register')" class="text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50">
+                        {{ __('Registrarse') }}
+                    </x-responsive-nav-link>
+                </div>
+            @endguest
         </div>
 
         <!-- Responsive Settings Options -->
