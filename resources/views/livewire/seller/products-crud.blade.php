@@ -1,10 +1,10 @@
-<div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+<div class="bg-white rounded-xl shadow-lg p-4 sm:p-8 mb-8">
     <!-- Header y botón de nuevo producto -->
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-wrap gap-4 items-center justify-between mb-6">
         <h2 class="text-2xl font-bold">Mis Productos</h2>
         <button wire:click="openModal"
-            class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow">
-            + Nuevo Producto
+            class="inline-flex items-center bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow">
+            <span class="mr-1">+</span> Nuevo Producto
         </button>
     </div>
 

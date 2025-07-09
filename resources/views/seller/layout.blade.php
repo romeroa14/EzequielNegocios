@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="flex min-h-screen bg-gray-100">
         <!-- Sidebar -->
-        <aside class="hidden md:flex md:w-150 md:flex-col md:fixed md:inset-y-0 bg-white shadow-lg">
+        <aside class="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 bg-white shadow-lg">
             <div class="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
                 <div class="px-4 mb-8">
                     <h2 class="text-2xl font-bold text-yellow-600">Panel</h2>
@@ -21,7 +21,7 @@
         </aside>
 
         <!-- Mobile sidebar -->
-        <div class="md:hidden">
+        <div class="lg:hidden">
             <div class="fixed inset-0 z-40 flex">
                 <!-- Sidebar overlay -->
                 <div id="sidebarOverlay" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden"></div>
@@ -57,9 +57,9 @@
         </div>
 
         <!-- Main content -->
-        <div class="md:pl-64 flex flex-col flex-1">
+        <div class="lg:pl-64 flex flex-col flex-1">
             <!-- Mobile header -->
-            <div class="md:hidden bg-white shadow-sm py-2 px-4">
+            <div class="lg:hidden bg-white shadow-sm py-2 px-4">
                 <button id="openSidebar" class="text-gray-500 hover:text-gray-600">
                     <span class="sr-only">Abrir sidebar</span>
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -68,7 +68,7 @@
                 </button>
             </div>
             
-            <main class="flex-1 p-4 md:p-8">
+            <main class="flex-1 p-4 lg:p-8">
                 @yield('content')
             </main>
         </div>

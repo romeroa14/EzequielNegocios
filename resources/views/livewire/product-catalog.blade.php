@@ -109,6 +109,57 @@
                             @enderror
                         </div>
 
+                        <!-- Product Line Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Línea de Producto</label>
+                            <select 
+                                wire:model.live="selectedLine" 
+                                class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 @error('selectedLine') border-red-300 text-red-900 @enderror"
+                            >
+                                <option value="">Todas las líneas</option>
+                                @foreach($this->productLines as $line)
+                                    <option value="{{ $line->id }}">{{ $line->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('selectedLine')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Brand Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+                            <select 
+                                wire:model.live="selectedBrand" 
+                                class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 @error('selectedBrand') border-red-300 text-red-900 @enderror"
+                            >
+                                <option value="">Todas las marcas</option>
+                                @foreach($this->brands as $brand)
+                                    <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('selectedBrand')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Presentation Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Presentación</label>
+                            <select 
+                                wire:model.live="selectedPresentation" 
+                                class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 @error('selectedPresentation') border-red-300 text-red-900 @enderror"
+                            >
+                                <option value="">Todas las presentaciones</option>
+                                @foreach($this->presentations as $presentation)
+                                    <option value="{{ $presentation->id }}">{{ $presentation->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('selectedPresentation')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         <!-- Quality Filter -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Calidad</label>
@@ -228,6 +279,9 @@
                         </div>
 
                         <p class="text-sm text-gray-600 mb-2">{{ $product->product->name }}</p>
+                            
+                            {{ $product->product->brand->name }} >
+                            {{ $product->product->productPresentation->name }}</p>
                         <p class="text-sm text-gray-500 mb-3 line-clamp-2">{{ Str::limit($product->description, 80) }}</p>
 
                         <!-- Price and Quantity -->

@@ -8,6 +8,9 @@ use App\Models\ProductListing;
 use App\Models\ProductCategory;
 use App\Models\ProductSubcategory;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\ProductLine;
+use App\Models\Brand;
+use App\Models\ProductPresentation;
 
 class ProductCatalog extends Component
 {
@@ -23,16 +26,23 @@ class ProductCatalog extends Component
     public $sortDirection = 'desc';
     public $showFilters = false;
     public $producer = null;
+    public $selectedLine = null;
+    public $selectedBrand = null;
+    public $selectedPresentation = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
         'selectedCategory' => ['except' => ''],
         'selectedSubcategory' => ['except' => ''],
+        'selectedLine' => ['except' => ''],
+        'selectedBrand' => ['except' => ''],
+        'selectedPresentation' => ['except' => ''],
         'selectedQuality' => ['except' => ''],
         'minPrice' => ['except' => ''],
         'maxPrice' => ['except' => ''],
+        'producer' => ['except' => ''],
         'sortBy' => ['except' => 'created_at'],
-        'sortDirection' => ['except' => 'desc'],
+        'sortDirection' => ['except' => 'desc']
     ];
 
     protected function rules()
@@ -104,7 +114,20 @@ class ProductCatalog extends Component
     public function updatedSelectedCategory()
     {
         $this->selectedSubcategory = '';
+        $this->selectedLine = null;
+        $this->selectedBrand = null;
         $this->resetPage();
+    }
+
+    public function updatedSelectedSubcategory()
+    {
+        $this->selectedLine = null;
+        $this->selectedBrand = null;
+    }
+
+    public function updatedSelectedLine()
+    {
+        $this->selectedBrand = null;
     }
 
     public function applyFilters()
@@ -117,9 +140,13 @@ class ProductCatalog extends Component
         $this->search = '';
         $this->selectedCategory = '';
         $this->selectedSubcategory = '';
+        $this->selectedLine = '';
+        $this->selectedBrand = '';
+        $this->selectedPresentation = '';
         $this->selectedQuality = '';
         $this->minPrice = '';
         $this->maxPrice = '';
+        $this->producer = '';
         $this->resetPage();
     }
 
@@ -137,26 +164,56 @@ class ProductCatalog extends Component
     public function getProductsProperty()
     {
         return ProductListing::query()
-            ->with(['product.category', 'product.subcategory', 'person.user'])
+            ->with([
+                'product.productCategory',
+                'product.productSubcategory',
+                'product.productLine',
+                'product.brand',
+                'product.productPresentation',
+                'person.user'
+            ])
             ->where('status', 'active')
-            // ->where('expiry_date', '>', now())
             ->when($this->search, function (Builder $query) {
                 $query->where(function (Builder $subQuery) {
                     $subQuery->where('title', 'like', '%' . $this->search . '%')
                         ->orWhere('description', 'like', '%' . $this->search . '%')
                         ->orWhereHas('product', function (Builder $productQuery) {
-                            $productQuery->where('name', 'like', '%' . $this->search . '%');
+                            $productQuery->where('name', 'like', '%' . $this->search . '%')
+                                ->orWhereHas('productLine', function (Builder $lineQuery) {
+                                    $lineQuery->where('name', 'like', '%' . $this->search . '%');
+                                })
+                                ->orWhereHas('brand', function (Builder $brandQuery) {
+                                    $brandQuery->where('name', 'like', '%' . $this->search . '%');
+                                })
+                                ->orWhereHas('productPresentation', function (Builder $presentationQuery) {
+                                    $presentationQuery->where('name', 'like', '%' . $this->search . '%');
+                                });
                         });
                 });
             })
             ->when($this->selectedCategory, function (Builder $query) {
-                $query->whereHas('product.category', function (Builder $categoryQuery) {
+                $query->whereHas('product.productCategory', function (Builder $categoryQuery) {
                     $categoryQuery->where('id', $this->selectedCategory);
                 });
             })
             ->when($this->selectedSubcategory, function (Builder $query) {
-                $query->whereHas('product.subcategory', function (Builder $subcategoryQuery) {
+                $query->whereHas('product.productSubcategory', function (Builder $subcategoryQuery) {
                     $subcategoryQuery->where('id', $this->selectedSubcategory);
+                });
+            })
+            ->when($this->selectedLine, function (Builder $query) {
+                $query->whereHas('product.productLine', function (Builder $lineQuery) {
+                    $lineQuery->where('id', $this->selectedLine);
+                });
+            })
+            ->when($this->selectedBrand, function (Builder $query) {
+                $query->whereHas('product.brand', function (Builder $brandQuery) {
+                    $brandQuery->where('id', $this->selectedBrand);
+                });
+            })
+            ->when($this->selectedPresentation, function (Builder $query) {
+                $query->whereHas('product.productPresentation', function (Builder $presentationQuery) {
+                    $presentationQuery->where('id', $this->selectedPresentation);
                 });
             })
             ->when($this->selectedQuality, function (Builder $query) {
@@ -197,6 +254,36 @@ class ProductCatalog extends Component
         return \App\Models\Person::whereHas('productListings', function($q) {
             $q->where('status', 'active');
         })->get();
+    }
+
+    public function getProductLinesProperty()
+    {
+        return ProductLine::where('is_active', true)
+            ->when($this->selectedCategory, function ($query) {
+                $query->where('product_category_id', $this->selectedCategory);
+            })
+            ->when($this->selectedSubcategory, function ($query) {
+                $query->where('product_subcategory_id', $this->selectedSubcategory);
+            })
+            ->orderBy('name')
+            ->get();
+    }
+
+    public function getBrandsProperty()
+    {
+        return Brand::where('is_active', true)
+            ->when($this->selectedLine, function ($query) {
+                $query->where('product_line_id', $this->selectedLine);
+            })
+            ->orderBy('name')
+            ->get();
+    }
+
+    public function getPresentationsProperty()
+    {
+        return ProductPresentation::where('is_active', true)
+            ->orderBy('name')
+            ->get();
     }
 
     public function render()
