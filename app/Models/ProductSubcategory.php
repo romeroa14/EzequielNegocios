@@ -10,7 +10,7 @@ class ProductSubcategory extends Model
     use HasFactory;
 
     protected $fillable = [
-        'category_id',
+        'product_category_id',
         'name',
         'description',
         'is_active'
@@ -23,8 +23,8 @@ class ProductSubcategory extends Model
     public static function rules($id = null)
     {
         return [
-            'category_id' => 'required|exists:product_categories,id',
-            'name' => 'required|string|max:255|unique:product_subcategories,name,' . $id . ',id,category_id,' . request('category_id'),
+            'product_category_id' => 'required|exists:product_categories,id',
+            'name' => 'required|string|max:255|unique:product_subcategories,name,' . $id . ',id,product_category_id,' . request('product_category_id'),
             'description' => 'required|string',
             'is_active' => 'boolean'
         ];
@@ -33,8 +33,8 @@ class ProductSubcategory extends Model
     public static function validationMessages()
     {
         return [
-            'category_id.required' => 'La categoría es obligatoria.',
-            'category_id.exists' => 'La categoría seleccionada no existe.',
+            'product_category_id.required' => 'La categoría es obligatoria.',
+            'product_category_id.exists' => 'La categoría seleccionada no existe.',
             'name.required' => 'El nombre es obligatorio.',
             'name.max' => 'El nombre no puede tener más de 255 caracteres.',
             'name.unique' => 'Ya existe una subcategoría con este nombre en la categoría seleccionada.',
@@ -43,13 +43,13 @@ class ProductSubcategory extends Model
         ];
     }
 
-    public function category()
+    public function productCategory()
     {
-        return $this->belongsTo(ProductCategory::class, 'category_id');
+        return $this->belongsTo(ProductCategory::class, 'product_category_id');
     }
 
     public function products()
     {
-        return $this->hasMany(Product::class, 'subcategory_id');
+        return $this->hasMany(Product::class, 'product_subcategory_id');
     }
 }

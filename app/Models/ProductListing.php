@@ -82,7 +82,7 @@ class ProductListing extends Model
             'location_state.max' => 'El estado no puede tener más de 255 caracteres.',
             'status.required' => 'El estado es obligatorio.',
             'status.in' => 'El estado debe ser active, pending, sold_out o inactive.'
-        ];
+    ];
     }
 
     public function person(): BelongsTo

@@ -45,8 +45,8 @@ class ProductsCrud extends Component
         $productId = $this->editingProduct ? $this->editingProduct->id : null;
         
         $rules = [
-            'form.category_id' => 'required|exists:product_categories,id',
-            'form.subcategory_id' => 'required|exists:product_subcategories,id',
+            'form.product_category_id' => 'required|exists:product_categories,id',
+            'form.product_subcategory_id' => 'required|exists:product_subcategories,id',
             'form.name' => 'required|string|max:255',
             'form.description' => 'required|string',
             'form.unit_type' => 'required|in:kg,ton,saco,caja,unidad',
@@ -74,10 +74,10 @@ class ProductsCrud extends Component
     protected function messages()
     {
         return [
-            'form.category_id.required' => 'La categoría es obligatoria.',
-            'form.category_id.exists' => 'La categoría seleccionada no existe.',
-            'form.subcategory_id.required' => 'La subcategoría es obligatoria.',
-            'form.subcategory_id.exists' => 'La subcategoría seleccionada no existe.',
+            'form.product_category_id.required' => 'La categoría es obligatoria.',
+            'form.product_category_id.exists' => 'La categoría seleccionada no existe.',
+            'form.product_subcategory_id.required' => 'La subcategoría es obligatoria.',
+            'form.product_subcategory_id.exists' => 'La subcategoría seleccionada no existe.',
             'form.name.required' => 'El nombre es obligatorio.',
             'form.name.max' => 'El nombre no puede tener más de 255 caracteres.',
             'form.description.required' => 'La descripción es obligatoria.',
@@ -114,7 +114,7 @@ class ProductsCrud extends Component
         $personId = Auth::id();
         $this->products = Product::where('person_id', $personId)
             ->where('is_active', true)
-            ->with(['category', 'subcategory'])
+            ->with(['productCategory', 'productSubcategory'])
             ->orderBy('id', 'desc')
             ->get();
     }
@@ -126,8 +126,11 @@ class ProductsCrud extends Component
         if ($productId) {
             $this->editingProduct = Product::where('id', $productId)->where('person_id', Auth::id())->firstOrFail();
             $this->form = [
-                'category_id' => $this->editingProduct->category_id,
-                'subcategory_id' => $this->editingProduct->subcategory_id,
+                'product_category_id' => $this->editingProduct->product_category_id,
+                'product_subcategory_id' => $this->editingProduct->product_subcategory_id,
+                'product_line_id' => $this->editingProduct->product_line_id,
+                'brand_id' => $this->editingProduct->brand_id,
+                'product_presentation_id' => $this->editingProduct->product_presentation_id,
                 'name' => $this->editingProduct->name,
                 'description' => $this->editingProduct->description,
                 'sku_base' => $this->editingProduct->sku_base,
@@ -152,8 +155,11 @@ class ProductsCrud extends Component
     public function resetForm()
     {
         $this->form = [
-            'category_id' => '',
-            'subcategory_id' => '',
+            'product_category_id' => '',
+            'product_subcategory_id' => '',
+            'product_line_id' => '',
+            'brand_id' => '',
+            'product_presentation_id' => '',
             'name' => '',
             'description' => '',
             'sku_base' => '',
@@ -166,8 +172,8 @@ class ProductsCrud extends Component
 
     public function categoryChanged($value)
     {
-        $this->form['category_id'] = $value;
-        $this->form['subcategory_id'] = '';
+        $this->form['product_category_id'] = $value;
+        $this->form['product_subcategory_id'] = '';
     }
 
     public function deleteProduct($productId)
@@ -267,8 +273,11 @@ class ProductsCrud extends Component
         $productId = $this->editingProduct ? $this->editingProduct->id : null;
 
         $validationRules = [
-            'form.category_id' => 'required|exists:product_categories,id',
-            'form.subcategory_id' => 'required|exists:product_subcategories,id',
+            'form.product_category_id' => 'required|exists:product_categories,id',
+            'form.product_subcategory_id' => 'required|exists:product_subcategories,id',
+            'form.product_line_id' => 'required|exists:product_lines,id',
+            'form.brand_id' => 'required|exists:brands,id',
+            'form.product_presentation_id' => 'required|exists:product_presentations,id',
             'form.name' => 'required|string|max:255',
             'form.description' => 'required|string',
             'form.unit_type' => 'required|in:kg,ton,saco,caja,unidad',
@@ -302,8 +311,11 @@ class ProductsCrud extends Component
             }
 
             $productData = [
-                'category_id' => $this->form['category_id'],
-                'subcategory_id' => $this->form['subcategory_id'],
+                'product_category_id' => $this->form['product_category_id'],
+                'product_subcategory_id' => $this->form['product_subcategory_id'],
+                'product_line_id' => $this->form['product_line_id'],
+                'brand_id' => $this->form['brand_id'],
+                'product_presentation_id' => $this->form['product_presentation_id'],
                 'name' => $this->form['name'],
                 'description' => $this->form['description'],
                 'sku_base' => $this->form['sku_base'],

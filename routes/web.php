@@ -23,6 +23,7 @@ use App\Http\Controllers\ProducerController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Buyer\DashboardController as BuyerDashboardController;
+use App\Http\Controllers\ProductPresentationController;
 
 /*
 |--------------------------------------------------------------------------

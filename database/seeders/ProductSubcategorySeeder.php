@@ -15,19 +15,19 @@ class ProductSubcategorySeeder extends Seeder
         $subcategories = [
             // Frutas
             [
-                'category_id' => 1,
+                'product_category_id' => 1,
                 'name' => 'Frutas Tropicales',
                 'description' => 'Mango, piña, patilla, lechosa',
                 'is_active' => true
             ],
             [
-                'category_id' => 1,
+                'product_category_id' => 1,
                 'name' => 'Frutas Cítricas',
                 'description' => 'Naranja, limón, mandarina, toronja',
                 'is_active' => true
             ],
             [
-                'category_id' => 1,
+                'product_category_id' => 1,
                 'name' => 'Frutas de Clima Templado',
                 'description' => 'Manzana, pera, durazno',
                 'is_active' => true
@@ -35,19 +35,19 @@ class ProductSubcategorySeeder extends Seeder
             
             // Hortalizas
             [
-                'category_id' => 2,
+                'product_category_id' => 2,
                 'name' => 'Verduras de Hoja',
                 'description' => 'Lechuga, espinaca, acelga',
                 'is_active' => true
             ],
             [
-                'category_id' => 2,
+                'product_category_id' => 2,
                 'name' => 'Verduras de Fruto',
                 'description' => 'Tomate, pimentón, berenjena',
                 'is_active' => true
             ],
             [
-                'category_id' => 2,
+                'product_category_id' => 2,
                 'name' => 'Bulbos y Tallos',
                 'description' => 'Cebolla, ajo, puerro',
                 'is_active' => true
@@ -55,13 +55,13 @@ class ProductSubcategorySeeder extends Seeder
             
             // Granos y Cereales
             [
-                'category_id' => 3,
+                'product_category_id' => 3,
                 'name' => 'Granos Básicos',
                 'description' => 'Arroz, maíz, trigo',
                 'is_active' => true
             ],
             [
-                'category_id' => 3,
+                'product_category_id' => 3,
                 'name' => 'Leguminosas',
                 'description' => 'Caraotas, frijoles, lentejas',
                 'is_active' => true
@@ -69,13 +69,13 @@ class ProductSubcategorySeeder extends Seeder
             
             // Tubérculos
             [
-                'category_id' => 4,
+                'product_category_id' => 4,
                 'name' => 'Tubérculos Comunes',
                 'description' => 'Papa, yuca, ñame',
                 'is_active' => true
             ],
             [
-                'category_id' => 4,
+                'product_category_id' => 4,
                 'name' => 'Raíces Andinas',
                 'description' => 'Oca, mashua, maca',
                 'is_active' => true
@@ -83,13 +83,13 @@ class ProductSubcategorySeeder extends Seeder
             
             // Proteínas
             [
-                'category_id' => 5,
+                'product_category_id' => 5,
                 'name' => 'Frutos Secos',
                 'description' => 'Merey, nueces, almendras',
                 'is_active' => true
             ],
             [
-                'category_id' => 5,
+                'product_category_id' => 5,
                 'name' => 'Semillas Oleaginosas',
                 'description' => 'Ajonjolí, girasol, linaza',
                 'is_active' => true
@@ -97,13 +97,13 @@ class ProductSubcategorySeeder extends Seeder
             
             // Insumos
             [
-                'category_id' => 6,
+                'product_category_id' => 6,
                 'name' => 'Fertilizantes',
                 'description' => 'Abonos orgánicos y químicos',
                 'is_active' => true
             ],
             [
-                'category_id' => 6,
+                'product_category_id' => 6,
                 'name' => 'Semillas Certificadas',
                 'description' => 'Semillas de alta calidad genética',
                 'is_active' => true

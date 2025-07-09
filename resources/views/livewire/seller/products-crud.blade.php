@@ -62,16 +62,16 @@
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Categoría</label>
                         <select 
-                            wire:model="form.category_id" 
+                            wire:model="form.product_category_id" 
                             wire:change="categoryChanged($event.target.value)"
-                            class="w-full border rounded px-3 py-2 @error('form.category_id') border-red-500 @enderror"
+                            class="w-full border rounded px-3 py-2 @error('form.product_category_id') border-red-500 @enderror"
                         >
                             <option value="">Selecciona una categoría</option>
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
                         </select>
-                        @error('form.category_id')
+                        @error('form.product_category_id')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                         @enderror
                     </div>
@@ -79,17 +79,46 @@
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">Subcategoría</label>
                         <select 
-                            wire:model="form.subcategory_id" 
-                            class="w-full border rounded px-3 py-2 @error('form.subcategory_id') border-red-500 @enderror"
+                            wire:model="form.product_subcategory_id" 
+                            class="w-full border rounded px-3 py-2 @error('form.product_subcategory_id') border-red-500 @enderror"
                         >
                             <option value="">Selecciona una subcategoría</option>
                             @foreach ($subcategories as $subcategory)
                                 <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
                             @endforeach
                         </select>
-                        @error('form.subcategory_id')
+                        @error('form.product_subcategory_id')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                         @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">Línea de producto</label>
+                        <select 
+                            wire:model="form.product_line_id" 
+                            class="w-full border rounded px-3 py-2 @error('form.product_line_id') border-red-500 @enderror"
+                        >
+                            <option value="">Selecciona una línea de producto</option>
+                            @foreach ($lines as $line)
+                                <option value="{{ $line->id }}">{{ $line->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('form.product_line_id')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">Marca</label>
+                        <select 
+                            wire:model="form.brand_id" 
+                            class="w-full border rounded px-3 py-2 @error('form.brand_id') border-red-500 @enderror"
+                        >
+                            <option value="">Selecciona una marca</option>
+                            @foreach ($brands as $brand)
+                                <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('form.brand_id')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                     </div>
 
                     <div class="mb-3">

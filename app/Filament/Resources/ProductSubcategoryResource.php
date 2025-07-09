@@ -17,13 +17,12 @@ class ProductSubcategoryResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-tag';
 
     protected static ?string $navigationGroup = 'Catálogo';
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $navigationLabel = 'Subcategorías';
     protected static ?string $pluralNavigationLabel = 'Subcategorías';
     protected static ?string $pluralModelLabel = 'Subcategorías';
     protected static ?string $modelLabel = 'Subcategoría';
-
-    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

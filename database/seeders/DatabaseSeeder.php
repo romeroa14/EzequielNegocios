@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
             ParishTableSeeder::class,
             ProductCategorySeeder::class,
             ProductSubcategorySeeder::class,
+            ProductPresentationSeeder::class,
+            ProductLineSeeder::class,
+            BrandSeeder::class,
             AdminUserSeeder::class,
         ]);
     }

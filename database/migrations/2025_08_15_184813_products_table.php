@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('person_id')->constrained('people');
-            $table->foreignId('category_id')->constrained('product_categories');
-            $table->foreignId('subcategory_id')->constrained('product_subcategories');
+            $table->foreignId('product_category_id')->constrained('product_categories');
+            $table->foreignId('product_subcategory_id')->constrained('product_subcategories');
+            $table->foreignId('product_presentation_id')->constrained('product_presentations');
+            $table->foreignId('product_line_id')->constrained('product_lines');
+            $table->foreignId('brand_id')->constrained('brands');
             $table->string('name');
             $table->string('description');
             $table->string('sku_base');

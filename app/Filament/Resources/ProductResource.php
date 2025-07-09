@@ -5,6 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
+use App\Models\ProductLine;
+use App\Models\Brand;
+use App\Models\ProductPresentation;
+use App\Models\Person;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -27,19 +31,30 @@ class ProductResource extends Resource
     protected static ?string $pluralModelLabel = 'Productos';
     protected static ?string $modelLabel = 'Producto';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 6;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('category_id')
-                    ->relationship('category', 'name')
+                Forms\Components\Select::make('person_id')
+                    ->label('Vendedor')
+                    ->options(Person::query()
+                        ->where('role', 'seller')
+                        ->where('is_active', true)
+                        ->get()
+                        ->mapWithKeys(fn ($person) => [$person->id => $person->full_name]))
+                    ->required()
+                    ->searchable()
+                    ->preload(),
+                    
+                Forms\Components\Select::make('product_category_id')
+                    ->relationship('productCategory', 'name')
                     ->label('Categoría')
                     ->required()
                     ->live()
                     ->afterStateUpdated(function ($set) {
-                        $set('subcategory_id', null);
+                        $set('product_subcategory_id', null);
                     })
                     ->searchable()
                     ->preload()
@@ -50,17 +65,17 @@ class ProductResource extends Resource
                             ->maxLength(255),
                     ]),
 
-                Forms\Components\Select::make('subcategory_id')
+                Forms\Components\Select::make('product_subcategory_id')
                     ->label('Subcategoría')
                     ->options(function (Forms\Get $get) {
-                        $categoryId = $get('category_id');
+                        $categoryId = $get('product_category_id');
                         
                         if (!$categoryId) {
                             return [];
                         }
                         
                         return \App\Models\ProductSubcategory::query()
-                            ->where('category_id', $categoryId)
+                            ->where('product_category_id', $categoryId)
                             ->where('is_active', true)
                             ->pluck('name', 'id')
                             ->toArray();
@@ -70,10 +85,10 @@ class ProductResource extends Resource
                     ->preload()
                     ->createOptionForm([
                         Forms\Components\Select::make('category_id')
-                            ->relationship('category', 'name')
+                            ->relationship('productCategory', 'name')
                             ->required()
                             ->default(function (Forms\Get $get) {
-                                return $get('../../category_id');
+                                return $get('../../product_category_id');
                             }),
                         Forms\Components\TextInput::make('name')
                             ->required()
@@ -83,6 +98,19 @@ class ProductResource extends Resource
                         Forms\Components\Toggle::make('is_active')
                             ->default(true),
                     ]),
+                Forms\Components\Select::make('product_line_id')
+                    ->label('Línea de producto')
+                    ->options(ProductLine::query()->where('is_active', true)->pluck('name', 'id'))
+                    ->required(),
+                Forms\Components\Select::make('brand_id')
+                    ->label('Marca')
+                    ->options(Brand::query()->where('is_active', true)->pluck('name', 'id'))
+                    ->required(),
+                Forms\Components\Select::make('product_presentation_id')
+                    ->label('Presentación')
+                    ->options(ProductPresentation::query()->where('is_active', true)->pluck('name', 'id'))
+                    ->required(),
+                    
                 Forms\Components\TextInput::make('name')
                     ->label('Nombre del producto')
                     ->required()
@@ -92,6 +120,7 @@ class ProductResource extends Resource
                     ->required()
                     ->maxLength(65535)
                     ->columnSpanFull(),
+                
                 Forms\Components\TextInput::make('sku_base')
                     ->label('SKU base')
                     ->required()
@@ -132,6 +161,7 @@ class ProductResource extends Resource
                     ->previewable()
                     ->preserveFilenames()
                     ->columnSpanFull(),
+                
                 Forms\Components\KeyValue::make('seasonal_info')
                     ->label('Información Estacional')
                     ->addButtonLabel('Agregar Información')
@@ -151,10 +181,10 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nombre')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('subcategory.name')
+                Tables\Columns\TextColumn::make('productSubcategory.name')
                     ->label('Subcategoría')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('subcategory.category.name')
+                Tables\Columns\TextColumn::make('productCategory.name')
                     ->label('Categoría')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('unit_type')
@@ -176,24 +206,10 @@ class ProductResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('subcategory')
-                    ->relationship('subcategory', 'name'),
-                Tables\Filters\SelectFilter::make('category')
-                    ->relationship('category', 'name'),
-                Tables\Filters\SelectFilter::make('unit_type')
-                    ->options([
-                        'kg' => 'Kilogramos',
-                        'ton' => 'Toneladas',
-                        'saco' => 'Sacos',
-                        'caja' => 'Cajas',
-                        'unidad' => 'Unidades',
-                    ]),
-                Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Activo'),
+                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -201,14 +217,14 @@ class ProductResource extends Resource
                 ]),
             ]);
     }
-
+    
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-
+    
     public static function getPages(): array
     {
         return [
@@ -216,19 +232,5 @@ class ProductResource extends Resource
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
-    }
-
-    public static function getNavigationBadge(): ?string
-    {
-        return static::getModel()::count();
-    }
-
-    // public static function getEloquentQuery(): Builder
-    // {
-    //     return parent::getEloquentQuery()
-    //         ->when(
-    //             !auth()->user()->hasRole('admin'),
-    //             fn (Builder $query) => $query->where('seller_id', auth()->id())
-    //         );
-    // }
+    }    
 }
