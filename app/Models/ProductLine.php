@@ -25,25 +25,25 @@ class ProductLine extends Model
 
     // Reglas de validación
     public static $rules = [
+        'product_category_id' => 'required|exists:product_categories,id',
+        'product_subcategory_id' => 'required|exists:product_subcategories,id',
         'name' => 'required|string|max:255|unique:product_lines,name',
         'description' => 'nullable|string|max:255',
         'is_active' => 'boolean',
-        'product_category_id' => 'required|exists:product_categories,id',
-        'product_subcategory_id' => 'required|exists:product_subcategories,id'
     ];
 
     // Mensajes de error personalizados en español
     public static $messages = [
+        'product_category_id.required' => 'La categoría es obligatoria',
+        'product_category_id.exists' => 'La categoría seleccionada no existe',
+        'product_subcategory_id.required' => 'La subcategoría es obligatoria',
+        'product_subcategory_id.exists' => 'La subcategoría seleccionada no existe',
         'name.required' => 'El nombre de la línea es obligatorio',
         'name.string' => 'El nombre debe ser texto',
         'name.max' => 'El nombre no puede tener más de 255 caracteres',
         'name.unique' => 'Esta línea ya existe en el sistema',
         'description.string' => 'La descripción debe ser texto',
         'description.max' => 'La descripción no puede tener más de 255 caracteres',
-        'product_category_id.required' => 'La categoría es obligatoria',
-        'product_category_id.exists' => 'La categoría seleccionada no existe',
-        'product_subcategory_id.required' => 'La subcategoría es obligatoria',
-        'product_subcategory_id.exists' => 'La subcategoría seleccionada no existe'
     ];
 
     // Relaciones

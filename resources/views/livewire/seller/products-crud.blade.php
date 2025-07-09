@@ -13,8 +13,11 @@
         @forelse($products as $product)
             <div class="bg-white rounded-lg shadow p-4 flex flex-col">
                 <h3 class="text-lg font-semibold">{{ $product->name }}</h3>
-                <p class="text-sm text-gray-500 mb-1">{{ $product->category->name ?? '-' }} >
-                    {{ $product->subcategory->name ?? '-' }}</p>
+                <p class="text-sm text-gray-500 mb-1">{{ $product->productCategory->name ?? '-' }} >
+                    {{ $product->productSubcategory->name ?? '-' }} >
+                    {{ $product->productLine->name ?? '-' }} >
+                    {{ $product->brand->name ?? '-' }} >
+                    {{ $product->productPresentation->name ?? '-' }}</p>
                 <p class="text-gray-700 text-sm flex-1">{{ $product->description }}</p>
                 @if ($product->image)
                     <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-80 rounded mb-2">
@@ -119,6 +122,22 @@
                         </select>
                         @error('form.brand_id')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">Presentación</label>
+                        <select 
+                            wire:model="form.product_presentation_id" 
+                            class="w-full border rounded px-3 py-2 @error('form.product_presentation_id') border-red-500 @enderror"
+                        >
+                            <option value="">Selecciona una presentación</option>
+                            @foreach ($presentations as $presentation)
+                                <option value="{{ $presentation->id }}">{{ $presentation->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('form.product_presentation_id')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div class="mb-3">

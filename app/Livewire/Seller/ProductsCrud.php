@@ -6,6 +6,9 @@ use Livewire\Component;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductSubcategory;
+use App\Models\ProductLine;
+use App\Models\Brand;
+use App\Models\ProductPresentation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -375,15 +378,22 @@ class ProductsCrud extends Component
         
         // Cargar subcategorías solo si hay una categoría seleccionada
         $subcategories = [];
-        if (!empty($this->form['category_id'])) {
-            $subcategories = ProductSubcategory::where('category_id', $this->form['category_id'])
+        if (!empty($this->form['product_category_id'])) {
+            $subcategories = ProductSubcategory::where('product_category_id', $this->form['product_category_id'])
                 ->where('is_active', true)
                 ->get();
         }
 
+        $lines = ProductLine::where('is_active', true)->get();
+        $brands = Brand::where('is_active', true)->get();
+        $presentations = ProductPresentation::where('is_active', true)->get();
+
         return view('livewire.seller.products-crud', [
             'categories' => $categories,
             'subcategories' => $subcategories,
+            'lines' => $lines,
+            'brands' => $brands,
+            'presentations' => $presentations,
             'products' => $this->products,
         ]);
     }
