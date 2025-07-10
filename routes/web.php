@@ -75,10 +75,10 @@ Route::middleware('guest')->group(function () {
 
 // Rutas para usuarios autenticados
 Route::middleware(['auth'])->group(function () {
-        
-
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/municipalities/{state_id}', [ProfileController::class, 'getMunicipalities'])->name('profile.municipalities');
+    Route::get('/profile/parishes/{municipality_id}', [ProfileController::class, 'getParishes'])->name('profile.parishes');
 });
 
 // Rutas de verificación de email
