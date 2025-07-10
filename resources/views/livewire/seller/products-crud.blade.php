@@ -81,29 +81,31 @@
                             @endif
 
                             <form wire:submit.prevent="saveProduct" class="space-y-4">
-                                <!-- Categoría -->
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Categoría</label>
-                                    <select 
-                                        wire:model="form.product_category_id"
-                                        wire:change="categoryChanged($event.target.value)"
-                                        class="w-full border rounded px-3 py-2 text-sm"
-                                    >
-                                        <option value="">Selecciona una categoría</option>
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('form.product_category_id')
-                                        <span class="text-red-600 text-xs">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-                                <!-- Grid de campos -->
+                                <!-- Categoría y Subcategoría en una fila -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
+                                        <label class="block text-sm font-medium mb-1">Categoría</label>
+                                        <select 
+                                            wire:model="form.product_category_id"
+                                            wire:change="categoryChanged($event.target.value)"
+                                            class="w-full border rounded px-3 py-2 text-sm"
+                                        >
+                                            <option value="">Selecciona una categoría</option>
+                                            @foreach ($categories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('form.product_category_id')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <div>
                                         <label class="block text-sm font-medium mb-1">Subcategoría</label>
-                                        <select wire:model="form.product_subcategory_id" class="w-full border rounded px-3 py-2 text-sm">
+                                        <select 
+                                            wire:model.live="form.product_subcategory_id" 
+                                            class="w-full border rounded px-3 py-2 text-sm"
+                                        >
                                             <option value="">Selecciona una subcategoría</option>
                                             @foreach ($subcategories as $subcategory)
                                                 <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
@@ -113,19 +115,35 @@
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
                                         @enderror
                                     </div>
+                                </div>
 
+                                <!-- Línea, Marca y Estado en una fila -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium mb-1">Línea de producto</label>
-                                        <select wire:model="form.product_line_id" class="w-full border rounded px-3 py-2 text-sm">
+                                        <select 
+                                            wire:model="form.product_line_id" 
+                                            class="w-full border rounded px-3 py-2 text-sm"
+                                            @if(empty($form['product_subcategory_id'])) disabled @endif
+                                        >
                                             <option value="">Selecciona una línea</option>
-                                            @foreach ($lines as $line)
-                                                <option value="{{ $line->id }}">{{ $line->name }}</option>
-                                            @endforeach
+                                            @if($lines && $lines->count() > 0)
+                                                @foreach ($lines as $line)
+                                                    <option value="{{ $line->id }}">{{ $line->name }}</option>
+                                                @endforeach
+                                            @elseif(!empty($form['product_subcategory_id']))
+                                                <option value="" disabled>No hay líneas disponibles para esta subcategoría</option>
+                                            @else
+                                                <option value="" disabled>Seleccione una subcategoría primero</option>
+                                            @endif
                                         </select>
                                         @error('form.product_line_id')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
                                         @enderror
+                                        
+                                        
                                     </div>
+
 
                                     <div>
                                         <label class="block text-sm font-medium mb-1">Marca</label>
@@ -140,6 +158,50 @@
                                         @enderror
                                     </div>
 
+                                    
+                                </div>
+
+                                <!-- Presentación y Cantidad en una fila -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-sm font-medium mb-1">Presentación</label>
+                                        <select 
+                                            wire:model="form.product_presentation_id" 
+                                            wire:change="presentationChanged"
+                                            class="w-full border rounded px-3 py-2 text-sm"
+                                        >
+                                            <option value="">Selecciona presentación</option>
+                                            @foreach ($presentations as $presentation)
+                                                <option value="{{ $presentation->id }}">{{ $presentation->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('form.product_presentation_id')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">
+                                            Cantidad
+                                            @if($selectedPresentation)
+                                                en {{ $selectedPresentation->unit_type }}
+                                            @endif
+                                        </label>
+                                        <input 
+                                            type="number" 
+                                            wire:model="form.custom_quantity" 
+                                            class="w-full border rounded px-3 py-2 text-sm"
+                                            step="0.01"
+                                            min="0.01"
+                                        />
+                                        @error('form.custom_quantity')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Nombre y SKU en una fila -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium mb-1">Nombre</label>
                                         <input type="text" wire:model="form.name" class="w-full border rounded px-3 py-2 text-sm" />
@@ -152,47 +214,6 @@
                                         <label class="block text-sm font-medium mb-1">SKU Base</label>
                                         <input type="text" wire:model="form.sku_base" class="w-full border rounded px-3 py-2 text-sm" />
                                         @error('form.sku_base')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Presentación</label>
-                                        <select wire:model="form.product_presentation_id" class="w-full border rounded px-3 py-2 text-sm">
-                                            <option value="">Selecciona presentación</option>
-                                            @foreach ($presentations as $presentation)
-                                                <option value="{{ $presentation->id }}">{{ $presentation->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('form.product_presentation_id')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Tipo de Unidad</label>
-                                        <select wire:model="form.unit_type" class="w-full border rounded px-3 py-2 text-sm">
-                                            <option value="">Selecciona tipo</option>
-                                            <option value="kg">Kilogramo</option>
-                                            <option value="ton">Tonelada</option>
-                                            <option value="saco">Saco</option>
-                                            <option value="caja">Caja</option>
-                                            <option value="unidad">Unidad</option>
-                                        </select>
-                                        @error('form.unit_type')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Info. estacional</label>
-                                        <input 
-                                            type="text" 
-                                            wire:model="form.seasonal_info" 
-                                            class="w-full border rounded px-3 py-2 text-sm"
-                                            placeholder="Ej: Primavera, Verano..." 
-                                        />
-                                        @error('form.seasonal_info')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
                                         @enderror
                                     </div>
@@ -236,8 +257,21 @@
                                     @endif
                                 </div>
 
-                                <!-- Estado -->
+                                <!-- Info Estacional -->
                                 <div>
+                                    <label class="block text-sm font-medium mb-1">Información Estacional</label>
+                                    <input 
+                                        type="text" 
+                                        wire:model="form.seasonal_info" 
+                                        class="w-full border rounded px-3 py-2 text-sm"
+                                        placeholder="Ej: Primavera, Verano..." 
+                                    />
+                                    @error('form.seasonal_info')
+                                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div class="flex items-end">
                                     <label class="flex items-center">
                                         <input 
                                             type="checkbox" 

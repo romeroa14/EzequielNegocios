@@ -47,7 +47,6 @@ class CreateCountryStateMunicipalitiesParishesTable extends Migration
             $table->string('name')->comment('Nombre del municipio');
             $table->string('id_municipio')->comment('ID del municipio');
             $table->timestamps();
-            $table->softDeletes();
             $table->comment('Municipios');
         });
 
@@ -60,7 +59,6 @@ class CreateCountryStateMunicipalitiesParishesTable extends Migration
             
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
-            $table->softDeletes();
 
             $table->foreign('municipality_id')->references('id')->on('municipalities')
                 ->onUpdate('cascade')->onDelete('cascade');

@@ -4,43 +4,24 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Person;
+use App\Models\State;
+use App\Models\Municipality;
+use App\Models\Parish;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Registered;
-// use Illuminate\Container\Attributes\Log;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Register Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles the registration of new users as well as their
-    | validation and creation. By default this controller uses a trait to
-    | provide this functionality without requiring any additional code.
-    |
-    */
-
     use RegistersUsers;
 
-    /**
-     * Where to redirect users after registration.
-     *
-     * @var string
-     */
     protected $redirectTo = '/home';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest');
@@ -48,15 +29,22 @@ class RegisterController extends Controller
 
     public function showRegistrationForm()
     {
-        return view('auth.register');
+        $states = State::where('country_id', 296)->get();
+        return view('auth.register', compact('states'));
     }
 
-    /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
+    public function getMunicipalities(Request $request)
+    {
+        $municipalities = Municipality::where('state_id', $request->state_id)->get();
+        return response()->json($municipalities);
+    }
+
+    public function getParishes(Request $request)
+    {
+        $parishes = Parish::where('municipality_id', $request->municipality_id)->get();
+        return response()->json($parishes);
+    }
+
     protected function validator(array $data)
     {
         $rules = [
@@ -70,6 +58,9 @@ class RegisterController extends Controller
             'role' => ['required', 'string', 'in:buyer,seller'],
             'address' => ['nullable', 'string', 'max:255'],
             'sector' => ['nullable', 'string', 'max:255'],
+            'state_id' => ['required', 'exists:states,id'],
+            'municipality_id' => ['required', 'exists:municipalities,id'],
+            'parish_id' => ['required', 'exists:parishes,id'],
         ];
 
         if (request('role') === 'seller') {
@@ -80,18 +71,8 @@ class RegisterController extends Controller
         return Validator::make($data, $rules);
     }
 
-    /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param  array  $data
-     * @return \App\Models\User
-     */
     protected function create(array $data)
     {
-        // Log::info('Entrando al método create de RegisterController', $data);
-        // o
-        dd('creando usuario', $data);
-
         try {
             DB::beginTransaction();
 
@@ -106,6 +87,9 @@ class RegisterController extends Controller
                 'role' => $data['role'],
                 'address' => $data['address'] ?? null,
                 'sector' => $data['sector'] ?? null,
+                'state_id' => $data['state_id'],
+                'municipality_id' => $data['municipality_id'],
+                'parish_id' => $data['parish_id'],
                 'company_name' => $data['company_name'] ?? null,
                 'company_rif' => $data['company_rif'] ?? null,
                 'is_active' => true,

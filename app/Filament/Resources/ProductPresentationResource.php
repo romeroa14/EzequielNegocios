@@ -34,6 +34,10 @@ class ProductPresentationResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
+                Forms\Components\TextInput::make('unit_type')
+                    ->label('Tipo de Unidad')
+                    ->required(),
+
                 Forms\Components\TextInput::make('description')
                     ->label('Descripción')
                     ->required()
@@ -47,6 +51,10 @@ class ProductPresentationResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nombre')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('unit_type')
+                    ->label('Tipo de Unidad')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('description')

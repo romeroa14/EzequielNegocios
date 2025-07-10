@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('description');
             $table->string('sku_base');
-            $table->enum('unit_type', ['kg', 'ton', 'saco', 'caja', 'unidad']);
+            $table->decimal('custom_quantity', 10, 2)->nullable();
             $table->string('image')->nullable();
             $table->json('seasonal_info');
             $table->boolean('is_active');

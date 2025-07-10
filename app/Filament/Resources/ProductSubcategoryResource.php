@@ -28,8 +28,8 @@ class ProductSubcategoryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('category_id')
-                    ->relationship('category', 'name')
+                Forms\Components\Select::make('product_category_id')
+                    ->relationship('productCategory', 'name')
                     ->label('Categoría')
                     ->required()
                     ->searchable()
@@ -53,7 +53,7 @@ class ProductSubcategoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('category.name')
+                Tables\Columns\TextColumn::make('productCategory.name')
                     ->label('Categoría')
                     ->searchable()
                     ->sortable(),
@@ -80,8 +80,8 @@ class ProductSubcategoryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('category_id')
-                    ->relationship('category', 'name')
+                Tables\Filters\SelectFilter::make('product_category_id')
+                    ->relationship('productCategory', 'name')
                     ->label('Categoría')
                     ->searchable()
                     ->preload(),

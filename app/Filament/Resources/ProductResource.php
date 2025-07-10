@@ -83,6 +83,10 @@ class ProductResource extends Resource
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->live()
+                    ->afterStateUpdated(function ($set) {
+                        $set('product_line_id', null);
+                    })
                     ->createOptionForm([
                         Forms\Components\Select::make('category_id')
                             ->relationship('productCategory', 'name')
@@ -100,41 +104,73 @@ class ProductResource extends Resource
                     ]),
                 Forms\Components\Select::make('product_line_id')
                     ->label('Línea de producto')
-                    ->options(ProductLine::query()->where('is_active', true)->pluck('name', 'id'))
-                    ->required(),
+                    ->options(function (Forms\Get $get) {
+                        $subcategoryId = $get('product_subcategory_id');
+                        
+                        if (!$subcategoryId) {
+                            return ProductLine::query()
+                                ->where('is_active', true)
+                                ->pluck('name', 'id')
+                                ->toArray();
+                        }
+                        
+                        return ProductLine::query()
+                            ->where('product_subcategory_id', $subcategoryId)
+                            ->where('is_active', true)
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    })
+                    ->required()
+                    ->searchable()
+                    ->preload(),
+                
+                Forms\Components\Grid::make()
+                    ->schema([
                 Forms\Components\Select::make('brand_id')
                     ->label('Marca')
                     ->options(Brand::query()->where('is_active', true)->pluck('name', 'id'))
                     ->required(),
+
                 Forms\Components\Select::make('product_presentation_id')
                     ->label('Presentación')
                     ->options(ProductPresentation::query()->where('is_active', true)->pluck('name', 'id'))
-                    ->required(),
+                            ->required()
+
+                            ->live()
+                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                $set('custom_quantity', 1);
+                            }),
+                        Forms\Components\TextInput::make('custom_quantity')
+                            ->label(function (Forms\Get $get) {
+                                $presentationId = $get('product_presentation_id');
+                                if (!$presentationId) return 'Cantidad';
+                                
+                                $presentation = ProductPresentation::find($presentationId);
+                                return $presentation ? "Cantidad en {$presentation->unit_type}" : 'Cantidad';
+                            })
+                            ->required()
+                            ->numeric()
+                            ->default(1)
+                            ->minValue(0.01)
+                            ->step(0.01),
+                    ])
+                    ->columns(3),
                     
+                Forms\Components\Grid::make()
+                    ->schema([
                 Forms\Components\TextInput::make('name')
                     ->label('Nombre del producto')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Textarea::make('description')
-                    ->label('Descripción del producto')
-                    ->required()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
+                
                 
                 Forms\Components\TextInput::make('sku_base')
                     ->label('SKU base')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Select::make('unit_type')
-                    ->label('Unidad de medida')
-                    ->options([
-                        'kg' => 'Kilogramos',
-                        'ton' => 'Toneladas',
-                        'saco' => 'Sacos',
-                        'caja' => 'Cajas',
-                        'unidad' => 'Unidades',
-                    ])
-                    ->required(),
+                ])
+                ->columns(2),
+                
                 Forms\Components\FileUpload::make('image')
                     ->label('Imagen del producto')
                     ->image()
@@ -160,6 +196,12 @@ class ProductResource extends Resource
                     ->openable()
                     ->previewable()
                     ->preserveFilenames()
+                    ->columnSpanFull(),
+                    
+                    Forms\Components\Textarea::make('description')
+                    ->label('Descripción del producto')
+                    ->required()
+                    ->maxLength(65535)
                     ->columnSpanFull(),
                 
                 Forms\Components\KeyValue::make('seasonal_info')
@@ -217,14 +259,14 @@ class ProductResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -232,5 +274,5 @@ class ProductResource extends Resource
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
-    }    
+    }
 }

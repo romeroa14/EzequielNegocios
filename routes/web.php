@@ -105,4 +105,8 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::view('/listings', 'seller.listings')->name('listings.index');
 });
 
+// Rutas para los selects en cascada de ubicación
+Route::get('/get-municipalities/{state_id}', [RegisteredUserController::class, 'getMunicipalities'])->name('get.municipalities');
+Route::get('/get-parishes/{municipality_id}', [RegisteredUserController::class, 'getParishes'])->name('get.parishes');
+
 require __DIR__.'/auth.php';

@@ -99,6 +99,39 @@
                     <x-text-input id="sector" class="block mt-1 w-full" type="text" name="sector" :value="old('sector')" />
                     <x-input-error :messages="$errors->get('sector')" class="mt-2" />
                 </div>
+
+                <!-- Ubicación -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- Estado -->
+                    <div>
+                        <x-input-label for="state_id" :value="__('Estado')" />
+                        <select id="state_id" name="state_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            <option value="">Selecciona un estado</option>
+                            @foreach ($states as $state)
+                                <option value="{{ $state->id }}">{{ $state->name }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error :messages="$errors->get('state_id')" class="mt-2" />
+                    </div>
+
+                    <!-- Municipio -->
+                    <div>
+                        <x-input-label for="municipality_id" :value="__('Municipio')" />
+                        <select id="municipality_id" name="municipality_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            <option value="">Selecciona un municipio</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('municipality_id')" class="mt-2" />
+                    </div>
+
+                    <!-- Parroquia -->
+                    <div>
+                        <x-input-label for="parish_id" :value="__('Parroquia')" />
+                        <select id="parish_id" name="parish_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            <option value="">Selecciona una parroquia</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('parish_id')" class="mt-2" />
+                    </div>
+                </div>
             </div>
 
             <!-- Información de Empresa (solo para vendedores) -->
@@ -146,30 +179,55 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const roleSelect = document.getElementById('role');
-        const companyInfo = document.getElementById('company-info');
-        const companyName = document.getElementById('company_name');
-        const companyRif = document.getElementById('company_rif');
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('role');
+    const stateSelect = document.getElementById('state_id');
+    const municipalitySelect = document.getElementById('municipality_id');
+    const parishSelect = document.getElementById('parish_id');
+    const companyInfo = document.getElementById('company-info');
 
-        function toggleCompanyFields() {
-            if (roleSelect.value === 'seller') {
+    roleSelect.addEventListener('change', function() {
+        const role = this.value;
+        if (role === 'seller') {
             companyInfo.classList.remove('hidden');
-                companyName.required = true;
-                companyRif.required = true;
-            } else {
+        } else {
             companyInfo.classList.add('hidden');
-                companyName.required = false;
-                companyRif.required = false;
         }
-        }
-
-        // Ejecutar al cargar la página
-        toggleCompanyFields();
-
-        // Ejecutar al cambiar el select
-        roleSelect.addEventListener('change', toggleCompanyFields);
     });
+
+    stateSelect.addEventListener('change', function() {
+        const stateId = this.value;
+        municipalitySelect.innerHTML = '<option value="">Selecciona un municipio</option>';
+        parishSelect.innerHTML = '<option value="">Selecciona una parroquia</option>';
+        
+        if (stateId) {
+            fetch(`/get-municipalities/${stateId}`)
+                .then(response => response.json())
+                .then(municipalities => {
+                    municipalities.forEach(municipality => {
+                        const option = new Option(municipality.name, municipality.id);
+                        municipalitySelect.add(option);
+                    });
+                });
+        }
+    });
+
+    municipalitySelect.addEventListener('change', function() {
+        const municipalityId = this.value;
+        parishSelect.innerHTML = '<option value="">Selecciona una parroquia</option>';
+        
+        if (municipalityId) {
+            fetch(`/get-parishes/${municipalityId}`)
+                .then(response => response.json())
+                .then(parishes => {
+                    parishes.forEach(parish => {
+                        const option = new Option(parish.name, parish.id);
+                        parishSelect.add(option);
+                    });
+                });
+        }
+    });
+});
 </script>
 @endpush
 

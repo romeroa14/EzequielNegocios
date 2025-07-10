@@ -12,7 +12,7 @@ class Product extends Model
     use HasFactory;
     use HasProductImage;
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_url', 'final_quantity'];
 
     protected $fillable = [
         'person_id',
@@ -24,7 +24,7 @@ class Product extends Model
         'name',
         'description',
         'sku_base',
-        'unit_type',
+        'custom_quantity',
         'image',
         'seasonal_info',
         'is_active'
@@ -32,7 +32,8 @@ class Product extends Model
 
     protected $casts = [
         'seasonal_info' => 'array',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
+        'custom_quantity' => 'decimal:2'
     ];
 
     public static function rules($id = null)
@@ -47,7 +48,7 @@ class Product extends Model
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'sku_base' => 'required|string|max:50|unique:products,sku_base,' . $id,
-            'unit_type' => 'required|in:kg,ton,saco,caja,unidad',
+            'custom_quantity' => 'nullable|numeric|min:0.01',
             'image' => 'nullable|image|max:2048',
             'seasonal_info' => 'nullable|array',
             'is_active' => 'boolean'
@@ -75,8 +76,8 @@ class Product extends Model
             'sku_base.required' => 'El SKU base es obligatorio.',
             'sku_base.max' => 'El SKU base no puede tener más de 50 caracteres.',
             'sku_base.unique' => 'Este SKU base ya está en uso.',
-            'unit_type.required' => 'El tipo de unidad es obligatorio.',
-            'unit_type.in' => 'El tipo de unidad debe ser kg, ton, saco, caja o unidad.',
+            'custom_quantity.numeric' => 'La cantidad personalizada debe ser un número.',
+            'custom_quantity.min' => 'La cantidad personalizada debe ser mayor a 0.',
             'image.image' => 'El archivo debe ser una imagen.',
             'image.max' => 'La imagen no puede ser mayor a 2MB.',
             'seasonal_info.array' => 'La información estacional debe ser un arreglo.',
@@ -84,6 +85,7 @@ class Product extends Model
         ];
     }
 
+    // Relaciones
     public function person(): BelongsTo
     {
         return $this->belongsTo(Person::class);
@@ -122,5 +124,25 @@ class Product extends Model
     public function priceHistory()
     {
         return $this->hasMany(PriceHistory::class);
+    }
+
+    // Accessors
+    public function getFinalQuantityAttribute()
+    {
+        return $this->custom_quantity ?? $this->productPresentation->quantity;
+    }
+
+    // Helper para obtener la descripción completa de la cantidad
+    public function getQuantityDescription()
+    {
+        $quantity = $this->final_quantity;
+        $unit = $this->productPresentation->unit_type;
+        $presentationName = $this->productPresentation->name;
+        
+        if ($this->custom_quantity) {
+            return "{$quantity} {$unit} ({$presentationName})";
+        }
+        
+        return $presentationName;
     }
 } 

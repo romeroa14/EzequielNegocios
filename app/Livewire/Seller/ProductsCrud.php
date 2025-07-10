@@ -24,19 +24,25 @@ class ProductsCrud extends Component
     public $products;
     public $showModal = false;
     public $editingProduct = null;
+    public $selectedPresentation = null;
+    public $lines;
     public $form = [
-        'category_id' => '',
-        'subcategory_id' => '',
+        'product_category_id' => '',
+        'product_subcategory_id' => '',
+        'product_line_id' => '',
+        'brand_id' => '',
+        'product_presentation_id' => '',
         'name' => '',
         'description' => '',
         'sku_base' => '',
-        'unit_type' => '',
+        'custom_quantity' => 1,
         'image' => null,
         'seasonal_info' => '',
         'is_active' => true,
     ];
     public $changeImage = false;
     public $productIdToDelete = null;
+    public $subcategories;
 
     protected $listeners = [
         'refreshComponent' => '$refresh',
@@ -50,9 +56,12 @@ class ProductsCrud extends Component
         $rules = [
             'form.product_category_id' => 'required|exists:product_categories,id',
             'form.product_subcategory_id' => 'required|exists:product_subcategories,id',
+            'form.product_line_id' => 'required|exists:product_lines,id',
+            'form.brand_id' => 'required|exists:brands,id',
+            'form.product_presentation_id' => 'required|exists:product_presentations,id',
             'form.name' => 'required|string|max:255',
             'form.description' => 'required|string',
-            'form.unit_type' => 'required|in:kg,ton,saco,caja,unidad',
+            'form.custom_quantity' => 'required|numeric|min:0.01',
             'form.seasonal_info' => 'nullable|string',
             'form.is_active' => 'boolean',
         ];
@@ -81,14 +90,21 @@ class ProductsCrud extends Component
             'form.product_category_id.exists' => 'La categoría seleccionada no existe.',
             'form.product_subcategory_id.required' => 'La subcategoría es obligatoria.',
             'form.product_subcategory_id.exists' => 'La subcategoría seleccionada no existe.',
+            'form.product_line_id.required' => 'La línea de producto es obligatoria.',
+            'form.product_line_id.exists' => 'La línea de producto seleccionada no existe.',
+            'form.brand_id.required' => 'La marca es obligatoria.',
+            'form.brand_id.exists' => 'La marca seleccionada no existe.',
+            'form.product_presentation_id.required' => 'La presentación es obligatoria.',
+            'form.product_presentation_id.exists' => 'La presentación seleccionada no existe.',
             'form.name.required' => 'El nombre es obligatorio.',
             'form.name.max' => 'El nombre no puede tener más de 255 caracteres.',
             'form.description.required' => 'La descripción es obligatoria.',
             'form.sku_base.required' => 'El SKU base es obligatorio.',
             'form.sku_base.max' => 'El SKU base no puede tener más de 50 caracteres.',
             'form.sku_base.unique' => 'Este SKU base ya está en uso.',
-            'form.unit_type.required' => 'El tipo de unidad es obligatorio.',
-            'form.unit_type.in' => 'El tipo de unidad debe ser kg, ton, saco, caja o unidad.',
+            'form.custom_quantity.required' => 'La cantidad es obligatoria.',
+            'form.custom_quantity.numeric' => 'La cantidad debe ser un número.',
+            'form.custom_quantity.min' => 'La cantidad debe ser mayor a 0.',
             'form.image.required' => 'La imagen es obligatoria.',
             'form.image.image' => 'El archivo debe ser una imagen.',
             'form.image.max' => 'La imagen no puede ser mayor a 2MB.',
@@ -97,19 +113,84 @@ class ProductsCrud extends Component
         ];
     }
 
+    public function presentationChanged()
+    {
+        if ($this->form['product_presentation_id']) {
+            $this->selectedPresentation = ProductPresentation::find($this->form['product_presentation_id']);
+            $this->form['custom_quantity'] = 1;
+        } else {
+            $this->selectedPresentation = null;
+        }
+    }
+
     public function updated($propertyName)
     {
         $this->validateOnly($propertyName);
 
-        if ($propertyName === 'form.category_id') {
-            $this->form['subcategory_id'] = '';
-            // Las subcategorías se cargarán automáticamente en el render()
+        if ($propertyName === 'form.product_category_id') {
+            // Al cambiar la categoría, reseteamos subcategoría y línea
+            $this->form['product_subcategory_id'] = '';
+            $this->form['product_line_id'] = '';
+            $this->lines = collect();
+            
+            // Cargamos las subcategorías de la categoría seleccionada
+            if (!empty($this->form['product_category_id'])) {
+                $this->subcategories = ProductSubcategory::where('product_category_id', $this->form['product_category_id'])
+                    ->where('is_active', true)
+                    ->get();
+                Log::info('Subcategorías cargadas para categoría', [
+                    'category_id' => $this->form['product_category_id'],
+                    'subcategories' => $this->subcategories->pluck('name', 'id')
+                ]);
+            }
+        }
+
+        if ($propertyName === 'form.product_subcategory_id') {
+            // Al cambiar la subcategoría, reseteamos la línea
+            $this->form['product_line_id'] = '';
+            
+            if (!empty($this->form['product_subcategory_id'])) {
+                Log::info('Buscando líneas para subcategoría', [
+                    'category_id' => $this->form['product_category_id'],
+                    'subcategory_id' => $this->form['product_subcategory_id']
+                ]);
+
+                // Cargamos las líneas que coincidan con la categoría y subcategoría
+                $this->lines = ProductLine::where('product_subcategory_id', $this->form['product_subcategory_id'])
+                    ->where('product_category_id', $this->form['product_category_id'])
+                    ->where('is_active', true)
+                    ->get();
+
+                Log::info('Líneas encontradas', [
+                    'count' => $this->lines->count(),
+                    'lines' => $this->lines->pluck('name', 'id')->toArray()
+                ]);
+            } else {
+                $this->lines = collect();
+            }
+        }
+
+        if ($propertyName === 'form.product_presentation_id') {
+            $this->presentationChanged();
+        }
+    }
+
+    public function updateProductLines()
+    {
+        if (!empty($this->form['product_subcategory_id'])) {
+            $this->lines = ProductLine::where('product_subcategory_id', $this->form['product_subcategory_id'])
+                ->where('is_active', true)
+                ->get();
+        } else {
+            $this->lines = collect();
         }
     }
 
     public function mount()
     {
         $this->loadProducts();
+        $this->lines = collect();
+        $this->subcategories = collect();
     }
 
     public function loadProducts()
@@ -127,7 +208,10 @@ class ProductsCrud extends Component
         $this->resetForm();
         $this->changeImage = false;
         if ($productId) {
-            $this->editingProduct = Product::where('id', $productId)->where('person_id', Auth::id())->firstOrFail();
+            $this->editingProduct = Product::where('id', $productId)
+                ->where('person_id', Auth::id())
+                ->firstOrFail();
+            
             $this->form = [
                 'product_category_id' => $this->editingProduct->product_category_id,
                 'product_subcategory_id' => $this->editingProduct->product_subcategory_id,
@@ -137,13 +221,26 @@ class ProductsCrud extends Component
                 'name' => $this->editingProduct->name,
                 'description' => $this->editingProduct->description,
                 'sku_base' => $this->editingProduct->sku_base,
-                'unit_type' => $this->editingProduct->unit_type,
+                'custom_quantity' => $this->editingProduct->custom_quantity ?? 1,
                 'image' => $this->editingProduct->image,
                 'seasonal_info' => $this->editingProduct->seasonal_info,
                 'is_active' => $this->editingProduct->is_active,
             ];
+            
+            if ($this->form['product_presentation_id']) {
+                $this->selectedPresentation = ProductPresentation::find($this->form['product_presentation_id']);
+            }
+
+            // Cargar las líneas de producto basadas en la categoría y subcategoría del producto
+            if ($this->form['product_subcategory_id'] && $this->form['product_category_id']) {
+                $this->lines = ProductLine::where('product_subcategory_id', $this->form['product_subcategory_id'])
+                    ->where('product_category_id', $this->form['product_category_id'])
+                    ->where('is_active', true)
+                    ->get();
+            }
         } else {
             $this->editingProduct = null;
+            $this->lines = collect();
         }
         $this->showModal = true;
     }
@@ -166,11 +263,12 @@ class ProductsCrud extends Component
             'name' => '',
             'description' => '',
             'sku_base' => '',
-            'unit_type' => '',
+            'custom_quantity' => 1,
             'image' => null,
             'seasonal_info' => '',
             'is_active' => true,
         ];
+        $this->selectedPresentation = null;
     }
 
     public function categoryChanged($value)
@@ -272,48 +370,20 @@ class ProductsCrud extends Component
 
     public function saveProduct()
     {
-        $formImageRule = is_string($this->form['image']) ? 'nullable|string' : 'nullable|image|max:2048';
-        $productId = $this->editingProduct ? $this->editingProduct->id : null;
-
-        $validationRules = [
-            'form.product_category_id' => 'required|exists:product_categories,id',
-            'form.product_subcategory_id' => 'required|exists:product_subcategories,id',
-            'form.product_line_id' => 'required|exists:product_lines,id',
-            'form.brand_id' => 'required|exists:brands,id',
-            'form.product_presentation_id' => 'required|exists:product_presentations,id',
-            'form.name' => 'required|string|max:255',
-            'form.description' => 'required|string',
-            'form.unit_type' => 'required|in:kg,ton,saco,caja,unidad',
-            'form.image' => $formImageRule,
-            'form.seasonal_info' => 'nullable|string',
-            'form.is_active' => 'boolean',
-        ];
-
-        // Agregar regla de SKU con validación condicional
-        if ($productId) {
-            $validationRules['form.sku_base'] = "required|string|max:50|unique:products,sku_base,{$productId}";
-        } else {
-            $validationRules['form.sku_base'] = 'required|string|max:50|unique:products,sku_base';
-        }
-
-        $this->validate($validationRules);
+        $this->validate();
 
         try {
             DB::beginTransaction();
-            
-            $imagePath = null;
 
-            // Manejar la imagen si se proporciona una nueva
-            if ($this->form['image'] instanceof TemporaryUploadedFile) {
-                $imagePath = $this->storeImage($this->form['image']);
-                Log::info('Nueva imagen almacenada', ['path' => $imagePath]);
-            } elseif ($this->editingProduct) {
-                // Mantener la imagen existente si no se proporciona una nueva
-                $imagePath = $this->editingProduct->image;
-                Log::info('Manteniendo imagen existente', ['path' => $imagePath]);
+            $imageToSave = $this->form['image'];
+            if ($imageToSave instanceof TemporaryUploadedFile) {
+                $imagePath = $imageToSave->store('products', 'public');
+            } else {
+                $imagePath = $this->editingProduct ? $this->editingProduct->image : null;
             }
 
             $productData = [
+                'person_id' => Auth::id(),
                 'product_category_id' => $this->form['product_category_id'],
                 'product_subcategory_id' => $this->form['product_subcategory_id'],
                 'product_line_id' => $this->form['product_line_id'],
@@ -322,41 +392,31 @@ class ProductsCrud extends Component
                 'name' => $this->form['name'],
                 'description' => $this->form['description'],
                 'sku_base' => $this->form['sku_base'],
-                'unit_type' => $this->form['unit_type'],
+                'custom_quantity' => $this->form['custom_quantity'],
+                'image' => $imagePath,
                 'seasonal_info' => $this->form['seasonal_info'],
                 'is_active' => $this->form['is_active'],
             ];
 
-            // Solo actualizar la imagen si tenemos una
-            if ($imagePath !== null) {
-                $productData['image'] = $imagePath;
-            }
-
             if ($this->editingProduct) {
-                // Actualizar producto existente
                 $this->editingProduct->update($productData);
                 $this->dispatch('product-updated');
-                Log::info('Producto actualizado', ['id' => $this->editingProduct->id, 'image' => $imagePath]);
             } else {
-                // Crear nuevo producto
-                $productData['person_id'] = Auth::id();
-                $product = Product::create($productData);
+                Product::create($productData);
                 $this->dispatch('product-added');
-                Log::info('Producto creado', ['id' => $product->id, 'image' => $imagePath]);
             }
 
             DB::commit();
-            $this->closeModal();
             $this->loadProducts();
-            session()->flash('success', $this->editingProduct ? 'Producto actualizado correctamente.' : 'Producto creado correctamente.');
+            $this->closeModal();
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al guardar producto', [
+            Log::error('Error al guardar producto:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            session()->flash('error', 'Error al guardar el producto: ' . $e->getMessage());
+            session()->flash('error', 'Error al guardar el producto. Por favor, intente nuevamente.');
         }
     }
 
@@ -376,22 +436,39 @@ class ProductsCrud extends Component
     {
         $categories = ProductCategory::where('is_active', true)->get();
         
-        // Cargar subcategorías solo si hay una categoría seleccionada
-        $subcategories = [];
-        if (!empty($this->form['product_category_id'])) {
-            $subcategories = ProductSubcategory::where('product_category_id', $this->form['product_category_id'])
+        // Si no hay subcategorías cargadas y hay una categoría seleccionada, las cargamos
+        if ((!isset($this->subcategories) || $this->subcategories->isEmpty()) && 
+            !empty($this->form['product_category_id'])) {
+            $this->subcategories = ProductSubcategory::where('product_category_id', $this->form['product_category_id'])
                 ->where('is_active', true)
                 ->get();
         }
 
-        $lines = ProductLine::where('is_active', true)->get();
+        // Si no hay líneas cargadas y tenemos categoría y subcategoría, las cargamos
+        if ((!isset($this->lines) || $this->lines->isEmpty()) && 
+            !empty($this->form['product_category_id']) && 
+            !empty($this->form['product_subcategory_id'])) {
+            
+            $this->lines = ProductLine::where('product_category_id', $this->form['product_category_id'])
+                ->where('product_subcategory_id', $this->form['product_subcategory_id'])
+                ->where('is_active', true)
+                ->get();
+
+            Log::info('Estado actual de líneas', [
+                'category_id' => $this->form['product_category_id'],
+                'subcategory_id' => $this->form['product_subcategory_id'],
+                'lines_count' => $this->lines->count(),
+                'lines' => $this->lines->pluck('name', 'id')->toArray()
+            ]);
+        }
+
         $brands = Brand::where('is_active', true)->get();
         $presentations = ProductPresentation::where('is_active', true)->get();
 
         return view('livewire.seller.products-crud', [
             'categories' => $categories,
-            'subcategories' => $subcategories,
-            'lines' => $lines,
+            'subcategories' => $this->subcategories ?? collect(),
+            'lines' => $this->lines ?? collect(),
             'brands' => $brands,
             'presentations' => $presentations,
             'products' => $this->products,

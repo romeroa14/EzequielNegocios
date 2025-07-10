@@ -48,7 +48,7 @@ class ProductLineResource extends Resource
                                     return [];
                                 }
                                 return ProductSubcategory::query()
-                                    ->where('category_id', $categoryId)
+                                    ->where('product_category_id', $categoryId)
                                     ->where('is_active', true)
                                     ->pluck('name', 'id');
                             })

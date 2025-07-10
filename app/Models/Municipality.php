@@ -3,14 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Municipality extends Model
 {
     protected $fillable = [
-        'name',
         'state_id',
+        'name',
         'id_municipio'
     ];
 
@@ -19,8 +19,8 @@ class Municipality extends Model
         return $this->belongsTo(State::class);
     }
 
-    public function people(): HasMany
+    public function parishes(): HasMany
     {
-        return $this->hasMany(Person::class);
+        return $this->hasMany(Parish::class);
     }
 } 

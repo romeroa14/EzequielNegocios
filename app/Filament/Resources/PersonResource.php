@@ -14,8 +14,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
 
 class PersonResource extends Resource
@@ -77,6 +77,45 @@ class PersonResource extends Resource
 
                 Forms\Components\Section::make('Ubicación')
                     ->schema([
+                        Forms\Components\Select::make('state_id')
+                            ->label('Estado')
+                            ->options(function () {
+                                return State::query()
+                                    ->where('country_id', 296) // Venezuela
+                                    ->pluck('name', 'id');
+                            })
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                $set('municipality_id', null);
+                                $set('parish_id', null);
+                            }),
+                        Forms\Components\Select::make('municipality_id')
+                            ->label('Municipio')
+                            ->options(function (callable $get) {
+                                $stateId = $get('state_id');
+                                if (!$stateId) {
+                                    return [];
+                                }
+                                return Municipality::query()
+                                    ->where('state_id', $stateId)
+                                    ->pluck('name', 'id');
+                            })
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(fn ($state, callable $set) => $set('parish_id', null)),
+                        Forms\Components\Select::make('parish_id')
+                            ->label('Parroquia')
+                            ->options(function (callable $get) {
+                                $municipalityId = $get('municipality_id');
+                                if (!$municipalityId) {
+                                    return [];
+                                }   
+                                return Parish::query()
+                                    ->where('municipality_id', $municipalityId)
+                                    ->pluck('name', 'id');
+                            })
+                            ->required(),
                         Forms\Components\TextInput::make('address')
                             ->label('Dirección')
                             ->maxLength(255),

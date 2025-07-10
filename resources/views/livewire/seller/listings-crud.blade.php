@@ -48,171 +48,171 @@
                         <!-- Header fijo -->
                         <div class="sticky top-0 bg-white px-4 py-3 border-b border-gray-200 flex justify-between items-center z-10">
                             <h2 class="text-lg font-semibold truncate">{{ $editingListing ? 'Editar Publicación' : 'Nueva Publicación' }}</h2>
-                            <button wire:click="closeModal" class="text-gray-400 hover:text-gray-700">
+                    <button wire:click="closeModal" class="text-gray-400 hover:text-gray-700">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
 
                         <!-- Contenido scrolleable -->
                         <div class="p-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
-                            @if(session('error'))
+                @if(session('error'))
                                 <div class="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">
-                                    {{ session('error') }}
-                                </div>
-                            @endif
-                            @if(session('success'))
+                        {{ session('error') }}
+                    </div>
+                @endif
+                @if(session('success'))
                                 <div class="mb-4 p-3 bg-green-100 text-green-700 rounded text-sm">
-                                    {{ session('success') }}
-                                </div>
-                            @endif
+                        {{ session('success') }}
+                    </div>
+                @endif
 
                             <form wire:submit.prevent="saveListing" class="space-y-4">
-                                <!-- Producto y Preview -->
+                        <!-- Producto y Preview -->
                                 <div x-data="{ img: @entangle('form.product_id') }">
-                                    <label class="block text-sm font-medium mb-1">Producto</label>
+                            <label class="block text-sm font-medium mb-1">Producto</label>
                                     <select 
                                         x-model="img" 
                                         wire:model="form.product_id" 
                                         class="w-full border rounded px-3 py-2 text-sm bg-white"
                                     >
-                                        <option value="">Selecciona un producto</option>
-                                        @foreach($products as $product)
-                                            <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('form.product_id')
-                                        <span class="text-red-600 text-xs">{{ $message }}</span>
-                                    @enderror
-                                    <template x-if="img">
+                                <option value="">Selecciona un producto</option>
+                                @foreach($products as $product)
+                                    <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('form.product_id')
+                                <span class="text-red-600 text-xs">{{ $message }}</span>
+                            @enderror
+                            <template x-if="img">
                                         <img 
                                             :src="img && {{ Js::from($products->pluck('image_url', 'id')) }}[img] ? {{ Js::from($products->pluck('image_url', 'id')) }}[img] : ''" 
                                             class="h-16 sm:h-24 rounded shadow mt-2" 
                                             x-show="img && {{ Js::from($products->pluck('image_url', 'id')) }}[img]"
                                         >
-                                    </template>
-                                </div>
+                            </template>
+                        </div>
 
                                 <!-- Grid de campos -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Título</label>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Título</label>
                                         <input 
                                             type="text" 
                                             wire:model="form.title" 
                                             class="w-full border rounded px-3 py-2 text-sm" 
                                         />
-                                        @error('form.title')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                                @error('form.title')
+                                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                                @enderror
+                            </div>
 
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Precio Unitario</label>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Precio Unitario</label>
                                         <input 
                                             type="number" 
                                             step="0.01" 
                                             wire:model="form.unit_price" 
                                             class="w-full border rounded px-3 py-2 text-sm" 
                                         />
-                                        @error('form.unit_price')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                                @error('form.unit_price')
+                                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                                @enderror
+                            </div>
 
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Cantidad Disponible</label>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Cantidad Disponible</label>
                                         <input 
                                             type="number" 
                                             wire:model="form.quantity_available" 
                                             class="w-full border rounded px-3 py-2 text-sm" 
                                         />
-                                        @error('form.quantity_available')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                                @error('form.quantity_available')
+                                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                                @enderror
+                            </div>
 
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Calidad</label>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Calidad</label>
                                         <select 
                                             wire:model="form.quality_grade" 
                                             class="w-full border rounded px-3 py-2 text-sm bg-white"
                                         >
-                                            <option value="">Selecciona una calidad</option>
-                                            <option value="premium">Premium</option>
-                                            <option value="standard">Estándar</option>
-                                            <option value="economic">Económico</option>
-                                        </select>
-                                        @error('form.quality_grade')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                                    <option value="">Selecciona una calidad</option>
+                                    <option value="premium">Premium</option>
+                                    <option value="standard">Estándar</option>
+                                    <option value="economic">Económico</option>
+                                </select>
+                                @error('form.quality_grade')
+                                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                                @enderror
+                        </div>
 
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Fecha de Cosecha</label>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Fecha de Cosecha</label>
                                         <input 
                                             type="date" 
                                             wire:model="form.harvest_date" 
                                             class="w-full border rounded px-3 py-2 text-sm" 
                                         />
-                                        @error('form.harvest_date')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                                @error('form.harvest_date')
+                                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                                @enderror
+                            </div>
 
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Ciudad</label>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Ciudad</label>
                                         <input 
                                             type="text" 
                                             wire:model="form.location_city" 
                                             class="w-full border rounded px-3 py-2 text-sm" 
                                         />
-                                        @error('form.location_city')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                                @error('form.location_city')
+                                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                                @enderror
+                            </div>
 
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Estado</label>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Estado</label>
                                         <input 
                                             type="text" 
                                             wire:model="form.location_state" 
                                             class="w-full border rounded px-3 py-2 text-sm" 
                                         />
-                                        @error('form.location_state')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                                @error('form.location_state')
+                                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                                @enderror
+                            </div>
 
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Estatus</label>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Estatus</label>
                                         <select 
                                             wire:model="form.status" 
                                             class="w-full border rounded px-3 py-2 text-sm bg-white"
                                         >
-                                            <option value="pending">Pendiente</option>
-                                            <option value="active">Activo</option>
-                                            <option value="sold_out">Agotado</option>
-                                            <option value="inactive">Inactivo</option>
-                                        </select>
-                                        @error('form.status')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
+                                    <option value="pending">Pendiente</option>
+                                    <option value="active">Activo</option>
+                                    <option value="sold_out">Agotado</option>
+                                    <option value="inactive">Inactivo</option>
+                                </select>
+                                @error('form.status')
+                                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
 
                                 <!-- Descripción -->
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Descripción</label>
+                            <label class="block text-sm font-medium mb-1">Descripción</label>
                                     <textarea 
                                         wire:model="form.description" 
                                         class="w-full border rounded px-3 py-2 text-sm h-20"
                                     ></textarea>
-                                    @error('form.description')
-                                        <span class="text-red-600 text-xs">{{ $message }}</span>
-                                    @enderror
-                                </div>
+                            @error('form.description')
+                                <span class="text-red-600 text-xs">{{ $message }}</span>
+                            @enderror
+                    </div>
 
                                 <!-- Botones -->
                                 <div class="flex justify-end pt-4 border-t border-gray-200">
@@ -221,16 +221,16 @@
                                         wire:click="closeModal"
                                         class="px-4 py-2 text-sm font-medium bg-gray-300 hover:bg-gray-400 text-gray-800 rounded mr-2"
                                     >
-                                        Cancelar
-                                    </button>
+                            Cancelar
+                        </button>
                                     <button 
                                         type="submit"
                                         class="px-4 py-2 text-sm font-medium bg-blue-500 hover:bg-blue-600 text-white rounded"
                                     >
-                                        Guardar
-                                    </button>
-                                </div>
-                            </form>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
                         </div>
                     </div>
                 </div>
