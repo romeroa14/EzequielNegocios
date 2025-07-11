@@ -60,7 +60,7 @@ return new class extends Migration
 
         // Segundo paso: Establecer valores por defecto si es necesario
         if (Schema::hasColumn('products', 'product_category_id')) {
-            // Obtener el primer ID de categoría como valor por defecto
+            // Obtener el primer ID de categoría como valor por defectoo
             $defaultCategoryId = DB::table('product_categories')->first()?->id ?? 1;
             DB::table('products')->whereNull('product_category_id')->update(['product_category_id' => $defaultCategoryId]);
         }
