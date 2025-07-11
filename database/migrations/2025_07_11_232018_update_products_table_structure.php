@@ -58,20 +58,69 @@ return new class extends Migration
             }
         });
 
-        // Segundo paso: Establecer valores por defecto si es necesario
+        // Segundo paso: Establecer valores por defecto para todas las columnas requeridas
         if (Schema::hasColumn('products', 'product_category_id')) {
-            // Obtener el primer ID de categoría como valor por defectoo
-            $defaultCategoryId = DB::table('product_categories')->first()?->id ?? 1;
-            DB::table('products')->whereNull('product_category_id')->update(['product_category_id' => $defaultCategoryId]);
+            $defaultCategoryId = DB::table('product_categories')->first()?->id;
+            if ($defaultCategoryId) {
+                DB::table('products')->whereNull('product_category_id')->update(['product_category_id' => $defaultCategoryId]);
+            }
         }
 
-        // Similar para otras columnas requeridas
         if (Schema::hasColumn('products', 'product_subcategory_id')) {
-            $defaultSubcategoryId = DB::table('product_subcategories')->first()?->id ?? 1;
-            DB::table('products')->whereNull('product_subcategory_id')->update(['product_subcategory_id' => $defaultSubcategoryId]);
+            $defaultSubcategoryId = DB::table('product_subcategories')->first()?->id;
+            if ($defaultSubcategoryId) {
+                DB::table('products')->whereNull('product_subcategory_id')->update(['product_subcategory_id' => $defaultSubcategoryId]);
+            }
         }
 
-        // Tercer paso: Hacer las columnas NOT NULL después de establecer valores por defecto
+        if (Schema::hasColumn('products', 'product_presentation_id')) {
+            $defaultPresentationId = DB::table('product_presentations')->first()?->id;
+            if ($defaultPresentationId) {
+                DB::table('products')->whereNull('product_presentation_id')->update(['product_presentation_id' => $defaultPresentationId]);
+            }
+        }
+
+        if (Schema::hasColumn('products', 'product_line_id')) {
+            $defaultLineId = DB::table('product_lines')->first()?->id;
+            if ($defaultLineId) {
+                DB::table('products')->whereNull('product_line_id')->update(['product_line_id' => $defaultLineId]);
+            }
+        }
+
+        if (Schema::hasColumn('products', 'brand_id')) {
+            $defaultBrandId = DB::table('brands')->first()?->id;
+            if ($defaultBrandId) {
+                DB::table('products')->whereNull('brand_id')->update(['brand_id' => $defaultBrandId]);
+            }
+        }
+
+        // Establecer valores por defecto para campos no ID
+        DB::table('products')->whereNull('name')->update(['name' => 'Producto sin nombre']);
+        DB::table('products')->whereNull('description')->update(['description' => 'Sin descripción']);
+        DB::table('products')->whereNull('sku_base')->update(['sku_base' => 'SKU-' . uniqid()]);
+
+        // Verificar que todas las columnas requeridas tengan valores antes de hacerlas NOT NULL
+        $requiredColumns = [
+            'product_category_id',
+            'product_subcategory_id',
+            'product_presentation_id',
+            'product_line_id',
+            'brand_id',
+            'name',
+            'description',
+            'sku_base'
+        ];
+
+        foreach ($requiredColumns as $column) {
+            if (Schema::hasColumn('products', $column)) {
+                $nullCount = DB::table('products')->whereNull($column)->count();
+                if ($nullCount > 0) {
+                    throw new \Exception("La columna {$column} aún tiene {$nullCount} valores NULL. No se puede proceder con la migración.");
+                }
+            }
+        }
+
+        // Tercer paso: Hacer las columnas NOT NULL después de verificar que no hay valores nulos
         Schema::table('products', function (Blueprint $table) {
             if (Schema::hasColumn('products', 'product_category_id')) {
                 $table->foreignId('product_category_id')->nullable(false)->change();
@@ -122,7 +171,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            // Aquí puedes eliminar las columnas si es necesario
             $columns = [
                 'person_id', 'product_category_id', 'product_subcategory_id',
                 'product_presentation_id', 'product_line_id', 'brand_id',
