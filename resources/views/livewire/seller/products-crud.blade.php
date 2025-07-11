@@ -68,12 +68,12 @@
         <!-- Productos del Vendedor -->
         <div>
             <h3 class="text-xl font-semibold mb-4">📦 Mis Productos</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse($products['seller'] as $product)
-                    <div class="bg-white rounded-lg shadow p-4 flex flex-col">
+            <div class="bg-white rounded-lg shadow p-4 flex flex-col">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-yellow-600 text-2xl">📦</span>
-                            <h3 class="text-lg font-semibold">{{ $product->name }}</h3>
+                <h3 class="text-lg font-semibold">{{ $product->name }}</h3>
                         </div>
 
                         <p class="text-sm text-gray-500 mb-1">{{ $product->productCategory->name ?? '-' }} >
@@ -82,12 +82,12 @@
                             {{ $product->brand->name ?? '-' }} >
                             {{ $product->productPresentation->name ?? '-' }}</p>
 
-                        @if ($product->image)
+                @if ($product->image)
                             <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-48 object-cover rounded mb-2">
-                        @else
-                            <img src="{{ asset('images/placeholder.png') }}" alt="{{ $product->name }}"
+                @else
+                    <img src="{{ asset('images/placeholder.png') }}" alt="{{ $product->name }}"
                                 class="w-full h-48 object-cover rounded mb-2">
-                        @endif
+                @endif
 
                         <div class="bg-gray-50 p-3 rounded mt-2">
                             <h4 class="font-medium text-gray-700 mb-2">Descripción</h4>
@@ -95,17 +95,17 @@
                         </div>
 
                         <div class="flex justify-between mt-auto pt-4">
-                            <button wire:click="openModal({{ $product->id }})"
-                                class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded">Editar</button>
-                            <button wire:click="confirmDelete({{ $product->id }})"
-                                class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded">Eliminar</button>
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-span-3 text-center text-gray-500 py-12">
-                        No tienes productos publicados aún.
-                    </div>
-                @endforelse
+                    <button wire:click="openModal({{ $product->id }})"
+                        class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded">Editar</button>
+                    <button wire:click="confirmDelete({{ $product->id }})"
+                        class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded">Eliminar</button>
+                </div>
+            </div>
+        @empty
+            <div class="col-span-3 text-center text-gray-500 py-12">
+                No tienes productos publicados aún.
+            </div>
+        @endforelse
             </div>
         </div>
     </div>
@@ -134,8 +134,8 @@
                             <button wire:click="closeModal" class="text-gray-400 hover:text-gray-700">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
+                    </svg>
+                </button>
                         </div>
 
                         <!-- Contenido scrolleable -->
@@ -155,76 +155,76 @@
                                 <!-- Categoría y Subcategoría en una fila -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium mb-1">Categoría</label>
-                                        <select 
-                                            wire:model="form.product_category_id"
-                                            wire:change="categoryChanged($event.target.value)"
+                        <label class="block text-sm font-medium mb-1">Categoría</label>
+                        <select 
+                            wire:model="form.product_category_id" 
+                            wire:change="categoryChanged($event.target.value)"
                                             class="w-full border rounded px-3 py-2 text-sm"
-                                        >
-                                            <option value="">Selecciona una categoría</option>
-                                            @foreach ($categories as $category)
-                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('form.product_category_id')
+                        >
+                            <option value="">Selecciona una categoría</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('form.product_category_id')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                        @enderror
+                    </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium mb-1">Subcategoría</label>
-                                        <select 
+                        <label class="block text-sm font-medium mb-1">Subcategoría</label>
+                        <select 
                                             wire:model.live="form.product_subcategory_id" 
                                             class="w-full border rounded px-3 py-2 text-sm"
-                                        >
-                                            <option value="">Selecciona una subcategoría</option>
-                                            @foreach ($subcategories as $subcategory)
-                                                <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('form.product_subcategory_id')
+                        >
+                            <option value="">Selecciona una subcategoría</option>
+                            @foreach ($subcategories as $subcategory)
+                                <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('form.product_subcategory_id')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                        @enderror
+                    </div>
                                 </div>
 
                                 <!-- Línea, Marca y Estado en una fila -->
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium mb-1">Línea de producto</label>
-                                        <select 
-                                            wire:model="form.product_line_id" 
+                        <label class="block text-sm font-medium mb-1">Línea de producto</label>
+                        <select 
+                            wire:model="form.product_line_id" 
                                             class="w-full border rounded px-3 py-2 text-sm"
                                             @if(empty($form['product_subcategory_id'])) disabled @endif
-                                        >
+                        >
                                             <option value="">Selecciona una línea</option>
                                             @if($lines && $lines->count() > 0)
-                                                @foreach ($lines as $line)
-                                                    <option value="{{ $line->id }}">{{ $line->name }}</option>
-                                                @endforeach
+                            @foreach ($lines as $line)
+                                <option value="{{ $line->id }}">{{ $line->name }}</option>
+                            @endforeach
                                             @elseif(!empty($form['product_subcategory_id']))
                                                 <option value="" disabled>No hay líneas disponibles para esta subcategoría</option>
                                             @else
                                                 <option value="" disabled>Seleccione una subcategoría primero</option>
                                             @endif
-                                        </select>
-                                        @error('form.product_line_id')
+                        </select>
+                        @error('form.product_line_id')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
+                        @enderror
                                         
                                         
-                                    </div>
+                    </div>
 
 
                                     <div>
-                                        <label class="block text-sm font-medium mb-1">Marca</label>
+                        <label class="block text-sm font-medium mb-1">Marca</label>
                                         <select wire:model="form.brand_id" class="w-full border rounded px-3 py-2 text-sm">
-                                            <option value="">Selecciona una marca</option>
-                                            @foreach ($brands as $brand)
-                                                <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('form.brand_id')
+                            <option value="">Selecciona una marca</option>
+                            @foreach ($brands as $brand)
+                                <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('form.brand_id')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
                                         @enderror
                                     </div>
@@ -249,7 +249,7 @@
                                         @error('form.product_presentation_id')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
                                         @enderror
-                                    </div>
+                    </div>
 
                                     <div>
                                         <label class="block text-sm font-medium mb-1">
@@ -258,7 +258,7 @@
                                                 en {{ $selectedPresentation->unit_type }}
                                             @endif
                                         </label>
-                                        <input 
+                        <input 
                                             type="number" 
                                             wire:model="form.custom_quantity" 
                                             class="w-full border rounded px-3 py-2 text-sm"
@@ -276,10 +276,10 @@
                                     <div>
                                         <label class="block text-sm font-medium mb-1">Nombre</label>
                                         <input type="text" wire:model="form.name" class="w-full border rounded px-3 py-2 text-sm" />
-                                        @error('form.name')
+                        @error('form.name')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                        @enderror
+                    </div>
 
                                     <div>
                                         <label class="block text-sm font-medium mb-1">SKU Base</label>
@@ -292,84 +292,84 @@
 
                                 <!-- Descripción -->
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Descripción</label>
-                                    <textarea 
-                                        wire:model="form.description" 
+                        <label class="block text-sm font-medium mb-1">Descripción</label>
+                        <textarea 
+                            wire:model="form.description" 
                                         class="w-full border rounded px-3 py-2 text-sm h-20"
-                                    ></textarea>
-                                    @error('form.description')
+                        ></textarea>
+                        @error('form.description')
                                         <span class="text-red-600 text-xs">{{ $message }}</span>
-                                    @enderror
-                                </div>
+                        @enderror
+                    </div>
 
                                 <!-- Imagen -->
                                 <div>
                                     <label class="block text-sm font-medium mb-1">Imagen</label>
-                                    @if ($editingProduct && $editingProduct->image && !$changeImage)
+                        @if ($editingProduct && $editingProduct->image && !$changeImage)
                                         <div class="flex items-center gap-3">
                                             <img src="{{ $editingProduct->image_url }}" alt="Imagen actual" class="h-16 rounded shadow">
-                                            <button 
-                                                type="button" 
-                                                wire:click="enableImageChange"
+                                <button 
+                                    type="button" 
+                                    wire:click="enableImageChange"
                                                 class="text-blue-500 hover:text-blue-600 text-sm"
-                                            >
-                                                Cambiar imagen
-                                            </button>
-                                        </div>
-                                    @else
-                                        <input 
-                                            type="file" 
-                                            wire:model="form.image" 
+                                >
+                                    Cambiar imagen
+                                </button>
+                            </div>
+                        @else
+                            <input 
+                                type="file" 
+                                wire:model="form.image" 
                                             class="w-full border rounded px-3 py-2 text-sm" 
-                                        />
-                                        @error('form.image')
+                            />
+                            @error('form.image')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    @endif
-                                </div>
+                            @enderror
+                        @endif
+                    </div>
 
                                 <!-- Info Estacional -->
                                 <div>
                                     <label class="block text-sm font-medium mb-1">Información Estacional</label>
-                                    <input 
-                                        type="text" 
-                                        wire:model="form.seasonal_info" 
+                        <input 
+                            type="text" 
+                            wire:model="form.seasonal_info" 
                                         class="w-full border rounded px-3 py-2 text-sm"
-                                        placeholder="Ej: Primavera, Verano..." 
-                                    />
-                                    @error('form.seasonal_info')
+                            placeholder="Ej: Primavera, Verano..." 
+                        />
+                        @error('form.seasonal_info')
                                         <span class="text-red-600 text-xs">{{ $message }}</span>
-                                    @enderror
-                                </div>
+                        @enderror
+                    </div>
 
                                 <div class="flex items-end">
                                     <label class="flex items-center">
-                                        <input 
-                                            type="checkbox" 
-                                            wire:model="form.is_active" 
+                        <input 
+                            type="checkbox" 
+                            wire:model="form.is_active" 
                                             class="rounded border-gray-300 text-yellow-500 shadow-sm focus:border-yellow-300 focus:ring focus:ring-yellow-200 focus:ring-opacity-50" 
-                                        />
+                        />
                                         <span class="ml-2 text-sm text-gray-700">Activo</span>
                                     </label>
-                                </div>
+                    </div>
 
                                 <!-- Botones -->
                                 <div class="flex justify-end pt-4 border-t border-gray-200">
-                                    <button 
-                                        type="button" 
+                        <button 
+                            type="button" 
                                         wire:click="closeModal"
                                         class="px-4 py-2 text-sm font-medium bg-gray-300 hover:bg-gray-400 text-gray-800 rounded mr-2"
-                                    >
-                                        Cancelar
-                                    </button>
-                                    <button 
-                                        type="submit"
+                        >
+                            Cancelar
+                        </button>
+                        <button 
+                            type="submit"
                                         class="px-4 py-2 text-sm font-medium bg-yellow-500 hover:bg-yellow-600 text-white rounded"
-                                    >
-                                        Guardar
-                                    </button>
-                                </div>
-                            </form>
+                        >
+                            Guardar
+                        </button>
+                    </div>
+                </form>
                         </div>
                     </div>
                 </div>

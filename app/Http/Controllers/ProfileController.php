@@ -90,7 +90,7 @@ class ProfileController extends Controller
 
         $validated = $request->validate($rules, $messages);
 
-        $person->update($validated);
+            $person->update($validated);
 
         return redirect()->route('profile.edit')->with('success', 'Perfil actualizado correctamente.');
     }
