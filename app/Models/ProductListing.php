@@ -13,8 +13,8 @@ class ProductListing extends Model
     use HasFactory, HasListingImages;
 
     protected $fillable = [
-        'product_id',
         'person_id',
+        'product_id',
         'title',
         'description',
         'unit_price',
@@ -22,8 +22,9 @@ class ProductListing extends Model
         'quality_grade',
         'harvest_date',
         'images',
-        'location_city',
-        'location_state',
+        'state_id',
+        'municipality_id',
+        'parish_id',
         'status',
     ];
 
@@ -47,8 +48,9 @@ class ProductListing extends Model
             'harvest_date' => 'required|date',
             'images' => 'nullable|array',
             'images.*' => 'image|max:2048',
-            'location_city' => 'required|string|max:255',
-            'location_state' => 'required|string|max:255',
+            'state_id' => 'required|exists:states,id',
+            'municipality_id' => 'required|exists:municipalities,id',
+            'parish_id' => 'required|exists:parishes,id',
             'status' => 'required|in:active,pending,sold_out,inactive'
         ];
     }
@@ -76,10 +78,12 @@ class ProductListing extends Model
             'images.array' => 'Las imágenes deben ser un arreglo.',
             'images.*.image' => 'Los archivos deben ser imágenes.',
             'images.*.max' => 'Las imágenes no pueden ser mayores a 2MB.',
-            'location_city.required' => 'La ciudad es obligatoria.',
-            'location_city.max' => 'La ciudad no puede tener más de 255 caracteres.',
-            'location_state.required' => 'El estado es obligatorio.',
-            'location_state.max' => 'El estado no puede tener más de 255 caracteres.',
+            'state_id.required' => 'El estado es obligatorio.',
+            'state_id.exists' => 'El estado seleccionado no existe.',
+            'municipality_id.required' => 'La municipalidad es obligatoria.',
+            'municipality_id.exists' => 'La municipalidad seleccionada no existe.',
+            'parish_id.required' => 'El municipio es obligatorio.',
+            'parish_id.exists' => 'El municipio seleccionado no existe.',
             'status.required' => 'El estado es obligatorio.',
             'status.in' => 'El estado debe ser active, pending, sold_out o inactive.'
     ];

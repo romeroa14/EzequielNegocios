@@ -137,24 +137,24 @@ class UniversalProductsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->visible(fn (RelationManager $livewire): bool => 
-                        $livewire->getOwnerRecord()->isTierraProducer()
+                        $livewire->getOwnerRecord()->isUniversalProducer()
                     ),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->visible(fn (RelationManager $livewire): bool => 
-                        $livewire->getOwnerRecord()->isTierraProducer()
+                        $livewire->getOwnerRecord()->isUniversalProducer()
                     ),
                 Tables\Actions\DeleteAction::make()
                     ->visible(fn (RelationManager $livewire): bool => 
-                        $livewire->getOwnerRecord()->isTierraProducer()
+                        $livewire->getOwnerRecord()->isUniversalProducer()
                     ),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
                         ->visible(fn (RelationManager $livewire): bool => 
-                            $livewire->getOwnerRecord()->isTierraProducer()
+                            $livewire->getOwnerRecord()->isUniversalProducer()
                         ),
                 ]),
             ]);

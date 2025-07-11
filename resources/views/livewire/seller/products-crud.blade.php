@@ -15,8 +15,11 @@
             <div x-data="{ open: false }">
                 <div class="flex items-center gap-2 cursor-pointer group mb-4" @click="open = !open">
                     <h3 class="text-xl font-semibold text-green-600 flex items-center gap-2">
-                        <span class="text-2xl">🌱</span>
-                        <span class="group-hover:text-green-700">Productos Universales de Tierra</span>
+                        <span class="text-2xl">🌎</span>
+                        <span class="group-hover:text-green-700">Productos Universales</span>
+                        @if($products['universal']->count() > 0)
+                            <span class="text-sm text-gray-500">({{ $products['universal']->count() }})</span>
+                        @endif
                     </h3>
                     <svg x-show="!open" class="w-6 h-6 text-green-600 group-hover:text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -30,9 +33,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         @foreach($products['universal'] as $product)
                             <div class="bg-white rounded-lg shadow p-4 flex flex-col border-2 border-green-200">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-green-600 text-2xl">🌱</span>
-                                    <h3 class="text-lg font-semibold">{{ $product->name }}</h3>
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-green-600 text-2xl">🌎</span>
+                                        <h3 class="text-lg font-semibold">{{ $product->name }}</h3>
+                                    </div>
+                                    <span class="text-sm text-gray-500">Por: {{ $product->creator->name }}</span>
                                 </div>
 
                                 <p class="text-sm text-gray-500 mb-1">{{ $product->productCategory->name ?? '-' }} >

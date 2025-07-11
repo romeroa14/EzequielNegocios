@@ -18,8 +18,11 @@
                     <p class="text-base text-gray-700 mb-1">Cantidad: {{ $listing->quantity_available }}</p>
                     <p class="text-base text-gray-700 mb-1">Calidad: {{ ucfirst($listing->quality_grade) }}</p>
                     <p class="text-base text-gray-700 mb-1">Cosecha: {{ $listing->harvest_date ? $listing->harvest_date->format('Y-m-d') : '-' }}</p>
-                    <p class="text-base text-gray-700 mb-1">Ciudad: {{ $listing->location_city }}</p>
-                    <p class="text-base text-gray-700 mb-1">Estado: {{ $listing->location_state }}</p>
+                    <p class="text-base text-gray-700 mb-1">Ubicación: 
+                        {{ $listing->parish->name ?? '' }}, 
+                        {{ $listing->municipality->name ?? '' }}, 
+                        {{ $listing->state->name ?? '' }}
+                    </p>
                     <p class="text-base text-gray-700 mb-1">Estatus: {{ ucfirst($listing->status) }}</p>
                 </div>
                 @if($listing->images && count($listing->images))
@@ -78,9 +81,16 @@
                                         class="w-full border rounded px-3 py-2 text-sm bg-white"
                                     >
                                 <option value="">Selecciona un producto</option>
-                                @foreach($products as $product)
-                                    <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                @endforeach
+                                <optgroup label="Productos Universales">
+                                    @foreach($products->where('is_universal', true) as $product)
+                                        <option value="{{ $product->id }}">🌎 {{ $product->name }}</option>
+                                    @endforeach
+                                </optgroup>
+                                <optgroup label="Mis Productos">
+                                    @foreach($products->where('person_id', Auth::id()) as $product)
+                                        <option value="{{ $product->id }}">📦 {{ $product->name }}</option>
+                                    @endforeach
+                                </optgroup>
                             </select>
                             @error('form.product_id')
                                 <span class="text-red-600 text-xs">{{ $message }}</span>
@@ -161,26 +171,55 @@
                                 @enderror
                             </div>
 
+                            <!-- Estado -->
                             <div>
-                                <label class="block text-sm font-medium mb-1">Ciudad</label>
-                                        <input 
-                                            type="text" 
-                                            wire:model="form.location_city" 
-                                            class="w-full border rounded px-3 py-2 text-sm" 
-                                        />
-                                @error('form.location_city')
+                                <label class="block text-sm font-medium mb-1">Estado</label>
+                                <select 
+                                    wire:model.live="form.state_id"
+                                    class="w-full border rounded px-3 py-2 text-sm"
+                                >
+                                    <option value="">Seleccione un estado</option>
+                                    @foreach($states as $state)
+                                        <option value="{{ $state->id }}">{{ $state->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('form.state_id')
                                     <span class="text-red-600 text-xs">{{ $message }}</span>
                                 @enderror
                             </div>
 
+                            <!-- Municipio -->
                             <div>
-                                <label class="block text-sm font-medium mb-1">Estado</label>
-                                        <input 
-                                            type="text" 
-                                            wire:model="form.location_state" 
-                                            class="w-full border rounded px-3 py-2 text-sm" 
-                                        />
-                                @error('form.location_state')
+                                <label class="block text-sm font-medium mb-1">Municipio</label>
+                                <select 
+                                    wire:model.live="form.municipality_id"
+                                    class="w-full border rounded px-3 py-2 text-sm"
+                                    @if(!$form['state_id']) disabled @endif
+                                >
+                                    <option value="">Seleccione un municipio</option>
+                                    @foreach($municipalities as $municipality)
+                                        <option value="{{ $municipality->id }}">{{ $municipality->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('form.municipality_id')
+                                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Parroquia -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Parroquia</label>
+                                <select 
+                                    wire:model="form.parish_id"
+                                    class="w-full border rounded px-3 py-2 text-sm"
+                                    @if(!$form['municipality_id']) disabled @endif
+                                >
+                                    <option value="">Seleccione una parroquia</option>
+                                    @foreach($parishes as $parish)
+                                        <option value="{{ $parish->id }}">{{ $parish->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('form.parish_id')
                                     <span class="text-red-600 text-xs">{{ $message }}</span>
                                 @enderror
                             </div>

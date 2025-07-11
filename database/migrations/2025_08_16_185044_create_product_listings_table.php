@@ -22,8 +22,9 @@ return new class extends Migration
             $table->enum('quality_grade', ['premium', 'standard', 'economic']);
             $table->date('harvest_date');
             $table->json('images')->nullable();
-            $table->string('location_city');
-            $table->string('location_state');
+            $table->foreignId('state_id')->constrained('states')->onDelete('cascade');
+            $table->foreignId('municipality_id')->constrained('municipalities')->onDelete('cascade');
+            $table->foreignId('parish_id')->constrained('parishes')->onDelete('cascade');
             $table->enum('status', ['active', 'pending', 'sold_out', 'inactive'])->default('pending');
             $table->timestamps();
         });

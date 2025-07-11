@@ -5,10 +5,17 @@ namespace App\Livewire\Seller;
 use Livewire\Component;
 use App\Models\ProductListing;
 use App\Models\Product;
+use App\Models\State;
+use App\Models\Municipality;
+use App\Models\Parish;
+use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ListingsCrud extends Component
 {
+    use WithFileUploads;
+
     public $listings;
     public $showModal = false;
     public $editingListing = null;
@@ -22,14 +29,66 @@ class ListingsCrud extends Component
         'quality_grade' => '',
         'harvest_date' => '',
         'images' => [],
-        'location_city' => '',
-        'location_state' => '',
+        'state_id' => '',
+        'municipality_id' => '',
+        'parish_id' => '',
         'status' => 'pending',
     ];
+
+    public $states;
+    public $municipalities = [];
+    public $parishes = [];
+
+    protected function rules()
+    {
+        return [
+            'form.title' => 'required|string|max:255',
+            'form.description' => 'required|string',
+            'form.unit_price' => 'required|numeric|min:0',
+            'form.quantity_available' => 'required|integer|min:1',
+            'form.quality_grade' => 'required|in:premium,standard,economic',
+            'form.harvest_date' => 'required|date',
+            'form.state_id' => 'required|exists:states,id',
+            'form.municipality_id' => 'required|exists:municipalities,id',
+            'form.parish_id' => 'required|exists:parishes,id',
+            'form.images.*' => 'image|max:2048',
+            'form.product_id' => 'required|exists:products,id',
+            'form.status' => 'required|in:pending,active,sold_out,inactive',
+        ];
+    }
 
     public function mount()
     {
         $this->loadListings();
+        $this->states = State::where('country_id', 296)->get(); // 296 es el ID de Venezuela
+        
+        // Si hay un estado seleccionado, cargar sus municipios
+        if ($this->form['state_id']) {
+            $this->municipalities = Municipality::where('state_id', $this->form['state_id'])->get();
+        }
+        
+        // Si hay un municipio seleccionado, cargar sus parroquias
+        if ($this->form['municipality_id']) {
+            $this->parishes = Parish::where('municipality_id', $this->form['municipality_id'])->get();
+        }
+    }
+
+    public function updatedFormStateId($value)
+    {
+        if ($value) {
+            $this->municipalities = Municipality::where('state_id', $value)->get();
+            $this->form['municipality_id'] = null;
+            $this->form['parish_id'] = null;
+            $this->parishes = [];
+        }
+    }
+
+    public function updatedFormMunicipalityId($value)
+    {
+        if ($value) {
+            $this->parishes = Parish::where('municipality_id', $value)->get();
+            $this->form['parish_id'] = null;
+        }
     }
 
     public function loadListings()
@@ -55,8 +114,9 @@ class ListingsCrud extends Component
                 'quality_grade' => $this->editingListing->quality_grade,
                 'harvest_date' => $this->editingListing->harvest_date ? $this->editingListing->harvest_date->format('Y-m-d') : '',
                 'images' => $this->editingListing->images ?? [],
-                'location_city' => $this->editingListing->location_city,
-                'location_state' => $this->editingListing->location_state,
+                'state_id' => $this->editingListing->state_id,
+                'municipality_id' => $this->editingListing->municipality_id,
+                'parish_id' => $this->editingListing->parish_id,
                 'status' => $this->editingListing->status,
             ];
         } else {
@@ -83,8 +143,9 @@ class ListingsCrud extends Component
             'quality_grade' => '',
             'harvest_date' => '',
             'images' => [],
-            'location_city' => '',
-            'location_state' => '',
+            'state_id' => '',
+            'municipality_id' => '',
+            'parish_id' => '',
             'status' => 'pending',
         ];
     }
@@ -99,8 +160,9 @@ class ListingsCrud extends Component
             'form.quantity_available' => 'required|integer|min:0',
             'form.quality_grade' => 'required|in:premium,standard,economic',
             'form.harvest_date' => 'required|date',
-            'form.location_city' => 'required|string|max:255',
-            'form.location_state' => 'required|string|max:255',
+            'form.state_id' => 'required|exists:states,id',
+            'form.municipality_id' => 'required|exists:municipalities,id',
+            'form.parish_id' => 'required|exists:parishes,id',
             'form.status' => 'required|in:active,pending,sold_out,inactive',
         ], [
             'form.product_id.required' => 'El producto es obligatorio.',
@@ -119,8 +181,12 @@ class ListingsCrud extends Component
             'form.quality_grade.in' => 'La calidad debe ser premium, standard o economic.',
             'form.harvest_date.required' => 'La fecha de cosecha es obligatoria.',
             'form.harvest_date.date' => 'La fecha de cosecha debe ser una fecha válida.',
-            'form.location_city.required' => 'La ciudad es obligatoria.',
-            'form.location_city.string' => 'La ciudad debe ser una cadena de texto.',
+            'form.state_id.required' => 'El estado es obligatorio.',
+            'form.state_id.exists' => 'El estado seleccionado no existe.',
+            'form.municipality_id.required' => 'El municipio es obligatorio.',
+            'form.municipality_id.exists' => 'El municipio seleccionado no existe.',
+            'form.parish_id.required' => 'La parroquia es obligatoria.',
+            'form.parish_id.exists' => 'La parroquia seleccionada no existe.',
         ]);
 
         $person = Auth::user();
@@ -138,7 +204,10 @@ class ListingsCrud extends Component
 
         try {
             if ($this->editingListing) {
-                $this->editingListing->update($this->form);
+                $this->editingListing->update(array_merge($this->form, [
+                    'person_id' => $personId,
+                    'images' => $imageArray,
+                ]));
                 $this->dispatch('listing-updated');
             } else {
                 ProductListing::create(array_merge($this->form, [
@@ -181,9 +250,16 @@ class ListingsCrud extends Component
 
     public function render()
     {
-        $products = Product::where('person_id', Auth::id())->get();
+        $products = Product::where(function($query) {
+            $query->where('person_id', Auth::id())
+                  ->orWhere('is_universal', true);
+        })->get();
+        
         return view('livewire.seller.listings-crud', [
             'listings' => $this->listings,
+            'states' => $this->states,
+            'municipalities' => $this->municipalities,
+            'parishes' => $this->parishes,
             'products' => $products,
         ]);
     }

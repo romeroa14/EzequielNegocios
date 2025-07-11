@@ -196,30 +196,21 @@ class ProductsCrud extends Component
     public function loadProducts()
     {
         $personId = Auth::id();
-        
-        // Obtener productos del vendedor
+
+        // Obtener productos universales de todos los productores universales
+        $universalProducts = Product::whereHas('creator', function ($query) {
+            $query->where('is_universal', true);
+        })->where('is_universal', true)->get();
+
+        // Obtener productos del vendedor actual
         $sellerProducts = Product::where('person_id', $personId)
-            ->where('is_active', true)
-            ->with(['productCategory', 'productSubcategory'])
-            ->orderBy('id', 'desc')
+            ->where('is_universal', false)
             ->get();
 
-        // Obtener productos universales de Tierra
-        $tierraUser = \App\Models\User::getTierraProducer();
-        $universalProducts = $tierraUser ? 
-            Product::where('creator_user_id', $tierraUser->id)
-                ->where('is_universal', true)
-                ->where('is_active', true)
-                ->with(['productCategory', 'productSubcategory'])
-                ->orderBy('id', 'desc')
-                ->get()
-            : collect();
-
-        // Combinar los productos en una colección
-        $this->products = collect([
+        $this->products = [
             'universal' => $universalProducts,
-            'seller' => $sellerProducts
-        ]);
+            'seller' => $sellerProducts,
+        ];
     }
 
     public function openModal($productId = null)
@@ -392,52 +383,33 @@ class ProductsCrud extends Component
         $this->validate();
 
         try {
-            DB::beginTransaction();
-
-            $imageToSave = $this->form['image'];
-            if ($imageToSave instanceof TemporaryUploadedFile) {
-                $imagePath = $imageToSave->store('products', 'public');
+            $data = collect($this->form)->except(['image'])->toArray();
+            
+            // Si el usuario es un productor universal y está creando un producto universal
+            if (Auth::user()->is_universal && $this->form['is_universal']) {
+                $data['is_universal'] = true;
             } else {
-                $imagePath = $this->editingProduct ? $this->editingProduct->image : null;
+                $data['is_universal'] = false;
             }
-
-            $productData = [
-                'person_id' => Auth::id(),
-                'product_category_id' => $this->form['product_category_id'],
-                'product_subcategory_id' => $this->form['product_subcategory_id'],
-                'product_line_id' => $this->form['product_line_id'],
-                'brand_id' => $this->form['brand_id'],
-                'product_presentation_id' => $this->form['product_presentation_id'],
-                'name' => $this->form['name'],
-                'description' => $this->form['description'],
-                'sku_base' => $this->form['sku_base'],
-                'custom_quantity' => $this->form['custom_quantity'],
-                'image' => $imagePath,
-                'seasonal_info' => $this->form['seasonal_info'],
-                'is_active' => $this->form['is_active'],
-                'creator_user_id' => Auth::id(),
-                'is_universal' => false,
-            ];
 
             if ($this->editingProduct) {
-                $this->editingProduct->update($productData);
-                $this->dispatch('product-updated');
+                $this->editingProduct->update($data);
+                $product = $this->editingProduct;
             } else {
-                Product::create($productData);
-                $this->dispatch('product-added');
+                $data['person_id'] = Auth::id();
+                $product = Product::create($data);
             }
 
-            DB::commit();
-            $this->loadProducts();
+            if ($this->form['image'] ?? null) {
+                $product->updateImage($this->form['image']);
+            }
+
+            $this->dispatch('product-' . ($this->editingProduct ? 'updated' : 'added'));
             $this->closeModal();
+            $this->loadProducts();
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error al guardar producto:', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            session()->flash('error', 'Error al guardar el producto. Por favor, intente nuevamente.');
+            $this->dispatch('error', $e->getMessage());
         }
     }
 

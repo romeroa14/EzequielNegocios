@@ -15,6 +15,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Person;
+use App\Models\Product;
+use App\Models\State;
+use App\Models\Municipality;
+use App\Models\Parish;
 
 class ProductListingResource extends Resource
 {
@@ -33,46 +37,78 @@ class ProductListingResource extends Resource
 
     public static function form(Form $form): Form
     {
+        $user = Auth::user();
+        $person = Person::where('email', $user->email)->first();
+
         return $form
             ->schema([
                 Forms\Components\Select::make('person_id')
                     ->label('Vendedor')
-                    ->relationship('seller', 'first_name')
+                    ->options(function () {
+                        return Person::where('role', 'seller')
+                            ->where('is_active', true)
+                            ->get()
+                            ->mapWithKeys(function ($person) {
+                                return [$person->id => $person->full_name . ' - ' . $person->identification_number];
+                            });
+                    })
+                    ->required()
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->visible(fn () => Auth::user()->role === 'admin'),
+
+                Forms\Components\Hidden::make('person_id')
+                    ->default($person?->id)
+                    ->visible(fn () => Auth::user()->role !== 'admin'),
 
                 Forms\Components\Select::make('product_id')
                     ->label('Producto')
-                    ->options(function (Forms\Get $get) {
-                        // Obtener el usuario Tierra
-                        $tierraUser = \App\Models\User::getTierraProducer();
+                    ->options(function () use ($person) {
+                        if (!$person && !Auth::user()->role === 'admin') return [];
                         
-                        // Obtener productos universales de Tierra
-                        $universalProducts = $tierraUser ? 
-                            \App\Models\Product::where('creator_user_id', $tierraUser->id)
-                                ->where('is_universal', true)
-                                ->where('is_active', true)
+                        // Si es admin, mostrar todos los productos
+                        if (Auth::user()->role === 'admin') {
+                            return Product::with('creator')
                                 ->get()
-                                ->mapWithKeys(fn ($product) => [$product->id => "🌱 {$product->name} (Tierra)"])
-                            : collect();
+                                ->mapWithKeys(function ($product) {
+                                    $creator = $product->creator ? (' - Por: ' . $product->creator->full_name) : '';
+                                    $prefix = $product->is_universal ? '🌎 ' : '📦 ';
+                                    return [$product->id => $prefix . $product->name ];
+                                });
+                        }
+
+                        // Obtener productos universales de todos los productores universales
+                        $universalProducts = Product::whereHas('creator', function ($query) {
+                            $query->where('is_universal', true);
+                        })->where('is_universal', true)->get();
 
                         // Obtener productos del vendedor actual
-                        $personId = $get('person_id');
-                        $sellerProducts = $personId ? 
-                            \App\Models\Product::where('person_id', $personId)
-                                ->where('is_active', true)
-                                ->get()
-                                ->mapWithKeys(fn ($product) => [$product->id => "📦 {$product->name} (Mis Productos)"])
-                            : collect();
+                        $sellerProducts = Product::where('person_id', $person->id)
+                            ->where('is_universal', false)
+                            ->get();
 
-                        // Combinar ambas colecciones
-                        return $universalProducts->union($sellerProducts);
+                        // Combinar y formatear los productos
+                        $allProducts = $universalProducts->concat($sellerProducts)
+                            ->mapWithKeys(function ($product) {
+                                $prefix = $product->is_universal ? '🌎 ' : '📦 ';
+                                return [$product->id => $prefix . $product->name];
+                            });
+
+                        return $allProducts;
                     })
+                    ->required()
                     ->searchable()
                     ->preload()
-                    ->required()
-                    ->live(),
+                    ->disabled(fn () => !$person && Auth::user()->role !== 'admin')
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if ($state) {
+                            $product = Product::find($state);
+                            if ($product && $product->image) {
+                                $set('images', [$product->image]);
+                            }
+                        }
+                    }),
 
                 Forms\Components\TextInput::make('title')
                     ->label('Título')
@@ -118,13 +154,46 @@ class ProductListingResource extends Resource
                     ->directory('listings')
                     ->columnSpanFull(),
 
-                Forms\Components\TextInput::make('location_city')
-                    ->label('Ciudad')
+                    Forms\Components\Select::make('state_id')
+                    ->label('Estado')
+                    ->options(function () {
+                        return State::query()
+                            ->where('country_id', 296) // Venezuela
+                            ->pluck('name', 'id');
+                    })
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        $set('municipality_id', null);
+                        $set('parish_id', null);
+                    }),
+                Forms\Components\Select::make('municipality_id')
+                    ->label('Municipio')
+                    ->options(function (callable $get) {
+                        $stateId = $get('state_id');
+                        if (!$stateId) {
+                            return [];
+                        }
+                        return Municipality::query()
+                            ->where('state_id', $stateId)
+                            ->pluck('name', 'id');
+                    })
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(fn ($state, callable $set) => $set('parish_id', null)),
+                Forms\Components\Select::make('parish_id')
+                    ->label('Parroquia')
+                    ->options(function (callable $get) {
+                        $municipalityId = $get('municipality_id');
+                        if (!$municipalityId) {
+                            return [];
+                        }   
+                        return Parish::query()
+                            ->where('municipality_id', $municipalityId)
+                            ->pluck('name', 'id');
+                    })
                     ->required(),
 
-                Forms\Components\TextInput::make('location_state')
-                    ->label('Estado')
-                    ->required(),
 
                 Forms\Components\Select::make('status')
                     ->label('Estado')
@@ -240,4 +309,6 @@ class ProductListingResource extends Resource
     {
         return static::getModel()::where('status', 'pending')->count();
     }
+
+    
 }
