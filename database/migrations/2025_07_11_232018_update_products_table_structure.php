@@ -9,43 +9,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Crear registros por defecto si no existen
-        if (DB::table('product_presentations')->count() === 0) {
-            DB::table('product_presentations')->insert([
-                'name' => 'Presentación por defecto',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        }
-        if (DB::table('product_categories')->count() === 0) {
-            DB::table('product_categories')->insert([
-                'name' => 'Categoría por defecto',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        }
-        if (DB::table('product_subcategories')->count() === 0) {
-            DB::table('product_subcategories')->insert([
-                'name' => 'Subcategoría por defecto',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        }
-        if (DB::table('product_lines')->count() === 0) {
-            DB::table('product_lines')->insert([
-                'name' => 'Línea por defecto',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        }
-        if (DB::table('brands')->count() === 0) {
-            DB::table('brands')->insert([
-                'name' => 'Marca por defecto',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        }
-
         // Primer paso: Agregar columnas como nullable
         Schema::table('products', function (Blueprint $table) {
             if (!Schema::hasColumn('products', 'person_id')) {
@@ -95,47 +58,6 @@ return new class extends Migration
             }
         });
 
-        // Segundo paso: Establecer valores por defecto para todas las columnas requeridas
-        if (Schema::hasColumn('products', 'product_category_id')) {
-            $defaultCategoryId = DB::table('product_categories')->first()?->id;
-            if ($defaultCategoryId) {
-                DB::table('products')->whereNull('product_category_id')->update(['product_category_id' => $defaultCategoryId]);
-            }
-        }
-
-        if (Schema::hasColumn('products', 'product_subcategory_id')) {
-            $defaultSubcategoryId = DB::table('product_subcategories')->first()?->id;
-            if ($defaultSubcategoryId) {
-                DB::table('products')->whereNull('product_subcategory_id')->update(['product_subcategory_id' => $defaultSubcategoryId]);
-            }
-        }
-
-        if (Schema::hasColumn('products', 'product_presentation_id')) {
-            $defaultPresentationId = DB::table('product_presentations')->first()?->id;
-            if ($defaultPresentationId) {
-                DB::table('products')->whereNull('product_presentation_id')->update(['product_presentation_id' => $defaultPresentationId]);
-            }
-        }
-
-        if (Schema::hasColumn('products', 'product_line_id')) {
-            $defaultLineId = DB::table('product_lines')->first()?->id;
-            if ($defaultLineId) {
-                DB::table('products')->whereNull('product_line_id')->update(['product_line_id' => $defaultLineId]);
-            }
-        }
-
-        if (Schema::hasColumn('products', 'brand_id')) {
-            $defaultBrandId = DB::table('brands')->first()?->id;
-            if ($defaultBrandId) {
-                DB::table('products')->whereNull('brand_id')->update(['brand_id' => $defaultBrandId]);
-            }
-        }
-
-        // Establecer valores por defecto para campos no ID
-        DB::table('products')->whereNull('name')->update(['name' => 'Producto sin nombre']);
-        DB::table('products')->whereNull('description')->update(['description' => 'Sin descripción']);
-        DB::table('products')->whereNull('sku_base')->update(['sku_base' => 'SKU-' . uniqid()]);
-
         // Verificar que todas las columnas requeridas tengan valores antes de hacerlas NOT NULL
         $requiredColumns = [
             'product_category_id',
@@ -159,7 +81,21 @@ return new class extends Migration
 
         // Tercer paso: Hacer las columnas NOT NULL después de verificar que no hay valores nulos
         Schema::table('products', function (Blueprint $table) {
-            // Estas columnas serán NOT NULL
+            if (Schema::hasColumn('products', 'product_category_id')) {
+                $table->foreignId('product_category_id')->nullable(false)->change();
+            }
+            if (Schema::hasColumn('products', 'product_subcategory_id')) {
+                $table->foreignId('product_subcategory_id')->nullable(false)->change();
+            }
+            if (Schema::hasColumn('products', 'product_presentation_id')) {
+                $table->foreignId('product_presentation_id')->nullable(false)->change();
+            }
+            if (Schema::hasColumn('products', 'product_line_id')) {
+                $table->foreignId('product_line_id')->nullable(false)->change();
+            }
+            if (Schema::hasColumn('products', 'brand_id')) {
+                $table->foreignId('brand_id')->nullable(false)->change();
+            }
             if (Schema::hasColumn('products', 'name')) {
                 $table->string('name')->nullable(false)->change();
             }
@@ -168,23 +104,6 @@ return new class extends Migration
             }
             if (Schema::hasColumn('products', 'sku_base')) {
                 $table->string('sku_base')->nullable(false)->change();
-            }
-
-            // Estas columnas se mantendrán como nullable
-            if (Schema::hasColumn('products', 'product_category_id')) {
-                $table->foreignId('product_category_id')->nullable()->change();
-            }
-            if (Schema::hasColumn('products', 'product_subcategory_id')) {
-                $table->foreignId('product_subcategory_id')->nullable()->change();
-            }
-            if (Schema::hasColumn('products', 'product_presentation_id')) {
-                $table->foreignId('product_presentation_id')->nullable()->change();
-            }
-            if (Schema::hasColumn('products', 'product_line_id')) {
-                $table->foreignId('product_line_id')->nullable()->change();
-            }
-            if (Schema::hasColumn('products', 'brand_id')) {
-                $table->foreignId('brand_id')->nullable()->change();
             }
         });
 
