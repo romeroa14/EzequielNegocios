@@ -9,34 +9,99 @@
     </div>
 
     <!-- Listado de productos -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @forelse($products as $product)
-            <div class="bg-white rounded-lg shadow p-4 flex flex-col">
-                <h3 class="text-lg font-semibold">{{ $product->name }}</h3>
-                <p class="text-sm text-gray-500 mb-1">{{ $product->productCategory->name ?? '-' }} >
-                    {{ $product->productSubcategory->name ?? '-' }} >
-                    {{ $product->productLine->name ?? '-' }} >
-                    {{ $product->brand->name ?? '-' }} >
-                    {{ $product->productPresentation->name ?? '-' }}</p>
-                <p class="text-gray-700 text-sm flex-1">{{ $product->description }}</p>
-                @if ($product->image)
-                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-80 rounded mb-2">
-                @else
-                    <img src="{{ asset('images/placeholder.png') }}" alt="{{ $product->name }}"
-                        class="w-full h-80 rounded mb-2">
-                @endif
-                <div class="flex justify-between mt-4">
-                    <button wire:click="openModal({{ $product->id }})"
-                        class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded">Editar</button>
-                    <button wire:click="confirmDelete({{ $product->id }})"
-                        class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded">Eliminar</button>
+    <div class="space-y-10">
+        <!-- Productos Universales de Tierra -->
+        @if($products['universal']->isNotEmpty())
+            <div x-data="{ open: false }">
+                <div class="flex items-center gap-2 cursor-pointer group mb-4" @click="open = !open">
+                    <h3 class="text-xl font-semibold text-green-600 flex items-center gap-2">
+                        <span class="text-2xl">🌱</span>
+                        <span class="group-hover:text-green-700">Productos Universales de Tierra</span>
+                    </h3>
+                    <svg x-show="!open" class="w-6 h-6 text-green-600 group-hover:text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                    <svg x-show="open" class="w-6 h-6 text-green-600 group-hover:text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                    </svg>
+                </div>
+
+                <div x-show="open" x-collapse>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        @foreach($products['universal'] as $product)
+                            <div class="bg-white rounded-lg shadow p-4 flex flex-col border-2 border-green-200">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-green-600 text-2xl">🌱</span>
+                                    <h3 class="text-lg font-semibold">{{ $product->name }}</h3>
+                                </div>
+
+                                <p class="text-sm text-gray-500 mb-1">{{ $product->productCategory->name ?? '-' }} >
+                                    {{ $product->productSubcategory->name ?? '-' }} >
+                                    {{ $product->productLine->name ?? '-' }} >
+                                    {{ $product->brand->name ?? '-' }} >
+                                    {{ $product->productPresentation->name ?? '-' }}</p>
+
+                                @if ($product->image)
+                                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-48 object-cover rounded mb-2">
+                                @else
+                                    <img src="{{ asset('images/placeholder.png') }}" alt="{{ $product->name }}"
+                                        class="w-full h-48 object-cover rounded mb-2">
+                                @endif
+
+                                <div class="bg-gray-50 p-3 rounded mt-2">
+                                    <h4 class="font-medium text-gray-700 mb-2">Descripción</h4>
+                                    <p class="text-gray-600">{{ $product->description }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
-        @empty
-            <div class="col-span-3 text-center text-gray-500 py-12">
-                No tienes productos publicados aún.
+        @endif
+
+        <!-- Productos del Vendedor -->
+        <div>
+            <h3 class="text-xl font-semibold mb-4">📦 Mis Productos</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @forelse($products['seller'] as $product)
+                    <div class="bg-white rounded-lg shadow p-4 flex flex-col">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-yellow-600 text-2xl">📦</span>
+                            <h3 class="text-lg font-semibold">{{ $product->name }}</h3>
+                        </div>
+
+                        <p class="text-sm text-gray-500 mb-1">{{ $product->productCategory->name ?? '-' }} >
+                            {{ $product->productSubcategory->name ?? '-' }} >
+                            {{ $product->productLine->name ?? '-' }} >
+                            {{ $product->brand->name ?? '-' }} >
+                            {{ $product->productPresentation->name ?? '-' }}</p>
+
+                        @if ($product->image)
+                            <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-48 object-cover rounded mb-2">
+                        @else
+                            <img src="{{ asset('images/placeholder.png') }}" alt="{{ $product->name }}"
+                                class="w-full h-48 object-cover rounded mb-2">
+                        @endif
+
+                        <div class="bg-gray-50 p-3 rounded mt-2">
+                            <h4 class="font-medium text-gray-700 mb-2">Descripción</h4>
+                            <p class="text-gray-600">{{ $product->description }}</p>
+                        </div>
+
+                        <div class="flex justify-between mt-auto pt-4">
+                            <button wire:click="openModal({{ $product->id }})"
+                                class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded">Editar</button>
+                            <button wire:click="confirmDelete({{ $product->id }})"
+                                class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded">Eliminar</button>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-3 text-center text-gray-500 py-12">
+                        No tienes productos publicados aún.
+                    </div>
+                @endforelse
             </div>
-        @endforelse
+        </div>
     </div>
 
     {{-- <div x-data="{ show: @entangle('showModal') }">

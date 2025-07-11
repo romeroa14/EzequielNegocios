@@ -229,7 +229,13 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('productCategory.name')
                     ->label('Categoría')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('unit_type')
+                Tables\Columns\TextColumn::make('productLine.name')
+                    ->label('Línea')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('brand.name')
+                    ->label('Marca')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('productPresentation.name')
                     ->label('Unidad')
                     ->searchable(),
                 Tables\Columns\ImageColumn::make('image')
@@ -240,6 +246,9 @@ class ProductResource extends Resource
                     ->square(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Activo')
+                    ->boolean(),
+                Tables\Columns\IconColumn::make('is_universal')
+                    ->label('Universal')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Creado')

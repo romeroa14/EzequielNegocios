@@ -196,11 +196,30 @@ class ProductsCrud extends Component
     public function loadProducts()
     {
         $personId = Auth::id();
-        $this->products = Product::where('person_id', $personId)
+        
+        // Obtener productos del vendedor
+        $sellerProducts = Product::where('person_id', $personId)
             ->where('is_active', true)
             ->with(['productCategory', 'productSubcategory'])
             ->orderBy('id', 'desc')
             ->get();
+
+        // Obtener productos universales de Tierra
+        $tierraUser = \App\Models\User::getTierraProducer();
+        $universalProducts = $tierraUser ? 
+            Product::where('creator_user_id', $tierraUser->id)
+                ->where('is_universal', true)
+                ->where('is_active', true)
+                ->with(['productCategory', 'productSubcategory'])
+                ->orderBy('id', 'desc')
+                ->get()
+            : collect();
+
+        // Combinar los productos en una colección
+        $this->products = collect([
+            'universal' => $universalProducts,
+            'seller' => $sellerProducts
+        ]);
     }
 
     public function openModal($productId = null)
@@ -396,6 +415,8 @@ class ProductsCrud extends Component
                 'image' => $imagePath,
                 'seasonal_info' => $this->form['seasonal_info'],
                 'is_active' => $this->form['is_active'],
+                'creator_user_id' => Auth::id(),
+                'is_universal' => false,
             ];
 
             if ($this->editingProduct) {

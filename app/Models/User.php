@@ -49,6 +49,15 @@ class User extends Authenticatable implements FilamentUser
         'is_active' => 'boolean',
     ];
 
+    // Constantes para roles
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_PRODUCER = 'producer';
+    public const ROLE_TECHNICIAN = 'technician';
+    public const ROLE_SUPPORT = 'support';
+
+    // Constante para el nombre especial del productor Tierra
+    public const TIERRA_PRODUCER_NAME = 'Tierra';
+
     public static function rules($id = null)
     {
         return [
@@ -81,7 +90,7 @@ class User extends Authenticatable implements FilamentUser
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->is_active && in_array($this->role, ['admin', 'producer', 'technician', 'support']);
+        return $this->is_active && in_array($this->role, [self::ROLE_ADMIN, self::ROLE_PRODUCER, self::ROLE_TECHNICIAN, self::ROLE_SUPPORT]);
     }
 
     /**
@@ -97,7 +106,7 @@ class User extends Authenticatable implements FilamentUser
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === self::ROLE_ADMIN;
     }
 
     /**
@@ -105,7 +114,7 @@ class User extends Authenticatable implements FilamentUser
      */
     public function isProducer(): bool
     {
-        return $this->role === 'producer';
+        return $this->role === self::ROLE_PRODUCER;
     }
 
     /**
@@ -113,7 +122,7 @@ class User extends Authenticatable implements FilamentUser
      */
     public function isTechnician(): bool
     {
-        return $this->role === 'technician';
+        return $this->role === self::ROLE_TECHNICIAN;
     }
 
     /**
@@ -121,7 +130,25 @@ class User extends Authenticatable implements FilamentUser
      */
     public function isSupport(): bool
     {
-        return $this->role === 'support';
+        return $this->role === self::ROLE_SUPPORT;
+    }
+
+    /**
+     * Verifica si este usuario es el productor especial "Tierra"
+     */
+    public function isTierraProducer(): bool
+    {
+        return $this->role === self::ROLE_PRODUCER && $this->name === self::TIERRA_PRODUCER_NAME;
+    }
+
+    /**
+     * Obtiene el productor Tierra del sistema
+     */
+    public static function getTierraProducer()
+    {
+        return self::where('role', self::ROLE_PRODUCER)
+                  ->where('name', self::TIERRA_PRODUCER_NAME)
+                  ->first();
     }
 
     // Relationships para el sistema admin
@@ -143,6 +170,14 @@ class User extends Authenticatable implements FilamentUser
     public function givenReviews()
     {
         return $this->hasMany(UserReview::class, 'reviewer_id');
+    }
+
+    /**
+     * Productos universales (solo para el productor Tierra)
+     */
+    public function universalProducts()
+    {
+        return $this->hasMany(Product::class, 'creator_user_id')->where('is_universal', true);
     }
 
     // Relationships

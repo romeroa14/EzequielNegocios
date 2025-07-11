@@ -44,10 +44,35 @@ class ProductListingResource extends Resource
 
                 Forms\Components\Select::make('product_id')
                     ->label('Producto')
-                    ->relationship('product', 'name')
+                    ->options(function (Forms\Get $get) {
+                        // Obtener el usuario Tierra
+                        $tierraUser = \App\Models\User::getTierraProducer();
+                        
+                        // Obtener productos universales de Tierra
+                        $universalProducts = $tierraUser ? 
+                            \App\Models\Product::where('creator_user_id', $tierraUser->id)
+                                ->where('is_universal', true)
+                                ->where('is_active', true)
+                                ->get()
+                                ->mapWithKeys(fn ($product) => [$product->id => "🌱 {$product->name} (Tierra)"])
+                            : collect();
+
+                        // Obtener productos del vendedor actual
+                        $personId = $get('person_id');
+                        $sellerProducts = $personId ? 
+                            \App\Models\Product::where('person_id', $personId)
+                                ->where('is_active', true)
+                                ->get()
+                                ->mapWithKeys(fn ($product) => [$product->id => "📦 {$product->name} (Mis Productos)"])
+                            : collect();
+
+                        // Combinar ambas colecciones
+                        return $universalProducts->union($sellerProducts);
+                    })
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->live(),
 
                 Forms\Components\TextInput::make('title')
                     ->label('Título')

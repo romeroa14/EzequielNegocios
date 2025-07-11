@@ -27,13 +27,16 @@ class Product extends Model
         'custom_quantity',
         'image',
         'seasonal_info',
-        'is_active'
+        'is_active',
+        'creator_user_id',
+        'is_universal'
     ];
 
     protected $casts = [
         'seasonal_info' => 'array',
         'is_active' => 'boolean',
-        'custom_quantity' => 'decimal:2'
+        'custom_quantity' => 'decimal:2',
+        'is_universal' => 'boolean'
     ];
 
     public static function rules($id = null)
@@ -51,7 +54,9 @@ class Product extends Model
             'custom_quantity' => 'nullable|numeric|min:0.01',
             'image' => 'nullable|image|max:2048',
             'seasonal_info' => 'nullable|array',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'creator_user_id' => 'nullable|exists:users,id',
+            'is_universal' => 'boolean'
         ];
     }
 
@@ -81,7 +86,9 @@ class Product extends Model
             'image.image' => 'El archivo debe ser una imagen.',
             'image.max' => 'La imagen no puede ser mayor a 2MB.',
             'seasonal_info.array' => 'La información estacional debe ser un arreglo.',
-            'is_active.boolean' => 'El estado debe ser verdadero o falso.'
+            'is_active.boolean' => 'El estado debe ser verdadero o falso.',
+            'creator_user_id.exists' => 'El usuario creador no existe.',
+            'is_universal.boolean' => 'El campo universal debe ser verdadero o falso.'
         ];
     }
 
@@ -126,6 +133,11 @@ class Product extends Model
         return $this->hasMany(PriceHistory::class);
     }
 
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'creator_user_id');
+    }
+
     // Accessors
     public function getFinalQuantityAttribute()
     {
@@ -144,5 +156,16 @@ class Product extends Model
         }
         
         return $presentationName;
+    }
+
+    // Scopes
+    public function scopeUniversal($query)
+    {
+        return $query->where('is_universal', true);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 } 
