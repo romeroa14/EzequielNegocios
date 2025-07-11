@@ -13,7 +13,6 @@ environments:
             - 'rm -rf node_modules'
         deploy:
             - 'php artisan storage:link'
-            - 'php artisan schema:dump'
             - 'php artisan migrate:mark --migration=2025_08_15_184813_products_table --force'
             - 'php artisan migrate --force'
             - 'php artisan db:seed --class=Database\\Seeders\\BaseDataSeeder --force'
