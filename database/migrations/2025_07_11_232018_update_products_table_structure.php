@@ -58,71 +58,22 @@ return new class extends Migration
             }
         });
 
-        // Verificar que todas las columnas requeridas tengan valores antes de hacerlas NOT NULL
-        $requiredColumns = [
-            'product_category_id',
-            'product_subcategory_id',
-            'product_presentation_id',
-            'product_line_id',
-            'brand_id',
-            'name',
-            'description',
-            'sku_base'
-        ];
-
-        foreach ($requiredColumns as $column) {
-            if (Schema::hasColumn('products', $column)) {
-                $nullCount = DB::table('products')->whereNull($column)->count();
-                if ($nullCount > 0) {
-                    throw new \Exception("La columna {$column} aún tiene {$nullCount} valores NULL. No se puede proceder con la migración.");
-                }
-            }
-        }
-
-        // Tercer paso: Hacer las columnas NOT NULL después de verificar que no hay valores nulos
+        // Mantener todas las columnas como nullable por ahora
         Schema::table('products', function (Blueprint $table) {
             if (Schema::hasColumn('products', 'product_category_id')) {
-                $table->foreignId('product_category_id')->nullable(false)->change();
+                $table->foreignId('product_category_id')->nullable()->change();
             }
             if (Schema::hasColumn('products', 'product_subcategory_id')) {
-                $table->foreignId('product_subcategory_id')->nullable(false)->change();
+                $table->foreignId('product_subcategory_id')->nullable()->change();
             }
             if (Schema::hasColumn('products', 'product_presentation_id')) {
-                $table->foreignId('product_presentation_id')->nullable(false)->change();
+                $table->foreignId('product_presentation_id')->nullable()->change();
             }
             if (Schema::hasColumn('products', 'product_line_id')) {
-                $table->foreignId('product_line_id')->nullable(false)->change();
+                $table->foreignId('product_line_id')->nullable()->change();
             }
             if (Schema::hasColumn('products', 'brand_id')) {
-                $table->foreignId('brand_id')->nullable(false)->change();
-            }
-            if (Schema::hasColumn('products', 'name')) {
-                $table->string('name')->nullable(false)->change();
-            }
-            if (Schema::hasColumn('products', 'description')) {
-                $table->string('description')->nullable(false)->change();
-            }
-            if (Schema::hasColumn('products', 'sku_base')) {
-                $table->string('sku_base')->nullable(false)->change();
-            }
-        });
-
-        // Cuarto paso: Agregar las restricciones de clave foránea
-        Schema::table('products', function (Blueprint $table) {
-            if (Schema::hasColumn('products', 'product_category_id')) {
-                $table->foreign('product_category_id')->references('id')->on('product_categories');
-            }
-            if (Schema::hasColumn('products', 'product_subcategory_id')) {
-                $table->foreign('product_subcategory_id')->references('id')->on('product_subcategories');
-            }
-            if (Schema::hasColumn('products', 'product_presentation_id')) {
-                $table->foreign('product_presentation_id')->references('id')->on('product_presentations');
-            }
-            if (Schema::hasColumn('products', 'product_line_id')) {
-                $table->foreign('product_line_id')->references('id')->on('product_lines');
-            }
-            if (Schema::hasColumn('products', 'brand_id')) {
-                $table->foreign('brand_id')->references('id')->on('brands');
+                $table->foreignId('brand_id')->nullable()->change();
             }
         });
     }

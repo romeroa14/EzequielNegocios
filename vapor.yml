@@ -13,8 +13,7 @@ environments:
             - 'rm -rf node_modules'
         deploy:
             - 'php artisan storage:link'
-            - 'php artisan migrate:fresh --force'
-            - 'php artisan db:seed --force'
+            - 'php artisan migrate:fresh --seed --force'
             - 'chmod -R 775 storage'
             - 'chmod -R 775 storage/app/public'
             - 'chown -R www-data:www-data storage'
