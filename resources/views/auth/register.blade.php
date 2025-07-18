@@ -2,6 +2,9 @@
 
 @section('content')
 <div class="min-h-screen flex flex-col items-center pt-6 sm:pt-0 bg-gradient-to-br from-green-50 to-green-100">
+    <!-- Banner superior -->
+    <x-ad-sense-banner type="banner" />
+    
     <div class="w-full sm:max-w-2xl mt-6 px-6 py-8 bg-white shadow-xl rounded-xl">
         <div class="mb-8 text-center">
             <h2 class="text-3xl font-bold text-gray-900">
@@ -83,6 +86,9 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Anuncio intermedio -->
+            <x-ad-sense-banner type="in-article" />
 
             <!-- Dirección -->
             <div class="border-t border-gray-200 pt-4">
@@ -175,6 +181,9 @@
             </div>
         </form>
     </div>
+    
+    <!-- Banner inferior -->
+    <x-ad-sense-banner type="banner" />
 </div>
 
 @push('scripts')
