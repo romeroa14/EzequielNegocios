@@ -1,6 +1,6 @@
 @if($show)
 <div id="cookie-banner" class="fixed bottom-0 left-0 right-0 bg-green-500 text-white p-4 z-50 shadow-lg border-t-4 border-green-600">
-    <div class="max-w-7xl mx-auto bg-green-800">
+    <div class="max-w-7xl mx-auto bg-green-500">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <!-- Información de cookies -->
             <div class="flex-1">
