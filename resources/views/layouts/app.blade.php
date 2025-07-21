@@ -19,6 +19,44 @@
     
     <!-- Additional Styles -->
     @livewireStyles
+
+    <!-- Estilos para AdSense -->
+    <style>
+        /* Clases para que AdSense identifique mejor las ubicaciones */
+        .ad-banner {
+            min-height: 90px;
+            margin: 20px 0;
+            background: #f8f9fa;
+            border: 1px dashed #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ad-sidebar {
+            min-height: 250px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border: 1px dashed #dee2e6;
+        }
+        
+        .ad-in-article {
+            min-height: 90px;
+            margin: 20px 0;
+            background: #f8f9fa;
+            border: 1px dashed #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Ocultar en producción cuando AdSense esté activo */
+        .ad-banner:empty,
+        .ad-sidebar:empty,
+        .ad-in-article:empty {
+            display: none;
+        }
+    </style>
 </head>
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100">
