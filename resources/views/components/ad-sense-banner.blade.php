@@ -4,7 +4,7 @@
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="ca-pub-5056825959094581"
-             data-ad-slot="YOUR_AD_SLOT_HERE"
+             data-ad-slot="REEMPLAZAR_CON_AD_SLOT_BANNER"
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>
         <script>
@@ -17,7 +17,7 @@
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="ca-pub-5056825959094581"
-             data-ad-slot="YOUR_SIDEBAR_AD_SLOT_HERE"
+             data-ad-slot="REEMPLAZAR_CON_AD_SLOT_SIDEBAR"
              data-ad-format="auto"></ins>
         <script>
              (adsbygoogle = window.adsbygoogle || []).push({});
@@ -31,7 +31,7 @@
              data-ad-layout="in-article"
              data-ad-format="fluid"
              data-ad-client="ca-pub-5056825959094581"
-             data-ad-slot="YOUR_IN_ARTICLE_AD_SLOT_HERE"></ins>
+             data-ad-slot="REEMPLAZAR_CON_AD_SLOT_IN_ARTICLE"></ins>
         <script>
              (adsbygoogle = window.adsbygoogle || []).push({});
         </script>
