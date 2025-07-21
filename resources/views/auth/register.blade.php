@@ -90,8 +90,9 @@
             <!-- Anuncio intermedio -->
             <x-ad-sense-banner type="in-article" />
 
-            <!-- Dirección -->
+            <!-- Dirección del Productor -->
             <div class="border-t border-gray-200 pt-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Dirección del Productor</h3>
                 
                 <!-- Ubicación -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -125,10 +126,12 @@
                         <x-input-error :messages="$errors->get('parish_id')" class="mt-2" />
                     </div>
 
-                <div class="mt-4">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Dirección del Productor</h3>
+                </div>
+                <!-- Dirección -->
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Dirección del Productor</h3>
                 
-                    <div>
+                <div>
                     <x-input-label for="address" :value="__('Dirección')" />
                     <x-text-input id="address" class="block mt-1 w-full" type="text" name="address" :value="old('address')" />
                     <x-input-error :messages="$errors->get('address')" class="mt-2" />
@@ -139,8 +142,10 @@
                     <x-text-input id="sector" class="block mt-1 w-full" type="text" name="sector" :value="old('sector')" />
                     <x-input-error :messages="$errors->get('sector')" class="mt-2" />
                 </div>
-                </div>
             </div>
+            </div>
+
+            
 
             <!-- Información de Empresa (solo para vendedores) -->
             <div id="company-info" class="hidden border-t border-gray-200 pt-4">

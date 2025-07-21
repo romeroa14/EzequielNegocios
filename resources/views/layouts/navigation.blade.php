@@ -20,7 +20,7 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('welcome') }}" class="text-2xl font-bold text-yellow-600">
+                    <a href="{{ route('home') }}" class="text-2xl font-bold text-yellow-600">
                         🌱 EzequielNegocios
                         <span class="text-xs text-gray-500">
                             Beta
@@ -44,10 +44,10 @@
                         @endif --}}
                     @endauth
                     
-                    <x-nav-link :href="route('catalog')" :active="request()->routeIs('catalog')">
+                    <x-nav-link :href="route('catalogo')" :active="request()->routeIs('catalogo')">
                         {{ __('Catálogo') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('producers')" :active="request()->routeIs('producers')">
+                    <x-nav-link :href="route('productores')" :active="request()->routeIs('productores')">
                         {{ __('Productores') }}
                     </x-nav-link>
                 </div>
@@ -147,10 +147,10 @@
                 @endif
             @endauth
             
-            <x-responsive-nav-link :href="route('catalog')" :active="request()->routeIs('catalog')">
+            <x-responsive-nav-link :href="route('catalogo')" :active="request()->routeIs('catalogo')">
                 {{ __('Catálogo') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('producers')" :active="request()->routeIs('producers')">
+            <x-responsive-nav-link :href="route('productores')" :active="request()->routeIs('productores')">
                 {{ __('Productores') }}
             </x-responsive-nav-link>
 

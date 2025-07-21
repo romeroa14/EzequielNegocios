@@ -28,28 +28,32 @@ use App\Http\Controllers\ProductPresentationController;
 
 
 // Rutas públicas
-Route::get('/', function () {
+Route::get('/home', function () {
     return view('welcome');
-})->name('welcome');
+})->name('home');
+
+Route::get('/', function () {
+    return view('catalog');
+})->name('catalogo');
 
 // Rutas del catálogo (públicas)
-Route::get('/catalog', function() {
+Route::get('/catalogo', function() {
     return view('catalog');
-})->name('catalog');
+})->name('catalogo');
 
 // Rutas de productos (públicas)
-Route::get('/products', function() {
+Route::get('/productos', function() {
     return view('products.products');
-})->name('products');
+})->name('productos');
 
 // Rutas de productores (públicas)
-Route::get('/producers', function() {
+Route::get('/productores', function() {
     return view('producers.producers');
-})->name('producers');
+})->name('productores');
 
-Route::get('/producers/{producer}', function() {
+Route::get('/productores/{producer}', function() {
     return view('producers.producer');
-})->name('producers.show');
+})->name('productores.show');
 
 // Route::get('/producers', [ProducerController::class, 'index'])->name('producers');
 // Route::get('/producers/{producer}', [ProducerController::class, 'show'])->name('producers.show');
