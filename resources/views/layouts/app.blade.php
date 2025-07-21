@@ -5,19 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>@yield('title', config('app.name', 'Laravel'))</title>
 
-    <!-- Google AdSense -->
-    <x-google-ad-sense />
+    <!-- Google Tag Manager -->
+    <x-google-tag-manager />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Scripts and Styles -->
+    <!-- Google AdSense -->
+    <x-google-ad-sense />
+
+    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
-    <!-- Additional Styles -->
+
+    <!-- Livewire Styles -->
     @livewireStyles
 
     <!-- Estilos para AdSense -->
@@ -35,9 +38,12 @@
         
         .ad-sidebar {
             min-height: 250px;
-            margin: 10px 0;
+            margin: 20px 0;
             background: #f8f9fa;
             border: 1px dashed #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .ad-in-article {
@@ -49,16 +55,12 @@
             align-items: center;
             justify-content: center;
         }
-        
-        /* Ocultar en producción cuando AdSense esté activo */
-        .ad-banner:empty,
-        .ad-sidebar:empty,
-        .ad-in-article:empty {
-            display: none;
-        }
     </style>
 </head>
 <body class="font-sans antialiased">
+    <!-- Google Tag Manager (noscript) -->
+    <x-google-tag-manager-noscript />
+
     <div class="min-h-screen bg-gray-100">
         @include('layouts.navigation')
 
@@ -91,10 +93,10 @@
         @endif
 
         <!-- Page Heading -->
-        @if (isset($header))
+        @hasSection('header')
             <header class="bg-white shadow">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
+                    @yield('header')
                 </div>
             </header>
         @endif
@@ -144,5 +146,8 @@
 
     @livewireScripts
     @stack('scripts')
+    
+    <!-- Cookie Banner -->
+    <x-cookie-banner />
 </body>
 </html> 

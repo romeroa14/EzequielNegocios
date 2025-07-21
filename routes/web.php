@@ -24,8 +24,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Buyer\DashboardController as BuyerDashboardController;
 use App\Http\Controllers\ProductPresentationController;
-
-
+use App\Http\Controllers\CookieController;
 
 // Rutas públicas
 Route::get('/home', function () {
@@ -60,6 +59,13 @@ Route::get('/productores/{producer}', function() {
 
 // Contactar productor (público, puedes hacer que envíe un email o redirija a WhatsApp)
 Route::post('/contact-producer/{producer}', [ProducerController::class, 'contact'])->name('producers.contact');
+
+// Rutas de políticas y cookies
+Route::get('/politica-privacidad', [CookieController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/politica-cookies', [CookieController::class, 'cookiePolicy'])->name('cookie-policy');
+Route::get('/preferencias-cookies', [CookieController::class, 'showPreferences'])->name('cookie.preferences.show');
+Route::post('/cookie-preferences', [CookieController::class, 'storePreferences'])->name('cookie.preferences');
+Route::patch('/cookie-preferences', [CookieController::class, 'updatePreferences'])->name('cookie.preferences.update');
 
 // Rutas de autenticación
 Route::middleware('guest')->group(function () {
