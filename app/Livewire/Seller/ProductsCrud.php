@@ -64,15 +64,10 @@ class ProductsCrud extends Component
             'form.custom_quantity' => 'required|numeric|min:0.01',
             'form.seasonal_info' => 'nullable|string',
             'form.is_active' => 'boolean',
+            'form.sku_base' => 'required|string|max:50|unique:products,sku_base',
         ];
 
-        // Agregar regla de SKU con validación condicional
-        if ($productId) {
-            $rules['form.sku_base'] = "required|string|max:50|unique:products,sku_base,{$productId}";
-        } else {
-            $rules['form.sku_base'] = 'required|string|max:50|unique:products,sku_base';
-        }
-
+        
         // Agregar regla de imagen con validación condicional
         if ($productId) {
             $rules['form.image'] = 'nullable|image|max:2048';
