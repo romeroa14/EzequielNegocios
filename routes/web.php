@@ -40,6 +40,30 @@ Route::get('/catalogo', function() {
     return view('catalog');
 })->name('catalogo');
 
+// Endpoint AJAX para detalles del producto
+Route::get('/product-details/{productId}', function($productId) {
+    $product = \App\Models\ProductListing::with([
+        'product.productCategory',
+        'product.productSubcategory', 
+        'product.productLine',
+        'product.brand',
+        'product.productPresentation',
+        'person',
+        'state',
+        'municipality',
+        'parish'
+    ])
+    ->where('id', $productId)
+    ->where('status', 'active')
+    ->first();
+    
+    if (!$product) {
+        return response()->json(['error' => 'Producto no encontrado'], 404);
+    }
+    
+    return response()->json($product);
+})->name('product.details');
+
 // Rutas de productos (públicas)
 Route::get('/productos', function() {
     return view('products.products');

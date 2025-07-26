@@ -35,6 +35,13 @@ class ProductListing extends Model
         'images' => 'array',
     ];
 
+    protected $appends = [
+        'images_url',
+        'main_image_url',
+        'all_images_url',
+        'images_count'
+    ];
+
     public static function rules($id = null)
     {
         return [
@@ -102,5 +109,57 @@ class ProductListing extends Model
     public function seller(): BelongsTo
     {
         return $this->belongsTo(Person::class, 'person_id');
+    }
+
+    public function state(): BelongsTo
+    {
+        return $this->belongsTo(State::class);
+    }
+
+    public function municipality(): BelongsTo
+    {
+        return $this->belongsTo(Municipality::class);
+    }
+
+    public function parish(): BelongsTo
+    {
+        return $this->belongsTo(Parish::class);
+    }
+
+    /**
+     * Obtiene la ubicación formateada
+     */
+    public function getLocationAttribute(): string
+    {
+        $parts = [];
+        
+        if ($this->parish) {
+            $parts[] = $this->parish->name;
+        }
+        if ($this->municipality) {
+            $parts[] = $this->municipality->name;
+        }
+        if ($this->state) {
+            $parts[] = $this->state->name;
+        }
+        
+        return implode(', ', $parts);
+    }
+
+    /**
+     * Obtiene la ubicación corta (solo estado y municipio)
+     */
+    public function getShortLocationAttribute(): string
+    {
+        $parts = [];
+        
+        if ($this->municipality) {
+            $parts[] = $this->municipality->name;
+        }
+        if ($this->state) {
+            $parts[] = $this->state->name;
+        }
+        
+        return implode(', ', $parts);
     }
 } 

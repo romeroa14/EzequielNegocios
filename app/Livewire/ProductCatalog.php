@@ -286,6 +286,41 @@ class ProductCatalog extends Component
             ->get();
     }
 
+    /**
+     * Obtiene los detalles completos de un producto para el modal
+     */
+    public function getProductDetails($productId)
+    {
+        return ProductListing::with([
+            'product.productCategory',
+            'product.productSubcategory', 
+            'product.productLine',
+            'product.brand',
+            'product.productPresentation',
+            'person',
+            'state',
+            'municipality',
+            'parish'
+        ])
+        ->where('id', $productId)
+        ->where('status', 'active')
+        ->first();
+    }
+
+    /**
+     * Obtiene los detalles del producto como JSON para el modal
+     */
+    public function getProductDetailsJson($productId)
+    {
+        $product = $this->getProductDetails($productId);
+        
+        if (!$product) {
+            return response()->json(['error' => 'Producto no encontrado'], 404);
+        }
+        
+        return response()->json($product);
+    }
+
     public function render()
     {
         return view('livewire.product-catalog', [

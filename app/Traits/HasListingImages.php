@@ -54,6 +54,39 @@ trait HasListingImages
         }
     }
 
+    /**
+     * Obtiene la URL de la imagen principal (primera imagen)
+     */
+    public function getMainImageUrlAttribute(): ?string
+    {
+        $urls = $this->images_url;
+        return !empty($urls) ? $urls[0] : null;
+    }
+
+    /**
+     * Obtiene todas las URLs de las imágenes
+     */
+    public function getAllImagesUrlAttribute(): array
+    {
+        return $this->images_url;
+    }
+
+    /**
+     * Verifica si tiene imágenes
+     */
+    public function hasImages(): bool
+    {
+        return !empty($this->images) && count($this->images) > 0;
+    }
+
+    /**
+     * Obtiene el número total de imágenes
+     */
+    public function getImagesCountAttribute(): int
+    {
+        return is_array($this->images) ? count($this->images) : 0;
+    }
+
     public function deleteImages(): void
     {
         if (empty($this->images)) {
@@ -82,6 +115,44 @@ trait HasListingImages
                     'path' => $image
                 ]);
             }
+        }
+    }
+
+    /**
+     * Agrega una nueva imagen a la lista
+     */
+    public function addImage(string $imagePath): void
+    {
+        $images = $this->images ?? [];
+        $images[] = $imagePath;
+        $this->update(['images' => $images]);
+    }
+
+    /**
+     * Elimina una imagen específica de la lista
+     */
+    public function removeImage(string $imagePath): void
+    {
+        $images = $this->images ?? [];
+        $key = array_search($imagePath, $images);
+        
+        if ($key !== false) {
+            // Eliminar el archivo físico
+            $disk = app()->environment('production') ? 'r2' : 'public';
+            try {
+                if (Storage::disk($disk)->exists($imagePath)) {
+                    Storage::disk($disk)->delete($imagePath);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error eliminando imagen', [
+                    'error' => $e->getMessage(),
+                    'path' => $imagePath
+                ]);
+            }
+            
+            // Remover de la lista
+            unset($images[$key]);
+            $this->update(['images' => array_values($images)]);
         }
     }
 

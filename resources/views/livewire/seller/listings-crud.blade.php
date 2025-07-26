@@ -241,6 +241,89 @@
                             </div>
                         </div>
 
+                        <!-- Imágenes -->
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Imágenes Adicionales</label>
+                            
+                            @if($editingListing && !empty($existingImages))
+                                <div class="mb-4">
+                                    <p class="text-sm text-gray-600 mb-2">Imágenes actuales:</p>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        @foreach($existingImages as $index => $imagePath)
+                                            <div class="relative">
+                                                <img src="{{ Storage::disk(app()->environment('production') ? 'r2' : 'public')->url($imagePath) }}" alt="Imagen {{ $index + 1 }}" class="w-full h-24 object-cover rounded">
+                                                <button 
+                                                    type="button" 
+                                                    wire:click="removeExistingImage({{ $index }})"
+                                                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            <!-- Contador de imágenes -->
+                            <div class="mb-2">
+                                <span class="text-sm text-gray-600">
+                                    Imágenes nuevas: {{ count($form['images']) }} | 
+                                    Total: {{ count($existingImages) + count($form['images']) }}
+                                </span>
+                            </div>
+                            
+                            <input 
+                                type="file" 
+                                wire:model="newImages" 
+                                multiple
+                                class="w-full border rounded px-3 py-2 text-sm bg-white" 
+                                accept="image/*"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">Selecciona una o más imágenes para agregar. La imagen del producto se agregará automáticamente.</p>
+                            @error('newImages.*')
+                                <span class="text-red-600 text-xs">{{ $message }}</span>
+                            @enderror
+                            
+                            <!-- Vista previa de imágenes nuevas -->
+                            @if(!empty($form['images']))
+                                <div class="mt-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <p class="text-sm text-gray-600">Imágenes nuevas a agregar:</p>
+                                        <button 
+                                            type="button" 
+                                            wire:click="clearNewImages"
+                                            class="text-sm text-red-600 hover:text-red-800"
+                                        >
+                                            Limpiar todas
+                                        </button>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        @foreach($form['images'] as $index => $image)
+                                            <div class="relative">
+                                                @if($image instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
+                                                    <img src="{{ $image->temporaryUrl() }}" alt="Vista previa" class="w-full h-24 object-cover rounded">
+                                                @elseif(is_string($image))
+                                                    <img src="{{ $image }}" alt="Imagen existente" class="w-full h-24 object-cover rounded">
+                                                @else
+                                                    <div class="w-full h-24 bg-gray-200 rounded flex items-center justify-center">
+                                                        <span class="text-xs text-gray-500">Imagen no válida</span>
+                                                    </div>
+                                                @endif
+                                                <button 
+                                                    type="button" 
+                                                    wire:click="removeImage({{ $index }})"
+                                                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+
                                 <!-- Descripción -->
                                 <div>
                             <label class="block text-sm font-medium mb-1">Descripción</label>
