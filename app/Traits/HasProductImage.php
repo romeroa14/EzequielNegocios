@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 trait HasProductImage
 {
@@ -14,11 +15,9 @@ trait HasProductImage
         }
         
         try {
-            // Determinar el disco a usar
+            // Determinar el disco a usar basado en el entorno
             $disk = app()->environment('production') ? 'r2' : 'public';
             
-            
-
             if ($disk === 'r2') {
                 // Para R2, usar la URL pública del bucket
                 $publicUrl = config('filesystems.disks.r2.url');
@@ -44,8 +43,77 @@ trait HasProductImage
             Log::info('URL generada para local', ['url' => $url]);
             return $url;
         } catch (\Exception $e) {
-            
+            Log::error('Error generando URL de imagen', [
+                'error' => $e->getMessage(),
+                'image' => $this->image
+            ]);
             return null;
+        }
+    }
+
+    public function updateImage($image)
+    {
+        if (!$image) {
+            return;
+        }
+
+        try {
+            // Determinar el disco a usar basado en el entorno
+            $disk = app()->environment('production') ? 'r2' : 'public';
+            
+            // Generar un nombre único para el archivo
+            $extension = $image->getClientOriginalExtension();
+            $fileName = uniqid() . '_' . time() . '.' . $extension;
+            $path = 'products/' . $fileName;
+
+            Log::info('Actualizando imagen', [
+                'disk' => $disk,
+                'path' => $path,
+                'fileName' => $fileName
+            ]);
+
+            // Eliminar imagen anterior si existe
+            if ($this->image) {
+                $this->deleteImage();
+            }
+
+            // Almacenar el archivo
+            if ($disk === 'r2') {
+                // Para R2 en producción
+                $path = $image->storePublicly($path, ['disk' => $disk]);
+                
+                // Verificar si el archivo se guardó correctamente
+                $exists = Storage::disk($disk)->exists($path);
+                Log::info('Verificación de almacenamiento en R2', [
+                    'path' => $path,
+                    'exists' => $exists
+                ]);
+
+                if (!$exists) {
+                    throw new \Exception('El archivo no se guardó correctamente en R2');
+                }
+            } else {
+                // Para almacenamiento local en desarrollo
+                $path = $image->storeAs('products', $fileName, 'public');
+                Log::info('Imagen almacenada localmente', [
+                    'path_resultado' => $path
+                ]);
+            }
+
+            // Actualizar el modelo
+            $this->update(['image' => $path]);
+            
+            Log::info('Imagen actualizada correctamente', [
+                'path' => $path,
+                'disk' => $disk
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar imagen', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
         }
     }
 

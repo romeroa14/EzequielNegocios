@@ -291,88 +291,6 @@ class ProductsCrud extends Component
         $this->dispatch('product-deleted');
     }
 
-    private function storeImage($image)
-    {
-        try {
-            Log::info('Intentando almacenar imagen', [
-                'original_name' => $image->getClientOriginalName(),
-                'mime_type' => $image->getMimeType(),
-                'size' => $image->getSize(),
-                'ambiente' => app()->environment(),
-            ]);
-
-            // Generar un nombre único para el archivo
-            $extension = $image->getClientOriginalExtension();
-            $fileName = uniqid() . '_' . time() . '.' . $extension;
-            $path = 'products/' . $fileName;
-
-            // Determinar el disco a usar
-            $disk = app()->environment('production') ? 'r2' : 'public';
-
-            Log::info('Configuración de almacenamiento', [
-                'disk' => $disk,
-                'path' => $path,
-                'fileName' => $fileName
-            ]);
-
-            // Almacenar el archivo
-            if ($disk === 'r2') {
-                try {
-                    // Para R2 en producción
-                    $path = $image->storePublicly($path, ['disk' => $disk]);
-                    
-                    // Verificar si el archivo se guardó correctamente
-                    $exists = Storage::disk($disk)->exists($path);
-                    Log::info('Verificación de almacenamiento en R2', [
-                        'path' => $path,
-                        'exists' => $exists
-                    ]);
-
-                    if (!$exists) {
-                        throw new \Exception('El archivo no se guardó correctamente en R2');
-                    }
-
-                    // Construir la URL directamente para R2
-                    $url = rtrim(config('filesystems.disks.r2.url'), '/') . '/' . ltrim($path, '/');
-                    Log::info('URL del archivo en R2', ['url' => $url]);
-
-                } catch (\Exception $e) {
-                    Log::error('Error al almacenar en R2', [
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
-                    ]);
-                    throw $e;
-                }
-            } else {
-                // Para almacenamiento local en desarrollo
-                $path = $image->storeAs('products', $fileName, 'public');
-                $url = url('storage/' . $path);
-                Log::info('Imagen almacenada localmente', [
-                    'path_resultado' => $path,
-                    'url' => $url
-                ]);
-            }
-
-            Log::info('Imagen almacenada correctamente', [
-                'path' => $path,
-                'disk' => $disk,
-                'url' => $url,
-                'storage_exists' => Storage::disk($disk)->exists($path)
-            ]);
-
-            return $path;
-        } catch (\Exception $e) {
-            Log::error('Error al almacenar imagen', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'disk' => $disk ?? 'unknown',
-                'path' => $path ?? 'unknown'
-            ]);
-            
-            throw $e;
-        }
-    }
-
     public function saveProduct()
     {
         $this->validate();
@@ -387,7 +305,55 @@ class ProductsCrud extends Component
                 $data['is_universal'] = false;
             }
 
+            // Manejar la imagen antes de crear/actualizar el producto
+            $imagePath = null;
+            if ($this->form['image'] && $this->form['image'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                // Determinar el disco a usar basado en el entorno
+                $disk = app()->environment('production') ? 'r2' : 'public';
+                
+                // Generar un nombre único para el archivo
+                $extension = $this->form['image']->getClientOriginalExtension();
+                $fileName = uniqid() . '_' . time() . '.' . $extension;
+                $path = 'products/' . $fileName;
+
+                Log::info('Guardando imagen', [
+                    'disk' => $disk,
+                    'path' => $path,
+                    'fileName' => $fileName
+                ]);
+
+                // Almacenar el archivo
+                if ($disk === 'r2') {
+                    // Para R2 en producción
+                    $imagePath = $this->form['image']->storePublicly($path, ['disk' => $disk]);
+                    
+                    // Verificar si el archivo se guardó correctamente
+                    $exists = Storage::disk($disk)->exists($imagePath);
+                    Log::info('Verificación de almacenamiento en R2', [
+                        'path' => $imagePath,
+                        'exists' => $exists
+                    ]);
+
+                    if (!$exists) {
+                        throw new \Exception('El archivo no se guardó correctamente en R2');
+                    }
+                } else {
+                    // Para almacenamiento local en desarrollo
+                    $imagePath = $this->form['image']->storeAs('products', $fileName, 'public');
+                    Log::info('Imagen almacenada localmente', [
+                        'path_resultado' => $imagePath
+                    ]);
+                }
+
+                // Agregar la ruta de la imagen a los datos
+                $data['image'] = $imagePath;
+            }
+
             if ($this->editingProduct) {
+                // Si estamos editando, eliminar la imagen anterior si existe
+                if ($imagePath && $this->editingProduct->image) {
+                    $this->editingProduct->deleteImage();
+                }
                 $this->editingProduct->update($data);
                 $product = $this->editingProduct;
             } else {
@@ -395,15 +361,15 @@ class ProductsCrud extends Component
                 $product = Product::create($data);
             }
 
-            if ($this->form['image'] ?? null) {
-                $product->updateImage($this->form['image']);
-            }
-
             $this->dispatch('product-' . ($this->editingProduct ? 'updated' : 'added'));
             $this->closeModal();
             $this->loadProducts();
 
         } catch (\Exception $e) {
+            Log::error('Error al guardar producto', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             $this->dispatch('error', $e->getMessage());
         }
     }
