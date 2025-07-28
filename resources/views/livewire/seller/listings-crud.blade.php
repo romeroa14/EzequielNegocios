@@ -10,51 +10,186 @@
     <!-- Listado de publicaciones -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($listings as $listing)
-            <div class="bg-white rounded-lg shadow p-4 flex flex-col min-h-[350px] min-w-[250px] justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold mb-1">{{ $listing->title }}</h3>
-                    <p class="text-base text-gray-500 mb-1">Producto: {{ $listing->product->name ?? '-' }}</p>
-                    <p class="text-base text-gray-700 mb-1">Precio: ${{ number_format($listing->unit_price, 2) }}</p>
-                    <p class="text-base text-gray-700 mb-1">Cantidad: {{ $listing->quantity_available }}</p>
-                    <p class="text-base text-gray-700 mb-1">Calidad: {{ ucfirst($listing->quality_grade) }}</p>
-                    <p class="text-base text-gray-700 mb-1">Cosecha: {{ $listing->harvest_date ? $listing->harvest_date->format('Y-m-d') : '-' }}</p>
-                    <p class="text-base text-gray-700 mb-1">Ubicación: 
-                        {{ $listing->parish->name ?? '' }}, 
-                        {{ $listing->municipality->name ?? '' }}, 
-                        {{ $listing->state->name ?? '' }}
-                    </p>
-                    <p class="text-base text-gray-700 mb-1">Estatus: {{ ucfirst($listing->status) }}</p>
-                    
-                    <!-- Mostrar imágenes específicas de la publicación -->
-                    @if($listing->hasImages())
-                        <div class="mt-2">
-                            <p class="text-xs text-gray-500 mb-1">Imágenes de la publicación ({{ $listing->images_count }}):</p>
-                            <div class="grid grid-cols-2 gap-1">
-                                @foreach($listing->images_url as $index => $imageUrl)
-                                    @if($index < 2) {{-- Mostrar solo las primeras 2 imágenes --}}
-                                        <img src="{{ $imageUrl }}" alt="Imagen {{ $index + 1 }}" class="w-full h-20 object-cover rounded">
-                                    @endif
-                                @endforeach
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <!-- Imagen Principal -->
+                <div class="relative aspect-w-16 aspect-h-9 bg-gray-100">
+                    @if($listing->hasImages() && !empty($listing->images))
+                        <img 
+                            src="{{ Storage::disk('public')->url($listing->images[0]) }}"
+                            alt="{{ $listing->title }}"
+                            class="w-full h-48 object-cover cursor-pointer"
+                            wire:click="$dispatch('openListingDetail', { listingId: {{ $listing->id }} })"
+                            onerror="this.src='{{ asset('images/placeholder.png') }}'"
+                        >
+                        @if(count($listing->images) > 1)
+                            <div class="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                                +{{ count($listing->images) - 1 }} fotos
                             </div>
-                            @if($listing->images_count > 2)
-                                <p class="text-xs text-gray-400 mt-1">+{{ $listing->images_count - 2 }} más</p>
-                            @endif
-                        </div>
+                        @endif
                     @else
-                        <div class="mt-2 p-2 bg-gray-100 rounded text-xs text-gray-500">
-                            Sin imágenes específicas
+                        <div class="flex items-center justify-center h-48 bg-gray-50">
+                            <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
                         </div>
                     @endif
                 </div>
-                <div class="flex justify-between mt-4">
-                    <button wire:click="openModal({{ $listing->id }})" class="bg-yellow-500 hover:bg-yellow-600 text-white text-base font-bold py-1 px-3 rounded">Editar</button>
+
+                <!-- Información -->
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-lg font-semibold text-gray-900 truncate">{{ $listing->title }}</h3>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full {{ $listing->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                            {{ ucfirst($listing->status) }}
+                        </span>
+                    </div>
+                    
+                    <p class="text-sm text-gray-600 mb-2">{{ $listing->product->name }}</p>
+                    
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-lg font-bold text-green-600">${{ number_format($listing->unit_price, 2) }}</span>
+                        <span class="text-sm text-gray-500">{{ $listing->quantity_available }} disponibles</span>
+                    </div>
+
+                    <div class="text-sm text-gray-500 mb-4">
+                        <p class="flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {{ $listing->location }}
+                        </p>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <button 
+                            wire:click="openModal({{ $listing->id }})"
+                            class="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                        >
+                            Editar
+                        </button>
+                        <button
+                            wire:click="$dispatch('openListingDetail', { listingId: {{ $listing->id }} })"
+                            class="text-gray-600 hover:text-gray-800 text-sm"
+                        >
+                            Ver detalles
+                        </button>
+                    </div>
                 </div>
             </div>
         @empty
-            <div class="col-span-3 text-center text-gray-500 py-12">
-                No tienes publicaciones aún.
+            <div class="col-span-3 text-center py-12 bg-white rounded-lg">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No tienes publicaciones</h3>
+                <p class="mt-1 text-sm text-gray-500">Comienza creando una nueva publicación.</p>
             </div>
         @endforelse
+    </div>
+
+    <!-- Modal de Detalle de Publicación -->
+    <div
+        x-data="{ 
+            show: false,
+            listingId: null,
+            selectedImageIndex: 0,
+            getImages() {
+                const listing = $wire.listings.find(l => l.id === this.listingId);
+                return listing?.images || [];
+            },
+            getImageUrl(path) {
+                return path ? '{{ Storage::disk('public')->url('') }}' + path : '{{ asset('images/placeholder.png') }}';
+            }
+        }"
+        @openListingDetail.window="
+            show = true;
+            listingId = $event.detail.listingId;
+            selectedImageIndex = 0;
+        "
+        x-show="show"
+        x-cloak
+        class="fixed inset-0 z-50 overflow-y-auto"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div 
+                class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+                @click="show = false"
+            ></div>
+
+            <div class="inline-block w-full max-w-4xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+                <!-- Contenido del Modal -->
+                <div class="grid grid-cols-3 gap-4">
+                    <!-- Imagen Principal (2/3 del ancho) -->
+                    <div class="col-span-2 relative">
+                        <template x-if="listingId && getImages().length > 0">
+                            <img 
+                                :src="getImageUrl(getImages()[selectedImageIndex])"
+                                class="w-full h-[600px] object-contain bg-gray-100"
+                                alt="Imagen principal"
+                            >
+                        </template>
+                    </div>
+
+                    <!-- Lista de Miniaturas y Detalles (1/3 del ancho) -->
+                    <div class="p-4 space-y-4">
+                        <!-- Miniaturas -->
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <template x-if="listingId">
+                                <template x-for="(image, index) in getImages()" :key="index">
+                                    <div 
+                                        @click="selectedImageIndex = index"
+                                        :class="{'ring-2 ring-blue-500': selectedImageIndex === index}"
+                                        class="cursor-pointer rounded-lg overflow-hidden"
+                                    >
+                                        <img 
+                                            :src="getImageUrl(image)"
+                                            class="w-full h-20 object-cover"
+                                            :alt="'Miniatura ' + (index + 1)"
+                                        >
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+
+                        <!-- Detalles de la Publicación -->
+                        <template x-if="listingId">
+                            <div class="space-y-3">
+                                <h3 x-text="$wire.listings.find(l => l.id === listingId)?.title" class="text-xl font-bold"></h3>
+                                <p class="text-gray-600" x-text="$wire.listings.find(l => l.id === listingId)?.description"></p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-2xl font-bold text-green-600">
+                                        $<span x-text="$wire.listings.find(l => l.id === listingId)?.unit_price"></span>
+                                    </span>
+                                    <span class="text-gray-600">
+                                        <span x-text="$wire.listings.find(l => l.id === listingId)?.quantity_available"></span> disponibles
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    <p class="mb-1">Calidad: <span x-text="$wire.listings.find(l => l.id === listingId)?.quality_grade" class="font-medium"></span></p>
+                                    <p class="mb-1">Cosecha: <span x-text="$wire.listings.find(l => l.id === listingId)?.harvest_date" class="font-medium"></span></p>
+                                    <p>Ubicación: <span x-text="$wire.listings.find(l => l.id === listingId)?.location" class="font-medium"></span></p>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Botón de Cerrar -->
+                        <button 
+                            @click="show = false"
+                            class="mt-4 w-full bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200"
+                        >
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal para crear/editar publicación -->
