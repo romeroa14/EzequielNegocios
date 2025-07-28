@@ -9,12 +9,18 @@ use App\Models\State;
 use App\Models\Municipality;
 use App\Models\Parish;
 use Illuminate\Support\Facades\Auth;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class ListingsCrud extends Component
 {
+    use WithFileUploads;
+
     public $listings;
     public $showModal = false;
     public $editingListing = null;
+    public $temporaryImages = []; // Para almacenar las imágenes temporales
     public $form = [
         'product_id' => '',
         'title' => '',
@@ -27,6 +33,7 @@ class ListingsCrud extends Component
         'municipality_id' => '',
         'parish_id' => '',
         'status' => 'pending',
+        'images' => [], // Array para guardar las rutas de las imágenes
     ];
 
     public $selectedImages = []; // Array para las imágenes seleccionadas
@@ -49,6 +56,7 @@ class ListingsCrud extends Component
             'form.parish_id' => 'required|exists:parishes,id',
             'form.product_id' => 'required|exists:products,id',
             'form.status' => 'required|in:pending,active,sold_out,inactive',
+            'temporaryImages.*' => 'nullable|image|max:2048', // Validación para las imágenes
         ];
     }
 
@@ -114,6 +122,7 @@ class ListingsCrud extends Component
                 'municipality_id' => $this->editingListing->municipality_id,
                 'parish_id' => $this->editingListing->parish_id,
                 'status' => $this->editingListing->status,
+                'images' => $this->editingListing->images ?? [], // Cargar las imágenes existentes
             ];
             
             if ($this->form['state_id']) {
@@ -151,35 +160,48 @@ class ListingsCrud extends Component
             'municipality_id' => '',
             'parish_id' => '',
             'status' => 'pending',
+            'images' => [], // Resetear también las imágenes
         ];
         $this->selectedImages = [];
+        $this->temporaryImages = [];
     }
 
     public function saveListing()
     {
         $this->validate();
 
-        $person = Auth::user();
-        if (!$person) {
-            $this->dispatch('error', 'No tienes un perfil de vendedor asociado.');
-            return;
-        }
+        try {
+            $person = Auth::user();
+            if (!$person) {
+                $this->dispatch('error', 'No tienes un perfil de vendedor asociado.');
+                return;
+            }
 
-        $listingData = array_merge($this->form, [
-            'person_id' => $person->id,
-            'images' => [], // Las publicaciones tendrán sus propias imágenes independientes
-        ]);
+            $listingData = array_merge($this->form, [
+                'person_id' => $person->id,
+                'images' => $this->form['images'] ?? [], // Asegurarnos de que las imágenes se guarden
+            ]);
 
-        if ($this->editingListing) {
-            $this->editingListing->update($listingData);
-            $this->dispatch('listing-updated');
-        } else {
-            ProductListing::create($listingData);
-            $this->dispatch('listing-added');
+            if ($this->editingListing) {
+                // Si estamos editando, actualizar las imágenes
+                $this->editingListing->update($listingData);
+                $this->dispatch('listing-updated');
+            } else {
+                // Si es nuevo, crear con las imágenes
+                ProductListing::create($listingData);
+                $this->dispatch('listing-added');
+            }
+            
+            $this->closeModal();
+            $this->loadListings();
+
+        } catch (\Exception $e) {
+            Log::error('Error al guardar listing', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            $this->dispatch('error', 'Error al guardar la publicación: ' . $e->getMessage());
         }
-        
-        $this->closeModal();
-        $this->loadListings();
     }
 
     public function testAddImage()
@@ -191,24 +213,52 @@ class ListingsCrud extends Component
     /**
      * Maneja la selección de una imagen del input
      */
-    public function handleImageSelected($fileData = null)
+    public function handleImageSelected($fileData)
     {
-        if ($fileData) {
-            // Usar la vista previa real del archivo
+        try {
+            if (!$fileData) {
+                return;
+            }
+
+            // Determinar el disco a usar basado en el entorno
+            $disk = app()->environment('production') ? 'r2' : 'public';
+            
+            // Generar un nombre único para el archivo
+            $extension = pathinfo($fileData['name'], PATHINFO_EXTENSION);
+            $fileName = uniqid() . '_' . time() . '.' . $extension;
+            $path = 'listings/' . $fileName;
+
+            // Decodificar la imagen base64 y guardarla
+            $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $fileData['preview']));
+            
+            if ($disk === 'r2') {
+                Storage::disk($disk)->put($path, $imageData, 'public');
+            } else {
+                Storage::disk($disk)->put($path, $imageData);
+            }
+
+            // Agregar la imagen al array de imágenes seleccionadas
             $this->selectedImages[] = [
                 'id' => uniqid(),
-                'name' => 'imagen_' . count($this->selectedImages) . '.jpg',
-                'preview' => $fileData
+                'name' => $fileName,
+                'path' => $path,
+                'preview' => $fileData['preview']
             ];
+
+            // Agregar la ruta al array de imágenes del formulario
+            if (!is_array($this->form['images'])) {
+                $this->form['images'] = [];
+            }
+            $this->form['images'][] = $path;
+
             $this->dispatch('success', 'Imagen agregada correctamente');
-        } else {
-            // Fallback con imagen de prueba
-            $this->selectedImages[] = [
-                'id' => uniqid(),
-                'name' => 'imagen_' . count($this->selectedImages) . '.jpg',
-                'preview' => 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNjc3NDhCIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VmlzdGEgcHJldmlhPC90ZXh0Pgo8L3N2Zz4K'
-            ];
-            $this->dispatch('success', 'Imagen agregada correctamente');
+            
+        } catch (\Exception $e) {
+            Log::error('Error al guardar imagen', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            $this->dispatch('error', 'Error al guardar la imagen: ' . $e->getMessage());
         }
     }
 
@@ -232,10 +282,33 @@ class ListingsCrud extends Component
      */
     public function removeImage($index)
     {
-        if (isset($this->selectedImages[$index])) {
-            unset($this->selectedImages[$index]);
-            $this->selectedImages = array_values($this->selectedImages);
-            $this->dispatch('success', 'Imagen eliminada');
+        try {
+            if (isset($this->selectedImages[$index])) {
+                $image = $this->selectedImages[$index];
+                
+                // Eliminar el archivo físico
+                $disk = app()->environment('production') ? 'r2' : 'public';
+                if (Storage::disk($disk)->exists($image['path'])) {
+                    Storage::disk($disk)->delete($image['path']);
+                }
+
+                // Eliminar de los arrays
+                unset($this->selectedImages[$index]);
+                $this->selectedImages = array_values($this->selectedImages);
+                
+                if (isset($this->form['images'][$index])) {
+                    unset($this->form['images'][$index]);
+                    $this->form['images'] = array_values($this->form['images']);
+                }
+
+                $this->dispatch('success', 'Imagen eliminada correctamente');
+            }
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar imagen', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            $this->dispatch('error', 'Error al eliminar la imagen');
         }
     }
 

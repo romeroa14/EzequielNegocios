@@ -240,61 +240,67 @@
                                 </div>
 
                                 <!-- Imágenes específicas de la publicación -->
-                                <div>
+                                <div x-data="{ 
+                                    handleFileSelect(event) {
+                                        const file = event.target.files[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onload = (e) => {
+                                                @this.handleImageSelected({
+                                                    name: file.name,
+                                                    preview: e.target.result
+                                                });
+                                            };
+                                            reader.readAsDataURL(file);
+                                            event.target.value = ''; // Limpiar input para permitir seleccionar el mismo archivo
+                                        }
+                                    }
+                                }">
                                     <label class="block text-sm font-medium mb-1">Imágenes de la Publicación</label>
-                                    <p class="text-xs text-gray-600 mb-2">
-                                        Estas imágenes serán específicas para esta publicación y no heredarán la imagen del producto.
-                                    </p>
-                                    
-                                    <!-- Input único de imagen -->
-                                    <div class="flex items-center space-x-3 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-                                        <input 
-                                            type="file" 
-                                            accept="image/*"
-                                            class="flex-1 text-sm"
-                                            onchange="handleImageSelect(this)"
-                                            id="imageInput"
-                                        />
+                                    <p class="text-xs text-gray-500 mb-2">Estas imágenes serán expuestas en el catálogo.</p>
+
+                                    <!-- Input de archivo oculto -->
+                                    <input 
+                                        type="file" 
+                                        id="imageInput" 
+                                        class="hidden"
+                                        accept="image/*"
+                                        x-ref="fileInput"
+                                        @change="handleFileSelect($event)"
+                                    />
+
+                                    <!-- Área de imágenes seleccionadas -->
+                                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+                                        @foreach($selectedImages as $index => $image)
+                                            <div class="relative group">
+                                                <img 
+                                                    src="{{ $image['preview'] }}" 
+                                                    alt="Imagen {{ $index + 1 }}"
+                                                    class="w-full h-32 object-cover rounded-lg shadow-sm"
+                                                >
+                                                <button 
+                                                    type="button"
+                                                    wire:click.prevent="removeImage({{ $index }})"
+                                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        @endforeach
+
+                                        <!-- Botón para agregar imagen -->
                                         <button 
-                                            type="button" 
-                                            wire:click="addImage"
-                                            class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                                            type="button"
+                                            @click.prevent="$refs.fileInput.click()"
+                                            class="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-gray-400 transition-colors"
                                         >
-                                            <span class="text-xl">+</span>
+                                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                            </svg>
                                         </button>
                                     </div>
-                                    
-                                    <!-- Vista previa de imágenes -->
-                                    @if(!empty($selectedImages))
-                                        <div class="mt-4">
-                                            <p class="text-sm text-gray-600 mb-2">Imágenes seleccionadas ({{ count($selectedImages) }}):</p>
-                                            <div class="grid grid-cols-3 gap-3">
-                                                @foreach($selectedImages as $index => $image)
-                                                    <div class="relative group">
-                                                        <img 
-                                                            src="{{ $image['preview'] }}" 
-                                                            alt="{{ $image['name'] }}" 
-                                                            class="w-full h-24 object-cover rounded-lg"
-                                                        />
-                                                        <button 
-                                                            type="button" 
-                                                            wire:click="removeImage({{ $index }})"
-                                                            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                                                        >
-                                                            ×
-                                                        </button>
-                                                        <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded-b-lg">
-                                                            {{ $image['name'] }}
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
-                                    
-                                    <p class="text-xs text-gray-500 mt-2">
-                                        Selecciona una imagen y haz clic en "+" para agregarla a la publicación.
-                                    </p>
                                 </div>
 
                                 <!-- Descripción -->
