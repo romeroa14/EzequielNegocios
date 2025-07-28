@@ -69,7 +69,7 @@
                             No se encontraron productos que coincidan con tus criterios de búsqueda.
                         </p>
                     </div>
-                @endforelseimage.png
+                @endforelse
             </div>
 
             <!-- Pagination -->

@@ -24,13 +24,30 @@
                         {{ $listing->state->name ?? '' }}
                     </p>
                     <p class="text-base text-gray-700 mb-1">Estatus: {{ ucfirst($listing->status) }}</p>
+                    
+                    <!-- Mostrar imágenes específicas de la publicación -->
+                    @if($listing->hasImages())
+                        <div class="mt-2">
+                            <p class="text-xs text-gray-500 mb-1">Imágenes de la publicación ({{ $listing->images_count }}):</p>
+                            <div class="grid grid-cols-2 gap-1">
+                                @foreach($listing->images_url as $index => $imageUrl)
+                                    @if($index < 2) {{-- Mostrar solo las primeras 2 imágenes --}}
+                                        <img src="{{ $imageUrl }}" alt="Imagen {{ $index + 1 }}" class="w-full h-20 object-cover rounded">
+                                    @endif
+                                @endforeach
+                            </div>
+                            @if($listing->images_count > 2)
+                                <p class="text-xs text-gray-400 mt-1">+{{ $listing->images_count - 2 }} más</p>
+                            @endif
+                        </div>
+                    @else
+                        <div class="mt-2 p-2 bg-gray-100 rounded text-xs text-gray-500">
+                            Sin imágenes específicas
+                        </div>
+                    @endif
                 </div>
-                @if($listing->images && count($listing->images))
-                    <img src="{{ $listing->images_url[0] }}" alt="Imagen" class="w-full h-80 rounded shadow my-2">
-                @endif
                 <div class="flex justify-between mt-4">
                     <button wire:click="openModal({{ $listing->id }})" class="bg-yellow-500 hover:bg-yellow-600 text-white text-base font-bold py-1 px-3 rounded">Editar</button>
-                    <button wire:click="confirmDelete({{ $listing->id }})" class="bg-red-500 hover:bg-red-600 text-white text-base font-bold py-1 px-3 rounded">Eliminar</button>
                 </div>
             </div>
         @empty
@@ -51,290 +68,246 @@
                         <!-- Header fijo -->
                         <div class="sticky top-0 bg-white px-4 py-3 border-b border-gray-200 flex justify-between items-center z-10">
                             <h2 class="text-lg font-semibold truncate">{{ $editingListing ? 'Editar Publicación' : 'Nueva Publicación' }}</h2>
-                    <button wire:click="closeModal" class="text-gray-400 hover:text-gray-700">
+                            <button wire:click="closeModal" class="text-gray-400 hover:text-gray-700">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
 
                         <!-- Contenido scrolleable -->
                         <div class="p-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
-                @if(session('error'))
-                                <div class="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">
-                        {{ session('error') }}
-                    </div>
-                @endif
-                @if(session('success'))
-                                <div class="mb-4 p-3 bg-green-100 text-green-700 rounded text-sm">
-                        {{ session('success') }}
-                    </div>
-                @endif
-
                             <form wire:submit.prevent="saveListing" class="space-y-4">
-                        <!-- Producto y Preview -->
-                                <div x-data="{ img: @entangle('form.product_id') }">
-                            <label class="block text-sm font-medium mb-1">Producto</label>
+                                <!-- Producto -->
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Producto</label>
                                     <select 
-                                        x-model="img" 
                                         wire:model="form.product_id" 
                                         class="w-full border rounded px-3 py-2 text-sm bg-white"
                                     >
-                                <option value="">Selecciona un producto</option>
-                                <optgroup label="Productos Universales">
-                                    @foreach($products->where('is_universal', true) as $product)
-                                        <option value="{{ $product->id }}">🌎 {{ $product->name }}</option>
-                                    @endforeach
-                                </optgroup>
-                                <optgroup label="Mis Productos">
-                                    @foreach($products->where('person_id', Auth::id()) as $product)
-                                        <option value="{{ $product->id }}">📦 {{ $product->name }}</option>
-                                    @endforeach
-                                </optgroup>
-                            </select>
-                            @error('form.product_id')
-                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                            @enderror
-                            <template x-if="img">
-                                        <img 
-                                            :src="img && {{ Js::from($products->pluck('image_url', 'id')) }}[img] ? {{ Js::from($products->pluck('image_url', 'id')) }}[img] : ''" 
-                                            class="h-16 sm:h-24 rounded shadow mt-2" 
-                                            x-show="img && {{ Js::from($products->pluck('image_url', 'id')) }}[img]"
-                                        >
-                            </template>
-                        </div>
+                                        <option value="">Selecciona un producto</option>
+                                        <optgroup label="Productos Universales">
+                                            @foreach($products->where('is_universal', true) as $product)
+                                                <option value="{{ $product->id }}">🌎 {{ $product->name }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                        <optgroup label="Mis Productos">
+                                            @foreach($products->where('person_id', Auth::id()) as $product)
+                                                <option value="{{ $product->id }}">📦 {{ $product->name }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    </select>
+                                    @error('form.product_id')
+                                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                                    @enderror
+                                </div>
 
                                 <!-- Grid de campos -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Título</label>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Título</label>
                                         <input 
                                             type="text" 
                                             wire:model="form.title" 
                                             class="w-full border rounded px-3 py-2 text-sm" 
                                         />
-                                @error('form.title')
-                                    <span class="text-red-600 text-xs">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                        @error('form.title')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
 
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Precio Unitario</label>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Precio Unitario</label>
                                         <input 
                                             type="number" 
                                             step="0.01" 
                                             wire:model="form.unit_price" 
                                             class="w-full border rounded px-3 py-2 text-sm" 
                                         />
-                                @error('form.unit_price')
-                                    <span class="text-red-600 text-xs">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                        @error('form.unit_price')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
 
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Cantidad Disponible</label>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Cantidad Disponible</label>
                                         <input 
                                             type="number" 
                                             wire:model="form.quantity_available" 
                                             class="w-full border rounded px-3 py-2 text-sm" 
                                         />
-                                @error('form.quantity_available')
-                                    <span class="text-red-600 text-xs">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                        @error('form.quantity_available')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
 
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Calidad</label>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Calidad</label>
                                         <select 
                                             wire:model="form.quality_grade" 
                                             class="w-full border rounded px-3 py-2 text-sm bg-white"
                                         >
-                                    <option value="">Selecciona una calidad</option>
-                                    <option value="premium">Premium</option>
-                                    <option value="standard">Estándar</option>
-                                    <option value="economic">Económico</option>
-                                </select>
-                                @error('form.quality_grade')
-                                    <span class="text-red-600 text-xs">{{ $message }}</span>
-                                @enderror
-                        </div>
+                                            <option value="">Selecciona una calidad</option>
+                                            <option value="premium">Premium</option>
+                                            <option value="standard">Estándar</option>
+                                            <option value="economic">Económico</option>
+                                        </select>
+                                        @error('form.quality_grade')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
 
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Fecha de Cosecha</label>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Fecha de Cosecha</label>
                                         <input 
                                             type="date" 
                                             wire:model="form.harvest_date" 
                                             class="w-full border rounded px-3 py-2 text-sm" 
                                         />
-                                @error('form.harvest_date')
-                                    <span class="text-red-600 text-xs">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                        @error('form.harvest_date')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
 
-                            <!-- Estado -->
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Estado</label>
-                                <select 
-                                    wire:model.live="form.state_id"
-                                    class="w-full border rounded px-3 py-2 text-sm"
-                                >
-                                    <option value="">Seleccione un estado</option>
-                                    @foreach($states as $state)
-                                        <option value="{{ $state->id }}">{{ $state->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('form.state_id')
-                                    <span class="text-red-600 text-xs">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                    <!-- Estado -->
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Estado</label>
+                                        <select 
+                                            wire:model.live="form.state_id"
+                                            class="w-full border rounded px-3 py-2 text-sm"
+                                        >
+                                            <option value="">Seleccione un estado</option>
+                                            @foreach($states as $state)
+                                                <option value="{{ $state->id }}">{{ $state->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('form.state_id')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
 
-                            <!-- Municipio -->
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Municipio</label>
-                                <select 
-                                    wire:model.live="form.municipality_id"
-                                    class="w-full border rounded px-3 py-2 text-sm"
-                                    @if(!$form['state_id']) disabled @endif
-                                >
-                                    <option value="">Seleccione un municipio</option>
-                                    @foreach($municipalities as $municipality)
-                                        <option value="{{ $municipality->id }}">{{ $municipality->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('form.municipality_id')
-                                    <span class="text-red-600 text-xs">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                    <!-- Municipio -->
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Municipio</label>
+                                        <select 
+                                            wire:model.live="form.municipality_id"
+                                            class="w-full border rounded px-3 py-2 text-sm"
+                                            @if(!$form['state_id']) disabled @endif
+                                        >
+                                            <option value="">Seleccione un municipio</option>
+                                            @foreach($municipalities as $municipality)
+                                                <option value="{{ $municipality->id }}">{{ $municipality->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('form.municipality_id')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
 
-                            <!-- Parroquia -->
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Parroquia</label>
-                                <select 
-                                    wire:model="form.parish_id"
-                                    class="w-full border rounded px-3 py-2 text-sm"
-                                    @if(!$form['municipality_id']) disabled @endif
-                                >
-                                    <option value="">Seleccione una parroquia</option>
-                                    @foreach($parishes as $parish)
-                                        <option value="{{ $parish->id }}">{{ $parish->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('form.parish_id')
-                                    <span class="text-red-600 text-xs">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                    <!-- Parroquia -->
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Parroquia</label>
+                                        <select 
+                                            wire:model="form.parish_id"
+                                            class="w-full border rounded px-3 py-2 text-sm"
+                                            @if(!$form['municipality_id']) disabled @endif
+                                        >
+                                            <option value="">Seleccione una parroquia</option>
+                                            @foreach($parishes as $parish)
+                                                <option value="{{ $parish->id }}">{{ $parish->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('form.parish_id')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
 
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Estatus</label>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Estatus</label>
                                         <select 
                                             wire:model="form.status" 
                                             class="w-full border rounded px-3 py-2 text-sm bg-white"
                                         >
-                                    <option value="pending">Pendiente</option>
-                                    <option value="active">Activo</option>
-                                    <option value="sold_out">Agotado</option>
-                                    <option value="inactive">Inactivo</option>
-                                </select>
-                                @error('form.status')
-                                    <span class="text-red-600 text-xs">{{ $message }}</span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Imágenes -->
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Imágenes Adicionales</label>
-                            
-                            @if($editingListing && !empty($existingImages))
-                                <div class="mb-4">
-                                    <p class="text-sm text-gray-600 mb-2">Imágenes actuales:</p>
-                                    <div class="grid grid-cols-3 gap-2">
-                                        @foreach($existingImages as $index => $imagePath)
-                                            <div class="relative">
-                                                <img src="{{ Storage::disk(app()->environment('production') ? 'r2' : 'public')->url($imagePath) }}" alt="Imagen {{ $index + 1 }}" class="w-full h-24 object-cover rounded">
-                                                <button 
-                                                    type="button" 
-                                                    wire:click="removeExistingImage({{ $index }})"
-                                                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
-                                                >
-                                                    ×
-                                                </button>
-                                            </div>
-                                        @endforeach
+                                            <option value="pending">Pendiente</option>
+                                            <option value="active">Activo</option>
+                                            <option value="sold_out">Agotado</option>
+                                            <option value="inactive">Inactivo</option>
+                                        </select>
+                                        @error('form.status')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
                                     </div>
                                 </div>
-                            @endif
-                            
-                            <!-- Contador de imágenes -->
-                            <div class="mb-2">
-                                <span class="text-sm text-gray-600">
-                                    Imágenes nuevas: {{ count($form['images']) }} | 
-                                    Total: {{ count($existingImages) + count($form['images']) }}
-                                </span>
-                            </div>
-                            
-                            <input 
-                                type="file" 
-                                wire:model="newImages" 
-                                multiple
-                                class="w-full border rounded px-3 py-2 text-sm bg-white" 
-                                accept="image/*"
-                            />
-                            <p class="text-xs text-gray-500 mt-1">Selecciona una o más imágenes para agregar. La imagen del producto se agregará automáticamente.</p>
-                            @error('newImages.*')
-                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                            @enderror
-                            
-                            <!-- Vista previa de imágenes nuevas -->
-                            @if(!empty($form['images']))
-                                <div class="mt-4">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <p class="text-sm text-gray-600">Imágenes nuevas a agregar:</p>
+
+                                <!-- Imágenes específicas de la publicación -->
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Imágenes de la Publicación</label>
+                                    <p class="text-xs text-gray-600 mb-2">
+                                        Estas imágenes serán específicas para esta publicación y no heredarán la imagen del producto.
+                                    </p>
+                                    
+                                    <!-- Input único de imagen -->
+                                    <div class="flex items-center space-x-3 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                                        <input 
+                                            type="file" 
+                                            accept="image/*"
+                                            class="flex-1 text-sm"
+                                            onchange="handleImageSelect(this)"
+                                            id="imageInput"
+                                        />
                                         <button 
                                             type="button" 
-                                            wire:click="clearNewImages"
-                                            class="text-sm text-red-600 hover:text-red-800"
+                                            wire:click="addImage"
+                                            class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                                         >
-                                            Limpiar todas
+                                            <span class="text-xl">+</span>
                                         </button>
                                     </div>
-                                    <div class="grid grid-cols-3 gap-2">
-                                        @foreach($form['images'] as $index => $image)
-                                            <div class="relative">
-                                                @if($image instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
-                                                    <img src="{{ $image->temporaryUrl() }}" alt="Vista previa" class="w-full h-24 object-cover rounded">
-                                                @elseif(is_string($image))
-                                                    <img src="{{ $image }}" alt="Imagen existente" class="w-full h-24 object-cover rounded">
-                                                @else
-                                                    <div class="w-full h-24 bg-gray-200 rounded flex items-center justify-center">
-                                                        <span class="text-xs text-gray-500">Imagen no válida</span>
+                                    
+                                    <!-- Vista previa de imágenes -->
+                                    @if(!empty($selectedImages))
+                                        <div class="mt-4">
+                                            <p class="text-sm text-gray-600 mb-2">Imágenes seleccionadas ({{ count($selectedImages) }}):</p>
+                                            <div class="grid grid-cols-3 gap-3">
+                                                @foreach($selectedImages as $index => $image)
+                                                    <div class="relative group">
+                                                        <img 
+                                                            src="{{ $image['preview'] }}" 
+                                                            alt="{{ $image['name'] }}" 
+                                                            class="w-full h-24 object-cover rounded-lg"
+                                                        />
+                                                        <button 
+                                                            type="button" 
+                                                            wire:click="removeImage({{ $index }})"
+                                                            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                        <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded-b-lg">
+                                                            {{ $image['name'] }}
+                                                        </div>
                                                     </div>
-                                                @endif
-                                                <button 
-                                                    type="button" 
-                                                    wire:click="removeImage({{ $index }})"
-                                                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
-                                                >
-                                                    ×
-                                                </button>
+                                                @endforeach
                                             </div>
-                                        @endforeach
-                                    </div>
+                                        </div>
+                                    @endif
+                                    
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        Selecciona una imagen y haz clic en "+" para agregarla a la publicación.
+                                    </p>
                                 </div>
-                            @endif
-                        </div>
 
                                 <!-- Descripción -->
                                 <div>
-                            <label class="block text-sm font-medium mb-1">Descripción</label>
+                                    <label class="block text-sm font-medium mb-1">Descripción</label>
                                     <textarea 
                                         wire:model="form.description" 
                                         class="w-full border rounded px-3 py-2 text-sm h-20"
                                     ></textarea>
-                            @error('form.description')
-                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                            @enderror
-                    </div>
+                                    @error('form.description')
+                                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                                    @enderror
+                                </div>
 
                                 <!-- Botones -->
                                 <div class="flex justify-end pt-4 border-t border-gray-200">
@@ -343,16 +316,16 @@
                                         wire:click="closeModal"
                                         class="px-4 py-2 text-sm font-medium bg-gray-300 hover:bg-gray-400 text-gray-800 rounded mr-2"
                                     >
-                            Cancelar
-                        </button>
+                                        Cancelar
+                                    </button>
                                     <button 
                                         type="submit"
                                         class="px-4 py-2 text-sm font-medium bg-blue-500 hover:bg-blue-600 text-white rounded"
                                     >
-                            Guardar
-                        </button>
-                    </div>
-                </form>
+                                        Guardar
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -381,29 +354,12 @@
             });
         });
 
-        window.addEventListener('listing-deleted', event => {
+        window.addEventListener('success', event => {
             Swal.fire({
                 icon: 'success',
-                title: '¡Publicación eliminada!',
-                text: 'La publicación se ha eliminado correctamente.',
+                title: '¡Éxito!',
+                text: event.detail,
                 confirmButtonColor: '#3b82f6'
-            });
-        });
-
-        window.addEventListener('show-delete-confirmation', event => {
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: '¡No podrás revertir esto!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3b82f6',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    @this.deleteListing(@this.listingIdToDelete);
-                }
             });
         });
 
@@ -416,5 +372,21 @@
             });
         });
     });
+
+    // Función para manejar la selección de imágenes en inputs dinámicos
+    function handleImageSelect(input) {
+        const file = input.files[0];
+        if (file) {
+            console.log('Archivo seleccionado:', file.name);
+            
+            // Crear una vista previa del archivo
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Llamar a Livewire con la vista previa
+                @this.handleImageSelected(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
 </script>
 

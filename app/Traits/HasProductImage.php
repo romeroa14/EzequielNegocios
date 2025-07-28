@@ -38,8 +38,8 @@ trait HasProductImage
                 return $url;
             }
             
-            // Para desarrollo, usar la URL pública local
-            $url = url('storage/' . $this->image);
+            // Para desarrollo, usar la URL pública local con ruta absoluta
+            $url = asset('storage/' . $this->image);
             Log::info('URL generada para local', ['url' => $url]);
             return $url;
         } catch (\Exception $e) {

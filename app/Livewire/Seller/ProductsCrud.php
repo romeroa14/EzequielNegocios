@@ -308,7 +308,7 @@ class ProductsCrud extends Component
             // Manejar la imagen antes de crear/actualizar el producto
             $imagePath = null;
             if ($this->form['image'] && $this->form['image'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                // Determinar el disco a usar basado en el entorno
+                // Siempre usar el disco 'public' para desarrollo/local
                 $disk = app()->environment('production') ? 'r2' : 'public';
                 
                 // Generar un nombre único para el archivo
@@ -338,9 +338,9 @@ class ProductsCrud extends Component
                         throw new \Exception('El archivo no se guardó correctamente en R2');
                     }
                 } else {
-                    // Para almacenamiento local en desarrollo
+                    // Para almacenamiento local en desarrollo SIEMPRE usar storage/app/public/products
                     $imagePath = $this->form['image']->storeAs('products', $fileName, 'public');
-                    Log::info('Imagen almacenada localmente', [
+                    Log::info('Imagen almacenada en storage/app/public/products', [
                         'path_resultado' => $imagePath
                     ]);
                 }
