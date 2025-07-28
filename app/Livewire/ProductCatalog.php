@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\ProductLine;
 use App\Models\Brand;
 use App\Models\ProductPresentation;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class ProductCatalog extends Component
 {
@@ -161,6 +163,20 @@ class ProductCatalog extends Component
         $this->resetPage();
     }
 
+    /**
+     * Obtiene la URL de la primera imagen de una publicación
+     */
+    public function getFirstImageUrl($listing)
+    {
+        // Verificar si la publicación tiene imágenes
+        if ($listing->hasImages()) {
+            return asset('storage/' . $listing->images[0]);
+        }
+        
+        // Si no hay imagen, devolver el placeholder
+        return asset('images/placeholder.png');
+    }
+
     public function getProductsProperty()
     {
         return ProductListing::query()
@@ -170,7 +186,10 @@ class ProductCatalog extends Component
                 'product.productLine',
                 'product.brand',
                 'product.productPresentation',
-                'person.user'
+                'person.user',
+                'state',
+                'municipality',
+                'parish'
             ])
             ->where('status', 'active')
             ->when($this->search, function (Builder $query) {
@@ -321,13 +340,23 @@ class ProductCatalog extends Component
         return response()->json($product);
     }
 
+    public function showProductDetail($listingId)
+    {
+        $this->dispatch('showProductDetail', $listingId);
+    }
+
+    public function contactSeller($productId)
+    {
+        // Aquí puedes implementar la lógica para contactar al vendedor
+        $this->dispatch('contactProducer', ['productId' => $productId]);
+    }
+
     public function render()
     {
         return view('livewire.product-catalog', [
             'products' => $this->products,
             'categories' => $this->categories,
             'subcategories' => $this->subcategories,
-            // 'producer' => $this->producer,
             'sellers' => $this->sellers,
         ]);
     }

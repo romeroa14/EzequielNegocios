@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use App\Traits\HasListingImages;
 
 class ProductListing extends Model
@@ -41,6 +42,25 @@ class ProductListing extends Model
         'all_images_url',
         'images_count'
     ];
+
+    /**
+     * Verifica si el listing tiene imágenes
+     */
+    public function hasImages(): bool
+    {
+        return !empty($this->images) && is_array($this->images);
+    }
+
+    /**
+     * Obtiene la URL de la primera imagen
+     */
+    public function getFirstImageUrlAttribute(): string
+    {
+        if ($this->hasImages()) {
+            return asset('storage/' . $this->images[0]);
+        }
+        return asset('images/placeholder.png');
+    }
 
     public static function rules($id = null)
     {

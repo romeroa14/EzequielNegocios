@@ -16,18 +16,26 @@
                 @forelse($products as $product)
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
                         <!-- Product Image -->
-                        <div class="aspect-w-4 aspect-h-3 bg-gray-200 relative group cursor-pointer">
+                        <div 
+                            wire:click="showProductDetail({{ $product->id }})"
+                            class="aspect-w-4 aspect-h-3 bg-gray-200 relative group cursor-pointer"
+                        >
                             <img 
-                                src="{{ $product->main_image_url ?? $product->product->image_url ?? asset('images/placeholder.png') }}"
-                                alt="{{ $product->product->name }}"
+                                src="{{ $this->getFirstImageUrl($product) }}"
+                                alt="{{ $product->title }}"
                                 class="w-full h-80 object-cover rounded"
-                                onerror="this.onerror=null; this.src='{{ asset('images/placeholder.png') }}';"
-                            >
+                                onerror="this.src='{{ asset('images/placeholder.png') }}'"
+                            />
+                            <!-- Hover overlay -->
+                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-200"></div>
                         </div>
 
                         <!-- Product Info -->
                         <div class="p-4">
-                            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">
+                            <h3 
+                                wire:click="showProductDetail({{ $product->id }})"
+                                class="text-lg font-semibold text-gray-900 line-clamp-2 cursor-pointer hover:text-blue-600"
+                            >
                                 {{ $product->title }}
                             </h3>
                             <p class="text-sm text-gray-600 mb-2">{{ $product->product->name }}</p>
@@ -80,4 +88,7 @@
             @endif
         </div>
     </div>
+
+    <!-- Product Detail Modal -->
+    <livewire:components.product-detail-modal />
 </div>
