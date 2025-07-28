@@ -1,6 +1,6 @@
 @extends('seller.layout')
 
 @section('content')
-    <livewire:seller.listings-crud />
+    <livewire:seller.listings-crud/>
 @endsection
 

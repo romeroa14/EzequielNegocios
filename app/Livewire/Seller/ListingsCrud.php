@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\On;
 
 class ListingsCrud extends Component
 {
@@ -327,6 +328,82 @@ class ListingsCrud extends Component
                 'trace' => $e->getTraceAsString()
             ]);
             $this->dispatch('error', 'Error al eliminar la imagen');
+        }
+    }
+
+    public function confirmDelete($listingId)
+    {
+        $this->js("
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Livewire.dispatch('deleteListing', { id: {$listingId} });
+                }
+            })
+        ");
+    }
+
+    #[On('deleteListing')]
+    public function deleteListing($id)
+    {
+        try {
+            if (!$id) {
+                throw new \Exception('ID de publicación no proporcionado');
+            }
+
+            $listing = ProductListing::where('person_id', Auth::id())
+                ->where('id', $id)
+                ->firstOrFail();
+
+            // Eliminar las imágenes físicas
+            if (!empty($listing->images)) {
+                foreach ($listing->images as $image) {
+                    $disk = app()->environment('production') ? 'r2' : 'public';
+                    if (Storage::disk($disk)->exists($image)) {
+                        Storage::disk($disk)->delete($image);
+                    }
+                }
+            }
+
+            // Eliminar el registro
+            $listing->delete();
+
+            // Recargar los listings después de eliminar
+            $this->loadListings();
+
+            $this->js("
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'Publicación eliminada correctamente',
+                    confirmButtonColor: '#3b82f6'
+                }).then(() => {
+                    window.location.reload();
+                });
+            ");
+
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar publicación', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            $this->js("
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al eliminar la publicación',
+                    confirmButtonColor: '#3b82f6'
+                });
+            ");
         }
     }
 
