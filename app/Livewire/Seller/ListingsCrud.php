@@ -124,6 +124,18 @@ class ListingsCrud extends Component
                 'status' => $this->editingListing->status,
                 'images' => $this->editingListing->images ?? [], // Cargar las imágenes existentes
             ];
+
+            // Cargar las imágenes existentes en selectedImages para mostrarlas en la vista
+            if (!empty($this->editingListing->images)) {
+                foreach ($this->editingListing->images as $imagePath) {
+                    $this->selectedImages[] = [
+                        'id' => uniqid(),
+                        'name' => basename($imagePath),
+                        'path' => $imagePath,
+                        'preview' => asset('storage/' . $imagePath)
+                    ];
+                }
+            }
             
             if ($this->form['state_id']) {
                 $this->municipalities = Municipality::where('state_id', $this->form['state_id'])->get();
@@ -160,7 +172,7 @@ class ListingsCrud extends Component
             'municipality_id' => '',
             'parish_id' => '',
             'status' => 'pending',
-            'images' => [], // Resetear también las imágenes
+            'images' => [], // Asegurarnos de resetear también las imágenes
         ];
         $this->selectedImages = [];
         $this->temporaryImages = [];
@@ -286,20 +298,26 @@ class ListingsCrud extends Component
             if (isset($this->selectedImages[$index])) {
                 $image = $this->selectedImages[$index];
                 
-                // Eliminar el archivo físico
-                $disk = app()->environment('production') ? 'r2' : 'public';
-                if (Storage::disk($disk)->exists($image['path'])) {
-                    Storage::disk($disk)->delete($image['path']);
+                // Si la imagen ya existe en el servidor (tiene path), eliminarla
+                if (isset($image['path'])) {
+                    $disk = app()->environment('production') ? 'r2' : 'public';
+                    if (Storage::disk($disk)->exists($image['path'])) {
+                        Storage::disk($disk)->delete($image['path']);
+                    }
+                    
+                    // Eliminar también del array de imágenes del formulario
+                    if (is_array($this->form['images'])) {
+                        $key = array_search($image['path'], $this->form['images']);
+                        if ($key !== false) {
+                            unset($this->form['images'][$key]);
+                            $this->form['images'] = array_values($this->form['images']);
+                        }
+                    }
                 }
 
-                // Eliminar de los arrays
+                // Eliminar de selectedImages
                 unset($this->selectedImages[$index]);
                 $this->selectedImages = array_values($this->selectedImages);
-                
-                if (isset($this->form['images'][$index])) {
-                    unset($this->form['images'][$index]);
-                    $this->form['images'] = array_values($this->form['images']);
-                }
 
                 $this->dispatch('success', 'Imagen eliminada correctamente');
             }
