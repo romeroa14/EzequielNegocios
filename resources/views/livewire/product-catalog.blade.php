@@ -1,116 +1,30 @@
 <div>
     <div class="min-h-screen bg-gray-50 py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Header -->
-            {{-- <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl">
-                    Catálogo de Productos
-                </h1>
-                <p class="mt-4 text-lg text-gray-600">
-                    Descubre productos frescos directamente de los productores
-                </p>
-            </div> --}}
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-gray-900">Catálogo de Productos</h3>
+                <!-- Mobile Filter Button -->
+                <button 
+                    class="lg:hidden bg-white p-2 rounded-lg shadow-sm border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    @click="$dispatch('set-show-filters', true)"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                </button>
+            </div>
 
-            <div class="flex gap-6">
-                <!-- Filters Sidebar -->
-                <div class="w-64 flex-shrink-0">
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                        <div class="mb-4">
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">Filtros</h3>
-                            
-                            <!-- Search -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Búsqueda</label>
-                                <input type="text" wire:model.live="search" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-
-                            <!-- Categories -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                                <select wire:model.live="selectedCategory" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="">Todas las categorías</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Subcategories -->
-                            @if($subcategories->isNotEmpty())
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Subcategoría</label>
-                                <select wire:model.live="selectedSubcategory" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="">Todas las subcategorías</option>
-                                    @foreach($subcategories as $subcategory)
-                                        <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            @endif
-
-                            <!-- Product Lines -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Línea de Producto</label>
-                                <select wire:model.live="selectedLine" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="">Todas las líneas</option>
-                                    @foreach($this->productLines as $line)
-                                        <option value="{{ $line->id }}">{{ $line->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Brands -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
-                                <select wire:model.live="selectedBrand" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="">Todas las marcas</option>
-                                    @foreach($this->brands as $brand)
-                                        <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Presentations -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Presentación</label>
-                                <select wire:model.live="selectedPresentation" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="">Todas las presentaciones</option>
-                                    @foreach($this->presentations as $presentation)
-                                        <option value="{{ $presentation->id }}">{{ $presentation->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Quality -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Calidad</label>
-                                <select wire:model.live="selectedQuality" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="">Todas las calidades</option>
-                                    <option value="premium">Premium</option>
-                                    <option value="standard">Estándar</option>
-                                    <option value="economic">Económica</option>
-                                </select>
-                            </div>
-
-                            <!-- Price Range -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Rango de Precio</label>
-                                <div class="flex gap-2">
-                                    <input type="number" wire:model.live="minPrice" placeholder="Min" class="w-1/2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <input type="number" wire:model.live="maxPrice" placeholder="Max" class="w-1/2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                </div>
-                            </div>
-
-                            <!-- Clear Filters -->
-                            <button wire:click="clearFilters" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
-                                Limpiar Filtros
-                            </button>
-                        </div>
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Filters Sidebar - Desktop -->
+                <div class="hidden lg:block">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-4">
+                        <h3 class="text-xl font-medium text-gray-900 mb-4">Filtros</h3>
+                        @include('livewire.partials.filter-content')
                     </div>
                 </div>
 
                 <!-- Main Content -->
-                <div class="flex-1">
+                <div class="lg:col-span-3">
                     <!-- Products Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                         @forelse($products as $product)
@@ -126,7 +40,6 @@
                                         class="w-full h-48 object-cover"
                                         onerror="this.src='{{ asset('images/placeholder.png') }}'"
                                     />
-                                    <!-- Hover overlay -->
                                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-200"></div>
                                 </div>
 
@@ -188,6 +101,46 @@
                     @endif
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Mobile Filters Drawer -->
+    <div 
+        x-data="{ show: false }"
+        x-show="show"
+        x-on:set-show-filters.window="show = $event.detail"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 lg:hidden"
+        x-cloak
+    >
+        <div 
+            x-show="show"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="translate-x-full"
+            x-transition:enter-end="translate-x-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="translate-x-0"
+            x-transition:leave-end="translate-x-full"
+            class="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-xl p-6 overflow-y-auto"
+            @click.away="show = false"
+        >
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-medium text-gray-900">Filtros</h3>
+                <button 
+                    class="text-gray-400 hover:text-gray-500"
+                    @click="show = false"
+                >
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            @include('livewire.partials.filter-content')
         </div>
     </div>
 
