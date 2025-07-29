@@ -113,6 +113,7 @@ class ProductListingResource extends Resource
 
                 Forms\Components\TextInput::make('title')
                     ->label('Título')
+                    ->columnSpanFull()
                     ->required()
                     ->maxLength(255),
 
@@ -122,30 +123,111 @@ class ProductListingResource extends Resource
                     ->maxLength(65535)
                     ->columnSpanFull(),
 
-                Forms\Components\TextInput::make('unit_price')
-                    ->label('Precio Unitario')
-                    ->required()
-                    ->numeric()
-                    ->prefix('$'),
+                Forms\Components\Section::make('Ubicación')
+                    ->description('Selecciona la ubicación donde se encuentra el producto')
+                    ->schema([
+                        Forms\Components\Select::make('state_id')
+                            ->label('Estado')
+                            ->options(function () {
+                                return State::query()
+                                    ->where('country_id', 296) // Venezuela
+                                    ->pluck('name', 'id');
+                            })
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                $set('municipality_id', null);
+                                $set('parish_id', null);
+                            }),
+                        Forms\Components\Select::make('municipality_id')
+                            ->label('Municipio')
+                            ->options(function (callable $get) {
+                                $stateId = $get('state_id');
+                                if (!$stateId) {
+                                    return [];
+                                }
+                                return Municipality::query()
+                                    ->where('state_id', $stateId)
+                                    ->pluck('name', 'id');
+                            })
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(fn ($state, callable $set) => $set('parish_id', null)),
+                        Forms\Components\Select::make('parish_id')
+                            ->label('Parroquia')
+                            ->options(function (callable $get) {
+                                $municipalityId = $get('municipality_id');
+                                if (!$municipalityId) {
+                                    return [];
+                                }   
+                                return Parish::query()
+                                    ->where('municipality_id', $municipalityId)
+                                    ->pluck('name', 'id');
+                            })
+                            ->required(),
+                    ])->columnSpan(2),
 
-                Forms\Components\TextInput::make('quantity_available')
-                    ->label('Cantidad Disponible')
-                    ->required()
-                    ->numeric()
-                    ->minValue(0),
+                Forms\Components\Section::make('Detalles del Producto')
+                    ->description('Especifica la presentación y precio del producto')
+                    ->schema([
+                        Forms\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\Select::make('product_presentation_id')
+                                    ->label('Presentación')
+                                    ->options(ProductPresentation::query()
+                                        ->where('is_active', true)
+                                        ->pluck('name', 'id'))
+                                    ->required()
+                                    ->searchable()
+                                    ->preload()
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                        $set('presentation_quantity', 1);
+                                    }),
 
-                Forms\Components\Select::make('quality_grade')
-                    ->label('Calidad')
-                    ->options([
-                        'premium' => 'Premium',
-                        'standard' => 'Estándar',
-                        'economic' => 'Económico',
-                    ])
-                    ->required(),
+                                Forms\Components\TextInput::make('presentation_quantity')
+                                    ->label(function (Forms\Get $get) {
+                                        $presentationId = $get('product_presentation_id');
+                                        if (!$presentationId) return 'Cantidad';
+                                        
+                                        $presentation = ProductPresentation::find($presentationId);
+                                        return $presentation ? "Cantidad en {$presentation->unit_type}" : 'Cantidad';
+                                    })
+                                    ->required()
+                                    ->numeric()
+                                    ->default(1)
+                                    ->minValue(0.01)
+                                    ->step(0.01),
 
-                Forms\Components\DatePicker::make('harvest_date')
-                    ->label('Fecha de Cosecha')
-                    ->required(),
+                                Forms\Components\TextInput::make('unit_price')
+                                    ->label(function (Forms\Get $get) {
+                                        $presentationId = $get('product_presentation_id');
+                                        if (!$presentationId) return 'Precio';
+                                        
+                                        $presentation = ProductPresentation::find($presentationId);
+                                        return $presentation ? "Precio por {$presentation->name}" : 'Precio';
+                                    })
+                                    ->required()
+                                    ->numeric()
+                                    ->prefix('$'),
+                            ]),
+                            
+                        Forms\Components\Select::make('quality_grade')
+                            ->label('Calidad')
+                            ->options([
+                                'premium' => 'Premium',
+                                'standard' => 'Estándar',
+                                'economic' => 'Económico'
+                            ])
+                            ->required()
+                            ->columnSpanFull(),
+                        Forms\Components\DatePicker::make('harvest_date')
+                            ->label('Fecha de Cosecha')
+                            ->required()
+                            ->columnSpanFull(),
+                    ])->columnSpan(2),
+
+                
 
                 Forms\Components\FileUpload::make('images')
                     ->label('Imágenes')
@@ -154,73 +236,6 @@ class ProductListingResource extends Resource
                     ->disk('public')
                     ->directory('listings')
                     ->columnSpanFull(),
-
-                    Forms\Components\Select::make('state_id')
-                    ->label('Estado')
-                    ->options(function () {
-                        return State::query()
-                            ->where('country_id', 296) // Venezuela
-                            ->pluck('name', 'id');
-                    })
-                    ->required()
-                    ->live()
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        $set('municipality_id', null);
-                        $set('parish_id', null);
-                    }),
-                Forms\Components\Select::make('municipality_id')
-                    ->label('Municipio')
-                    ->options(function (callable $get) {
-                        $stateId = $get('state_id');
-                        if (!$stateId) {
-                            return [];
-                        }
-                        return Municipality::query()
-                            ->where('state_id', $stateId)
-                            ->pluck('name', 'id');
-                    })
-                    ->required()
-                    ->live()
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('parish_id', null)),
-                Forms\Components\Select::make('parish_id')
-                    ->label('Parroquia')
-                    ->options(function (callable $get) {
-                        $municipalityId = $get('municipality_id');
-                        if (!$municipalityId) {
-                            return [];
-                        }   
-                        return Parish::query()
-                            ->where('municipality_id', $municipalityId)
-                            ->pluck('name', 'id');
-                    })
-                    ->required(),
-
-                Forms\Components\Select::make('product_presentation_id')
-                    ->label('Presentación')
-                    ->options(ProductPresentation::query()
-                        ->where('is_active', true)
-                        ->pluck('name', 'id'))
-                    ->required()
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
-                        $set('presentation_quantity', 1);
-                    }),
-
-                Forms\Components\TextInput::make('presentation_quantity')
-                    ->label(function (Forms\Get $get) {
-                        $presentationId = $get('product_presentation_id');
-                        if (!$presentationId) return 'Cantidad';
-                        
-                        $presentation = ProductPresentation::find($presentationId);
-                        return $presentation ? "Cantidad en {$presentation->unit_type}" : 'Cantidad';
-                    })
-                    ->required()
-                    ->numeric()
-                    ->default(1)
-                    ->minValue(0.01)
-                    ->step(0.01),
 
                 Forms\Components\Select::make('status')
                     ->label('Estado')
@@ -255,14 +270,8 @@ class ProductListingResource extends Resource
                     ->label('Título')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('unit_price')
-                    ->label('Precio')
-                    ->money()
-                    ->sortable(),
+            
 
-                Tables\Columns\TextColumn::make('quantity_available')
-                    ->label('Disponible')
-                    ->numeric(),
 
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Estado')
@@ -280,6 +289,11 @@ class ProductListingResource extends Resource
                 Tables\Columns\TextColumn::make('formatted_presentation')
                     ->label('Cantidad')
                     ->searchable(),
+
+                    Tables\Columns\TextColumn::make('unit_price')
+                    ->label('Precio')
+                    ->money()
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Creado')
