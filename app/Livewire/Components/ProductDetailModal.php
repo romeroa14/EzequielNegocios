@@ -71,6 +71,7 @@ class ProductDetailModal extends Component
 
                 // Información del vendedor
                 'seller' => [
+                    'id' => $listing->person->id,
                     'name' => $listing->person->first_name . ' ' . $listing->person->last_name,
                     'location' => $listing->location
                 ],

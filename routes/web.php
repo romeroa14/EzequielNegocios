@@ -70,13 +70,9 @@ Route::get('/productos', function() {
 })->name('productos');
 
 // Rutas de productores (públicas)
-Route::get('/productores', function() {
-    return view('producers.producers');
-})->name('productores');
-
-Route::get('/productores/{producer}', function() {
-    return view('producers.producer');
-})->name('productores.show');
+Route::get('/productores', [ProducerController::class, 'index'])->name('productores.index');
+Route::get('/productores/{producer}', [ProducerController::class, 'show'])->name('productores.show');
+Route::post('/productores/{producer}/contact', [ProducerController::class, 'contact'])->name('productores.contact');
 
 // Route::get('/producers', [ProducerController::class, 'index'])->name('producers');
 // Route::get('/producers/{producer}', [ProducerController::class, 'show'])->name('producers.show');

@@ -2,32 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Person;
+use App\Models\ProductListing;
+use Illuminate\Http\Request;
 
 class ProducerController extends Controller
 {
     public function index()
     {
-        $producers = Person::where('role', 'seller')
-            ->with(['user', 'listings'])
-            ->paginate(12);
-            
-        return view('producers.producers', compact('producers'));
+        $producers = Person::whereHas('productListings', function($query) {
+            $query->where('status', 'active');
+        })->paginate(12);
+
+        return view('producers.index', compact('producers'));
     }
 
     public function show(Person $producer)
     {
-        if ($producer->role !== 'seller') {
-            abort(404);
-        }
+        $listings = ProductListing::where('person_id', $producer->id)
+            ->where('status', 'active')
+            ->with(['product', 'state', 'municipality', 'parish'])
+            ->paginate(12);
 
-        $producer->load(['user', 'listings' => function($query) {
-            $query->where('status', 'active')
-                  ->with('category')
-                  ->orderBy('created_at', 'desc');
-        }]);
+        return view('producers.show', [
+            'producer' => $producer,
+            'listings' => $listings
+        ]);
+    }
 
-        return view('producers.show', compact('producer'));
+    public function contact(Request $request, Person $producer)
+    {
+        // Aquí puedes implementar la lógica de contacto
+        // Por ejemplo, enviar un email o redireccionar a WhatsApp
+        return back()->with('success', 'Mensaje enviado correctamente');
     }
 } 

@@ -189,10 +189,10 @@
 
                         <!-- Contact Button -->
                         <a 
-                            href="{{ route('productor.show', ['listing' => $listing['id']]) }}"
+                            href="{{ route('productores.show', ['producer' => $listing['seller']['id']]) }}"
                             class="block w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg text-center transition duration-150 ease-in-out"
                         >
-                            Contactar Vendedor
+                            Ver Productor
                         </a>
                     </div>
                 </div>

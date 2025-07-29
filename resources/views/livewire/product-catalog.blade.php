@@ -107,12 +107,12 @@
                                     </div>
 
                                     <!-- Action Button -->
-                                    <button 
-                                        wire:click="$dispatch('contactProducer', { productId: {{ $product->id }} })"
-                                        class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out"
+                                    <a 
+                                        href="{{ route('productores.show', ['producer' => $product->person_id]) }}"
+                                        class="block w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md text-center transition duration-150 ease-in-out"
                                     >
-                                        Contactar Productor
-                                    </button>
+                                        Ver Productor
+                                    </a>
                                 </div>
                             </div>
                         @empty
