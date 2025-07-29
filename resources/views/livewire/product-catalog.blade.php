@@ -3,10 +3,10 @@
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-2xl font-bold text-gray-900">Catálogo de Productos</h3>
-                <!-- Mobile Filter Button -->
+                <!-- Mobile Filter Toggle Button -->
                 <button 
+                    wire:click="$toggle('showFilters')"
                     class="lg:hidden bg-white p-2 rounded-lg shadow-sm border border-gray-200 text-gray-600 hover:bg-gray-50"
-                    @click="$dispatch('set-show-filters', true)"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -14,14 +14,49 @@
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <!-- Filters Sidebar - Desktop -->
-                <div class="hidden lg:block">
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-4">
-                        <h3 class="text-xl font-medium text-gray-900 mb-4">Filtros</h3>
-                        @include('livewire.partials.filter-content')
+            <div class="lg:grid lg:grid-cols-4 lg:gap-6">
+                <!-- Filters Panel - Always visible on desktop, toggleable on mobile -->
+                <div 
+                    class="transform lg:transform-none lg:opacity-100 lg:relative lg:block
+                           fixed inset-y-0 left-0 z-40 w-full max-w-xs lg:max-w-none bg-white lg:bg-transparent
+                           transition duration-300 ease-in-out
+                           {{ $showFilters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0' }}"
+                >
+                    <div class="h-full lg:h-auto overflow-y-auto lg:overflow-visible p-6 lg:p-0 lg:sticky lg:top-4">
+                        <!-- Mobile Header -->
+                        <div class="flex items-center justify-between mb-6 lg:hidden">
+                            <h3 class="text-xl font-medium text-gray-900">Filtros</h3>
+                            <button 
+                                wire:click="$set('showFilters', false)"
+                                class="text-gray-400 hover:text-gray-500"
+                            >
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Filter Content -->
+                        <div class="bg-white lg:rounded-lg lg:shadow-sm lg:border lg:border-gray-200 lg:p-6">
+                            <h3 class="hidden lg:block text-xl font-medium text-gray-900 mb-4">Filtros</h3>
+                            @include('livewire.partials.filter-content', [
+                                'categories' => $categories,
+                                'subcategories' => $subcategories,
+                                'productLines' => $productLines,
+                                'brands' => $brands,
+                                'presentations' => $presentations
+                            ])
+                        </div>
                     </div>
                 </div>
+
+                <!-- Backdrop - Mobile only -->
+                @if($showFilters)
+                    <div 
+                        class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+                        wire:click="$set('showFilters', false)"
+                    ></div>
+                @endif
 
                 <!-- Main Content -->
                 <div class="lg:col-span-3">
@@ -101,46 +136,6 @@
                     @endif
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Mobile Filters Drawer -->
-    <div 
-        x-data="{ show: false }"
-        x-show="show"
-        x-on:set-show-filters.window="show = $event.detail"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 lg:hidden"
-        x-cloak
-    >
-        <div 
-            x-show="show"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="translate-x-full"
-            x-transition:enter-end="translate-x-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="translate-x-0"
-            x-transition:leave-end="translate-x-full"
-            class="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-xl p-6 overflow-y-auto"
-            @click.away="show = false"
-        >
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-medium text-gray-900">Filtros</h3>
-                <button 
-                    class="text-gray-400 hover:text-gray-500"
-                    @click="show = false"
-                >
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            @include('livewire.partials.filter-content')
         </div>
     </div>
 
