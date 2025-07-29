@@ -18,10 +18,11 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->decimal('unit_price', 10, 2);
-            $table->integer('quantity_available');
             $table->enum('quality_grade', ['premium', 'standard', 'economic']);
             $table->date('harvest_date');
             $table->json('images')->nullable();
+            $table->foreignId('product_presentation_id')->constrained('product_presentations')->onDelete('cascade');
+            $table->decimal('presentation_quantity', 10, 2)->default(1.00);
             $table->foreignId('state_id')->constrained('states')->onDelete('cascade');
             $table->foreignId('municipality_id')->constrained('municipalities')->onDelete('cascade');
             $table->foreignId('parish_id')->constrained('parishes')->onDelete('cascade');

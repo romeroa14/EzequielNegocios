@@ -78,12 +78,14 @@
                             </div>
 
                             <!-- Contact Button -->
-                            <button 
-                                onclick="window.location.href='https://wa.me/{{ $producer->phone }}'"
-                                class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out"
+                            <a 
+                                href="https://wa.me/{{ $producer->phone }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="block w-full bg-green-600 hover:bg-green-700 text-white text-center font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out"
                             >
                                 Contactar por WhatsApp
-                            </button>
+                            </a>
                         </div>
                     </div>
                 @empty

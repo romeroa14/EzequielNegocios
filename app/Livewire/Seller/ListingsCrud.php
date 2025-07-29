@@ -13,6 +13,7 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
+use App\Models\ProductPresentation;
 
 class ListingsCrud extends Component
 {
@@ -27,7 +28,6 @@ class ListingsCrud extends Component
         'title' => '',
         'description' => '',
         'unit_price' => '',
-        'quantity_available' => '',
         'quality_grade' => '',
         'harvest_date' => '',
         'state_id' => '',
@@ -35,6 +35,8 @@ class ListingsCrud extends Component
         'parish_id' => '',
         'status' => 'pending',
         'images' => [], // Array para guardar las rutas de las imágenes
+        'product_presentation_id' => '',
+        'presentation_quantity' => 1,
     ];
 
     public $selectedImages = []; // Array para las imágenes seleccionadas
@@ -49,7 +51,6 @@ class ListingsCrud extends Component
             'form.title' => 'required|string|max:255',
             'form.description' => 'required|string',
             'form.unit_price' => 'required|numeric|min:0',
-            'form.quantity_available' => 'required|integer|min:1',
             'form.quality_grade' => 'required|in:premium,standard,economic',
             'form.harvest_date' => 'required|date',
             'form.state_id' => 'required|exists:states,id',
@@ -57,6 +58,8 @@ class ListingsCrud extends Component
             'form.parish_id' => 'required|exists:parishes,id',
             'form.product_id' => 'required|exists:products,id',
             'form.status' => 'required|in:pending,active,sold_out,inactive',
+            'form.product_presentation_id' => 'required|exists:product_presentations,id',
+            'form.presentation_quantity' => 'required|numeric|min:0.01',
             'temporaryImages.*' => 'nullable|image|max:2048', // Validación para las imágenes
         ];
     }
@@ -108,7 +111,8 @@ class ListingsCrud extends Component
                 'state', 
                 'municipality', 
                 'parish', 
-                'product'
+                'product',
+                'productPresentation'
             ])->findOrFail($listingId);
             
             $this->form = [
@@ -116,7 +120,6 @@ class ListingsCrud extends Component
                 'title' => $this->editingListing->title,
                 'description' => $this->editingListing->description,
                 'unit_price' => $this->editingListing->unit_price,
-                'quantity_available' => $this->editingListing->quantity_available,
                 'quality_grade' => $this->editingListing->quality_grade,
                 'harvest_date' => $this->editingListing->harvest_date ? $this->editingListing->harvest_date->format('Y-m-d') : '',
                 'state_id' => $this->editingListing->state_id,
@@ -124,6 +127,8 @@ class ListingsCrud extends Component
                 'parish_id' => $this->editingListing->parish_id,
                 'status' => $this->editingListing->status,
                 'images' => $this->editingListing->images ?? [], // Cargar las imágenes existentes
+                'product_presentation_id' => $this->editingListing->product_presentation_id,
+                'presentation_quantity' => $this->editingListing->presentation_quantity,
             ];
 
             // Cargar las imágenes existentes en selectedImages para mostrarlas en la vista
@@ -166,7 +171,6 @@ class ListingsCrud extends Component
             'title' => '',
             'description' => '',
             'unit_price' => '',
-            'quantity_available' => '',
             'quality_grade' => '',
             'harvest_date' => '',
             'state_id' => '',
@@ -174,6 +178,8 @@ class ListingsCrud extends Component
             'parish_id' => '',
             'status' => 'pending',
             'images' => [], // Asegurarnos de resetear también las imágenes
+            'product_presentation_id' => '',
+            'presentation_quantity' => 1,
         ];
         $this->selectedImages = [];
         $this->temporaryImages = [];
@@ -413,6 +419,8 @@ class ListingsCrud extends Component
             $query->where('person_id', Auth::id())
                   ->orWhere('is_universal', true);
         })->get();
+
+        $presentations = ProductPresentation::where('is_active', true)->get();
         
         return view('livewire.seller.listings-crud', [
             'listings' => $this->listings,
@@ -420,6 +428,7 @@ class ListingsCrud extends Component
             'municipalities' => $this->municipalities,
             'parishes' => $this->parishes,
             'products' => $products,
+            'presentations' => $presentations,
         ]);
     }
 }

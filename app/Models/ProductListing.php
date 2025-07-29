@@ -19,10 +19,11 @@ class ProductListing extends Model
         'title',
         'description',
         'unit_price',
-        'quantity_available',
         'quality_grade',
         'harvest_date',
         'images',
+        'product_presentation_id',
+        'presentation_quantity',
         'state_id',
         'municipality_id',
         'parish_id',
@@ -31,16 +32,17 @@ class ProductListing extends Model
 
     protected $casts = [
         'unit_price' => 'decimal:2',
-        'quantity_available' => 'integer',
         'harvest_date' => 'datetime',
         'images' => 'array',
+        'presentation_quantity' => 'decimal:2',
     ];
 
     protected $appends = [
         'images_url',
         'main_image_url',
         'all_images_url',
-        'images_count'
+        'images_count',
+        'formatted_presentation'
     ];
 
     /**
@@ -70,11 +72,12 @@ class ProductListing extends Model
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'unit_price' => 'required|numeric|min:0',
-            'quantity_available' => 'required|integer|min:0',
             'quality_grade' => 'required|in:premium,standard,economic',
             'harvest_date' => 'required|date',
             'images' => 'nullable|array',
             'images.*' => 'image|max:2048',
+            'product_presentation_id' => 'required|exists:product_presentations,id',
+            'presentation_quantity' => 'required|numeric|min:0.01',
             'state_id' => 'required|exists:states,id',
             'municipality_id' => 'required|exists:municipalities,id',
             'parish_id' => 'required|exists:parishes,id',
@@ -95,9 +98,6 @@ class ProductListing extends Model
             'unit_price.required' => 'El precio unitario es obligatorio.',
             'unit_price.numeric' => 'El precio unitario debe ser un número.',
             'unit_price.min' => 'El precio unitario debe ser mayor o igual a 0.',
-            'quantity_available.required' => 'La cantidad disponible es obligatoria.',
-            'quantity_available.integer' => 'La cantidad disponible debe ser un número entero.',
-            'quantity_available.min' => 'La cantidad disponible debe ser mayor o igual a 0.',
             'quality_grade.required' => 'La calidad es obligatoria.',
             'quality_grade.in' => 'La calidad debe ser premium, standard o economic.',
             'harvest_date.required' => 'La fecha de cosecha es obligatoria.',
@@ -105,6 +105,11 @@ class ProductListing extends Model
             'images.array' => 'Las imágenes deben ser un arreglo.',
             'images.*.image' => 'Los archivos deben ser imágenes.',
             'images.*.max' => 'Las imágenes no pueden ser mayores a 2MB.',
+            'product_presentation_id.required' => 'La presentación es obligatoria.',
+            'product_presentation_id.exists' => 'La presentación seleccionada no existe.',
+            'presentation_quantity.required' => 'La cantidad es obligatoria.',
+            'presentation_quantity.numeric' => 'La cantidad debe ser un número.',
+            'presentation_quantity.min' => 'La cantidad debe ser mayor a 0.',
             'state_id.required' => 'El estado es obligatorio.',
             'state_id.exists' => 'El estado seleccionado no existe.',
             'municipality_id.required' => 'La municipalidad es obligatoria.',
@@ -113,7 +118,7 @@ class ProductListing extends Model
             'parish_id.exists' => 'El municipio seleccionado no existe.',
             'status.required' => 'El estado es obligatorio.',
             'status.in' => 'El estado debe ser active, pending, sold_out o inactive.'
-    ];
+        ];
     }
 
     public function person(): BelongsTo
@@ -144,6 +149,20 @@ class ProductListing extends Model
     public function parish(): BelongsTo
     {
         return $this->belongsTo(Parish::class);
+    }
+
+    public function productPresentation(): BelongsTo
+    {
+        return $this->belongsTo(ProductPresentation::class);
+    }
+
+    public function getFormattedPresentationAttribute(): string
+    {
+        if (!$this->productPresentation) {
+            return '';
+        }
+
+        return "{$this->presentation_quantity} {$this->productPresentation->unit_type}";
     }
 
     /**

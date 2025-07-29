@@ -19,6 +19,7 @@ use App\Models\Product;
 use App\Models\State;
 use App\Models\Municipality;
 use App\Models\Parish;
+use App\Models\ProductPresentation;
 
 class ProductListingResource extends Resource
 {
@@ -194,6 +195,32 @@ class ProductListingResource extends Resource
                     })
                     ->required(),
 
+                Forms\Components\Select::make('product_presentation_id')
+                    ->label('Presentación')
+                    ->options(ProductPresentation::query()
+                        ->where('is_active', true)
+                        ->pluck('name', 'id'))
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                        $set('presentation_quantity', 1);
+                    }),
+
+                Forms\Components\TextInput::make('presentation_quantity')
+                    ->label(function (Forms\Get $get) {
+                        $presentationId = $get('product_presentation_id');
+                        if (!$presentationId) return 'Cantidad';
+                        
+                        $presentation = ProductPresentation::find($presentationId);
+                        return $presentation ? "Cantidad en {$presentation->unit_type}" : 'Cantidad';
+                    })
+                    ->required()
+                    ->numeric()
+                    ->default(1)
+                    ->minValue(0.01)
+                    ->step(0.01),
 
                 Forms\Components\Select::make('status')
                     ->label('Estado')
@@ -245,6 +272,14 @@ class ProductListingResource extends Resource
                         'danger' => 'inactive',
                         'secondary' => 'sold_out',
                     ]),
+
+                Tables\Columns\TextColumn::make('productPresentation.name')
+                    ->label('Presentación')
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('formatted_presentation')
+                    ->label('Cantidad')
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Creado')

@@ -49,7 +49,7 @@
                         
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-lg font-bold text-green-600">${{ number_format($listing->unit_price, 2) }}</span>
-                            <span class="text-sm text-gray-500">{{ $listing->quantity_available }} disponibles</span>
+                            <span class="text-sm text-gray-500">{{ $listing->formatted_presentation }}</span>
                         </div>
 
                         <div class="text-sm text-gray-500 mb-4">
@@ -168,9 +168,7 @@
                                         <span class="text-2xl font-bold text-green-600">
                                             $<span x-text="$wire.listings.find(l => l.id === listingId)?.unit_price"></span>
                                         </span>
-                                        <span class="text-gray-600">
-                                            <span x-text="$wire.listings.find(l => l.id === listingId)?.quantity_available"></span> disponibles
-                                        </span>
+                                        <span class="text-gray-600" x-text="$wire.listings.find(l => l.id === listingId)?.formatted_presentation"></span>
                                     </div>
                                     <div class="text-sm text-gray-500">
                                         <p class="mb-1">Calidad: <span x-text="$wire.listings.find(l => l.id === listingId)?.quality_grade" class="font-medium"></span></p>
@@ -354,6 +352,37 @@
                                                 @endforeach
                                             </select>
                                             @error('form.parish_id')
+                                                <span class="text-red-600 text-xs">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Presentación</label>
+                                            <select 
+                                                wire:model="form.product_presentation_id" 
+                                                class="w-full border rounded px-3 py-2 text-sm bg-white"
+                                            >
+                                                <option value="">Selecciona una presentación</option>
+                                                @foreach($presentations as $presentation)
+                                                    <option value="{{ $presentation->id }}">{{ $presentation->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('form.product_presentation_id')
+                                                <span class="text-red-600 text-xs">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">
+                                                Cantidad por {{ $presentations->where('id', $form['product_presentation_id'])->first()?->unit_type ?? 'unidad' }}
+                                            </label>
+                                            <input 
+                                                type="number" 
+                                                step="0.01"
+                                                wire:model="form.presentation_quantity" 
+                                                class="w-full border rounded px-3 py-2 text-sm" 
+                                            />
+                                            @error('form.presentation_quantity')
                                                 <span class="text-red-600 text-xs">{{ $message }}</span>
                                             @enderror
                                         </div>
