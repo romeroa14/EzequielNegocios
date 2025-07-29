@@ -3,19 +3,45 @@
         x-data="{ 
             selectedImageIndex: 0,
             show: false,
+            images: [],
             init() {
-                this.selectedImageIndex = 0;
-                this.show = false;
+                this.$watch('show', value => {
+                    if (value && $wire.listing) {
+                        this.images = $wire.listing.images;
+                        this.selectedImageIndex = 0;
+                        console.log('Modal opened with images:', {
+                            images: this.images,
+                            selectedIndex: this.selectedImageIndex,
+                            wireData: $wire.listing
+                        });
+                    }
+                });
 
                 Livewire.on('modal-ready', () => {
                     this.show = true;
-                    this.selectedImageIndex = 0;
+                    this.images = $wire.listing.images;
+                    console.log('Modal ready:', {
+                        images: this.images,
+                        selectedIndex: this.selectedImageIndex,
+                        wireData: $wire.listing
+                    });
                 });
 
                 Livewire.on('modal-closed', () => {
                     this.show = false;
                     this.selectedImageIndex = 0;
+                    this.images = [];
                 });
+            },
+            changeImage(index) {
+                console.log('Changing image:', {
+                    fromIndex: this.selectedImageIndex,
+                    toIndex: index,
+                    currentImage: this.images[this.selectedImageIndex],
+                    newImage: this.images[index],
+                    allImages: this.images
+                });
+                this.selectedImageIndex = index;
             }
         }"
         x-show="show"
@@ -51,35 +77,37 @@
                     <div class="w-full md:w-2/3 p-6 bg-white">
                         <!-- Main image -->
                         <div class="relative aspect-w-4 aspect-h-3 bg-gray-50 rounded-lg mb-4">
-                            @if(!empty($listing['images']))
+                            @if($listing && !empty($listing['images']))
                                 <img 
-                                    :src="$wire.listing.images[selectedImageIndex]"
+                                    src="{{ $listing['images'][$selectedImageIndex ?? 0] }}"
                                     class="w-full h-full object-contain"
-                                    :alt="'Imagen ' + (selectedImageIndex + 1)"
+                                    alt="{{ $listing['title'] }}"
                                 >
                             @endif
                         </div>
 
                         <!-- Thumbnails -->
                         <div class="grid grid-cols-6 gap-2 mt-4">
-                            @foreach($listing['images'] as $index => $image)
-                                <button 
-                                    type="button"
-                                    @click="selectedImageIndex = {{ $index }}"
-                                    class="relative aspect-square rounded-lg overflow-hidden transition-all duration-200 ease-in-out"
-                                    :class="selectedImageIndex === {{ $index }} ? 'ring-2 ring-blue-500' : 'hover:ring-2 hover:ring-blue-300'"
-                                >
-                                    <img 
-                                        src="{{ $image }}"
-                                        class="w-full h-full object-cover"
-                                        alt="Imagen {{ $index + 1 }}"
+                            @if($listing && !empty($listing['images']))
+                                @foreach($listing['images'] as $index => $image)
+                                    <button 
+                                        type="button"
+                                        wire:click="$set('selectedImageIndex', {{ $index }})"
+                                        class="relative aspect-square rounded-lg overflow-hidden transition-all duration-200 ease-in-out
+                                               {{ $selectedImageIndex === $index ? 'ring-2 ring-blue-500' : 'hover:ring-2 hover:ring-blue-300' }}"
                                     >
-                                    <div 
-                                        class="absolute inset-0 transition-opacity duration-200"
-                                        :class="selectedImageIndex === {{ $index }} ? 'bg-black bg-opacity-0' : 'bg-black bg-opacity-10'"
-                                    ></div>
-                                </button>
-                            @endforeach
+                                        <img 
+                                            src="{{ $image }}"
+                                            class="w-full h-full object-cover"
+                                            alt="Imagen {{ $index + 1 }}"
+                                        >
+                                        <div 
+                                            class="absolute inset-0 transition-opacity duration-200
+                                                   {{ $selectedImageIndex === $index ? 'bg-black bg-opacity-0' : 'bg-black bg-opacity-10' }}"
+                                        ></div>
+                                    </button>
+                                @endforeach
+                            @endif
                         </div>
                     </div>
 

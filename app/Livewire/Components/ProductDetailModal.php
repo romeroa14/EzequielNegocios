@@ -10,11 +10,14 @@ use Livewire\Attributes\On;
 class ProductDetailModal extends Component
 {
     public $listing = null;
+    public $selectedImageIndex = 0;
 
     #[On('showProductDetail')] 
     public function showModal($listingId)
     {
         try {
+            $this->selectedImageIndex = 0; // Reset index
+            
             $listing = ProductListing::with([
                 'product.productCategory',
                 'product.productSubcategory',
@@ -29,6 +32,13 @@ class ProductDetailModal extends Component
             ->where('id', $listingId)
             ->where('status', 'active')
             ->firstOrFail();
+
+            // Log para verificar las imágenes
+            Log::info('Listing images:', [
+                'listing_id' => $listingId,
+                'raw_images' => $listing->images,
+                'images_count' => count($listing->images ?? [])
+            ]);
 
             // Asegurarse de que las imágenes estén disponibles
             if (empty($listing->images)) {
@@ -67,13 +77,23 @@ class ProductDetailModal extends Component
 
                 // Imágenes
                 'images' => collect($listing->images)->map(function($image) {
-                    return asset('storage/' . $image);
+                    $url = asset('storage/' . $image);
+                    Log::info('Processing image:', ['original' => $image, 'url' => $url]);
+                    return $url;
                 })->values()->all()
             ];
+
+            // Log para verificar los datos finales
+            Log::info('Modal data prepared:', [
+                'images_count' => count($this->listing['images']),
+                'first_image' => $this->listing['images'][0] ?? null,
+                'all_images' => $this->listing['images']
+            ]);
 
             // Asegurarse de que haya al menos una imagen
             if (empty($this->listing['images'])) {
                 $this->listing['images'] = [asset('images/placeholder.png')];
+                Log::info('Using placeholder image');
             }
 
             $this->dispatch('modal-ready');
@@ -91,6 +111,7 @@ class ProductDetailModal extends Component
     public function closeModal()
     {
         $this->listing = null;
+        $this->selectedImageIndex = 0;
         $this->dispatch('modal-closed');
     }
 
