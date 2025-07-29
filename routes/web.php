@@ -135,3 +135,7 @@ Route::get('/get-municipalities/{state_id}', [RegisteredUserController::class, '
 Route::get('/get-parishes/{municipality_id}', [RegisteredUserController::class, 'getParishes'])->name('get.parishes');
 
 require __DIR__.'/auth.php';
+
+Route::get('/productor/{listing}', function ($listing) {
+    return view('productor.show', ['listing' => $listing]);
+})->name('productor.show');

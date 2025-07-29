@@ -30,6 +30,11 @@ class ProductDetailModal extends Component
             ->where('status', 'active')
             ->firstOrFail();
 
+            // Asegurarse de que las imágenes estén disponibles
+            if (empty($listing->images)) {
+                $listing->images = [];
+            }
+
             // Preparar los datos para el modal
             $this->listing = [
                 'id' => $listing->id,
@@ -63,9 +68,10 @@ class ProductDetailModal extends Component
                 // Imágenes
                 'images' => collect($listing->images)->map(function($image) {
                     return asset('storage/' . $image);
-                })->toArray()
+                })->values()->all()
             ];
 
+            // Asegurarse de que haya al menos una imagen
             if (empty($this->listing['images'])) {
                 $this->listing['images'] = [asset('images/placeholder.png')];
             }
@@ -90,7 +96,8 @@ class ProductDetailModal extends Component
 
     public function contactSeller($listingId)
     {
-        $this->dispatch('contactProducer', ['listingId' => $listingId]);
+        // Redirigir a la página del productor
+        return redirect()->route('productor.show', ['listing' => $listingId]);
     }
 
     public function render()

@@ -4,8 +4,16 @@
             selectedImageIndex: 0,
             show: false,
             init() {
+                this.selectedImageIndex = 0;
+                this.show = false;
+
                 Livewire.on('modal-ready', () => {
                     this.show = true;
+                    this.selectedImageIndex = 0;
+                });
+
+                Livewire.on('modal-closed', () => {
+                    this.show = false;
                     this.selectedImageIndex = 0;
                 });
             }
@@ -45,10 +53,9 @@
                         <div class="relative aspect-w-4 aspect-h-3 bg-gray-50 rounded-lg mb-4">
                             @if(!empty($listing['images']))
                                 <img 
-                                    src="{{ $listing['images'][0] }}"
-                                    x-bind:src="$wire.listing.images[selectedImageIndex]"
+                                    :src="$wire.listing.images[selectedImageIndex]"
                                     class="w-full h-full object-contain"
-                                    :alt="$wire.listing.title"
+                                    :alt="'Imagen ' + (selectedImageIndex + 1)"
                                 >
                             @endif
                         </div>
@@ -57,12 +64,10 @@
                         <div class="grid grid-cols-6 gap-2 mt-4">
                             @foreach($listing['images'] as $index => $image)
                                 <button 
+                                    type="button"
                                     @click="selectedImageIndex = {{ $index }}"
-                                    :class="{
-                                        'ring-2 ring-blue-500': selectedImageIndex === {{ $index }},
-                                        'hover:ring-2 hover:ring-blue-300': selectedImageIndex !== {{ $index }}
-                                    }"
                                     class="relative aspect-square rounded-lg overflow-hidden transition-all duration-200 ease-in-out"
+                                    :class="selectedImageIndex === {{ $index }} ? 'ring-2 ring-blue-500' : 'hover:ring-2 hover:ring-blue-300'"
                                 >
                                     <img 
                                         src="{{ $image }}"
@@ -70,11 +75,8 @@
                                         alt="Imagen {{ $index + 1 }}"
                                     >
                                     <div 
-                                        :class="{
-                                            'bg-black bg-opacity-0': selectedImageIndex === {{ $index }},
-                                            'bg-black bg-opacity-10': selectedImageIndex !== {{ $index }}
-                                        }"
                                         class="absolute inset-0 transition-opacity duration-200"
+                                        :class="selectedImageIndex === {{ $index }} ? 'bg-black bg-opacity-0' : 'bg-black bg-opacity-10'"
                                     ></div>
                                 </button>
                             @endforeach
@@ -158,12 +160,12 @@
                         </div>
 
                         <!-- Contact Button -->
-                        <button 
-                            wire:click="contactSeller({{ $listing['id'] }})"
-                            class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition duration-150 ease-in-out"
+                        <a 
+                            href="{{ route('productor.show', ['listing' => $listing['id']]) }}"
+                            class="block w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg text-center transition duration-150 ease-in-out"
                         >
                             Contactar Vendedor
-                        </button>
+                        </a>
                     </div>
                 </div>
                 @endif
