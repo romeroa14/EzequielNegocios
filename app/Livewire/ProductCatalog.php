@@ -190,7 +190,7 @@ class ProductCatalog extends Component
                 'product.productSubcategory',
                 'product.productLine',
                 'product.brand',
-                'product.productPresentation',
+                'productPresentation',
                 'person.user',
                 'state',
                 'municipality',
@@ -227,9 +227,7 @@ class ProductCatalog extends Component
                 });
             })
             ->when($this->selectedPresentation, function (Builder $query) {
-                $query->whereHas('product', function (Builder $productQuery) {
-                    $productQuery->where('product_presentation_id', $this->selectedPresentation);
-                });
+                $query->where('product_presentation_id', $this->selectedPresentation);
             })
             ->when($this->selectedQuality, function (Builder $query) {
                 $query->where('quality_grade', $this->selectedQuality);
@@ -340,7 +338,58 @@ class ProductCatalog extends Component
 
     public function showProductDetail($listingId)
     {
-        $this->dispatch('showProductDetail', $listingId);
+        try {
+            $listing = ProductListing::with([
+                'product.productCategory',
+                'product.productSubcategory', 
+                'product.productLine',
+                'product.brand',
+                'productPresentation',
+                'person',
+                'state',
+                'municipality',
+                'parish'
+            ])
+            ->where('id', $listingId)
+            ->where('status', 'active')
+            ->firstOrFail();
+
+            // Preparar los datos para el modal
+            $this->dispatch('showProductDetail', [
+                'id' => $listing->id,
+                'title' => $listing->title,
+                'description' => $listing->description,
+                'unit_price' => $listing->unit_price,
+                'formatted_price' => number_format($listing->unit_price, 2),
+                'presentation_quantity' => $listing->presentation_quantity,
+                'product' => [
+                    'name' => $listing->product->name,
+                    'category_name' => $listing->product->productCategory?->name ?? 'N/A',
+                    'subcategory_name' => $listing->product->productSubcategory?->name ?? 'N/A',
+                    'brand_name' => $listing->product->brand?->name ?? 'N/A',
+                    'presentation_name' => $listing->productPresentation?->name ?? 'N/A',
+                    'presentation_unit' => $listing->productPresentation?->unit_type ?? 'unidades'
+                ],
+                'images' => collect($listing->images)->map(function($image) {
+                    return asset('storage/' . $image);
+                })->values()->all(),
+                'seller' => [
+                    'id' => $listing->person->id,
+                    'name' => $listing->person->first_name . ' ' . $listing->person->last_name,
+                ],
+                'location' => $listing->location,
+                'formatted_location' => $listing->formatted_location,
+                'formatted_date' => $listing->harvest_date ? $listing->harvest_date->format('d/m/Y') : null,
+                'status' => $listing->status,
+                'formatted_status' => ucfirst($listing->status)
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error showing product detail:', [
+                'error' => $e->getMessage(),
+                'listing_id' => $listingId
+            ]);
+        }
     }
 
     public function contactSeller($productId)

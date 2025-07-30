@@ -93,7 +93,11 @@
                                     <div class="flex items-center justify-between mb-3">
                                         <div>
                                             <span class="text-lg font-bold text-green-600">${{ number_format($product->unit_price, 2) }}</span>
-                                            <span class="text-sm text-gray-500">/ unidad</span>
+                                            <div class="flex items-center gap-2 text-sm text-gray-500">
+                                                <span>por {{ $product->productPresentation->name ?? 'unidad' }}</span>
+                                                <span class="text-gray-300">·</span>
+                                                <span>{{ $product->presentation_quantity }} {{ $product->productPresentation->unit_type ?? 'unidades' }}</span>
+                                            </div>
                                         </div>
                                         <div class="text-sm text-gray-500">
                                             {{ $product->quantity_available }} disponibles
@@ -101,9 +105,9 @@
                                     </div>
 
                                     <!-- Location and Producer -->
-                                    <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
+                                    <div class="flex items-center justify-between text-xs text-gray-500">
                                         <span>📍 {{ $product->short_location }}</span>
-                                        <span>👤 {{ $product->person->first_name . ' ' . $product->person->last_name ?? 'Productor' }}</span>
+                                        <span>👤 {{ $product->person->first_name . ' ' . $product->person->last_name }}</span>
                                     </div>
 
                                     <!-- Action Button -->

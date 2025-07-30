@@ -133,7 +133,11 @@
                                 <span class="text-3xl font-bold text-gray-900">$</span>
                                 <span class="text-3xl font-bold text-gray-900">{{ $listing['formatted_price'] }}</span>
                             </div>
-                            <span class="text-sm text-gray-500">{{ $listing['quantity_available'] }} disponibles</span>
+                            <div class="flex items-center gap-2 text-sm text-gray-500">
+                                <span>por {{ $listing['product']['presentation_name'] ?? 'unidad' }}</span>
+                                <span class="text-gray-300">·</span>
+                                <span>{{ number_format($listing['presentation_quantity'], 2) }} {{ $listing['product']['presentation_unit'] ?? 'unidades' }}</span>
+                            </div>
                         </div>
 
                         <!-- Product Details -->
