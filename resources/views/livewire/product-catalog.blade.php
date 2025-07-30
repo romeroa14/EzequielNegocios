@@ -92,7 +92,12 @@
                                     <!-- Price and Quantity -->
                                     <div class="flex items-center justify-between mb-3">
                                         <div>
-                                            <span class="text-lg font-bold text-green-600">${{ number_format($product->unit_price, 2) }}</span>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-lg font-bold text-green-600">${{ number_format($product->unit_price, 2) }}</span>
+                                                @if($product->current_rate)
+                                                    <span class="text-sm text-gray-500">≈ Bs.D {{ $product->formatted_bs_price }}</span>
+                                                @endif
+                                            </div>
                                             <div class="flex items-center gap-2 text-sm text-gray-500">
                                                 <span>por {{ $product->productPresentation->name ?? 'unidad' }}</span>
                                                 <span class="text-gray-300">·</span>

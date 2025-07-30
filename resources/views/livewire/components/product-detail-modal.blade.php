@@ -129,14 +129,26 @@
 
                         <!-- Price -->
                         <div class="mb-6">
-                            <div class="flex items-center">
-                                <span class="text-3xl font-bold text-gray-900">$</span>
-                                <span class="text-3xl font-bold text-gray-900">{{ $listing['formatted_price'] }}</span>
+                            <div class="flex items-center gap-3">
+                                <div>
+                                    <span class="text-3xl font-bold text-gray-900">$</span>
+                                    <span class="text-3xl font-bold text-gray-900">{{ $listing['formatted_price'] }}</span>
+                                </div>
+                                @if(isset($listing['bs_price']))
+                                    <div class="text-lg text-gray-600">
+                                        ≈ Bs.D {{ number_format($listing['bs_price'], 2) }}
+                                    </div>
+                                @endif
                             </div>
-                            <div class="flex items-center gap-2 text-sm text-gray-500">
+                            @if(isset($listing['current_rate']))
+                                <div class="text-sm text-gray-500">
+                                    Tasa BCV: {{ $listing['current_rate'] }}
+                                </div>
+                            @endif
+                            <div class="flex items-center gap-2 text-sm text-gray-500 mt-2">
                                 <span>por {{ $listing['product']['presentation_name'] ?? 'unidad' }}</span>
                                 <span class="text-gray-300">·</span>
-                                <span>{{ number_format($listing['presentation_quantity'], 2) }} {{ $listing['product']['presentation_unit'] ?? 'unidades' }}</span>
+                                <span>{{ $listing['presentation_quantity'] }} {{ $listing['product']['presentation_unit'] ?? 'unidades' }}</span>
                             </div>
                         </div>
 

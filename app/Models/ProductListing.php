@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use App\Traits\HasListingImages;
+use App\Traits\HasCurrencyConversion;
 
 class ProductListing extends Model
 {
-    use HasFactory, HasListingImages;
+    use HasFactory;
+    use HasCurrencyConversion;
 
     protected $fillable = [
         'person_id',

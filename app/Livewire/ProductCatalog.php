@@ -360,7 +360,9 @@ class ProductCatalog extends Component
                 'title' => $listing->title,
                 'description' => $listing->description,
                 'unit_price' => $listing->unit_price,
-                'formatted_price' => number_format($listing->unit_price, 2),
+                'formatted_price' => $listing->formatted_price,
+                'bs_price' => $listing->bs_price,
+                'current_rate' => $listing->current_rate,
                 'presentation_quantity' => $listing->presentation_quantity,
                 'product' => [
                     'name' => $listing->product->name,

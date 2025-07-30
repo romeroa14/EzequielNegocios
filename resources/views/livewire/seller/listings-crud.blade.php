@@ -48,7 +48,13 @@
                         <p class="text-sm text-gray-600 mb-2">{{ $listing->product->name }}</p>
                         
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-lg font-bold text-green-600">${{ number_format($listing->unit_price, 2) }}</span>
+                            <div>
+                                <span class="text-lg font-bold text-green-600">${{ number_format($listing->unit_price, 2) }}</span>
+                                @if($listing->current_rate)
+                                    <div class="text-sm text-gray-500">≈ Bs.D {{ $listing->formatted_bs_price }}</div>
+                                    <div class="text-xs text-gray-400">Tasa BCV: {{ $listing->current_rate }}</div>
+                                @endif
+                            </div>
                             <span class="text-sm text-gray-500">{{ $listing->formatted_presentation }}</span>
                         </div>
 
