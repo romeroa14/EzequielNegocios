@@ -13,6 +13,7 @@ use App\Traits\HasCurrencyConversion;
 class ProductListing extends Model
 {
     use HasFactory;
+    use HasListingImages;
     use HasCurrencyConversion;
 
     protected $fillable = [
