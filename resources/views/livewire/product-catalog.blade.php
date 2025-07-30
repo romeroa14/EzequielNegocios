@@ -3,6 +3,29 @@
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-2xl font-bold text-gray-900">Catálogo de Productos</h3>
+                
+                <!-- Desktop Tasas BCV -->
+                <div class="hidden lg:block bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+                    <div class="text-sm font-medium text-gray-600 mb-2">Tasas BCV</div>
+                    <div class="space-y-1">
+                        @if($exchangeRates['usd']['rate'])
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold">USD:</span>
+                                <span class="text-green-600">Bs.D {{ $exchangeRates['usd']['rate'] }}</span>
+                            </div>
+                        @endif
+                        @if($exchangeRates['eur']['rate'])
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold">EUR:</span>
+                                <span class="text-green-600">Bs.D {{ $exchangeRates['eur']['rate'] }}</span>
+                            </div>
+                        @endif
+                        <div class="text-xs text-gray-500">
+                            Actualizado: {{ $exchangeRates['usd']['fetched_at'] ?? 'No disponible' }}
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Mobile Filter Toggle Button -->
                 <button 
                     wire:click="$toggle('showFilters')"
@@ -150,4 +173,29 @@
 
     <!-- Product Detail Modal -->
     <livewire:components.product-detail-modal />
+
+    <!-- Mobile Tasas BCV -->
+    <div class="fixed bottom-0 left-0 right-0 z-20 lg:hidden">
+        <div class="bg-white shadow-lg border-t border-gray-100">
+            <div class="max-w-7xl mx-auto px-4 py-2">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm font-medium text-gray-800">Tasas BCV:</div>
+                    <div class="flex items-center gap-6">
+                        @if($exchangeRates['usd']['rate'])
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium">USD:</span>
+                                <span class="text-green-600">{{ $exchangeRates['usd']['rate'] }}</span>
+                            </div>
+                        @endif
+                        @if($exchangeRates['eur']['rate'])
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium">EUR:</span>
+                                <span class="text-green-600">{{ $exchangeRates['eur']['rate'] }}</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

@@ -5,9 +5,15 @@
     <!-- Hero Section -->
     <div class="relative bg-gradient-to-r from-green-600 to-green-700 overflow-hidden">
         <div class="max-w-7xl mx-auto">
+            
             <div class="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+                
+
                 <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
                     <div class="sm:text-center lg:text-left">
+
+                         
+
                         <h1 class="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
                             <span class="block xl:inline">Conecta con</span>
                             <span class="block text-green-200 xl:inline">productores locales</span>
@@ -22,13 +28,16 @@
                                 </a>
                             </div>
                             <div class="mt-3 sm:mt-0 sm:ml-3">
-                                <a href="{{ route('productores') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-500 hover:bg-green-400 md:py-4 md:text-lg md:px-10">
+                                <a href="{{ route('productores.index') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-500 hover:bg-green-400 md:py-4 md:text-lg md:px-10">
                                     Conocer Productores
                                 </a>
                             </div>
+
                         </div>
+                               
                     </div>
                 </main>
+                
             </div>
         </div>
         <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
@@ -38,6 +47,31 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <p class="mt-4 text-xl font-semibold">Del campo a tu mesa</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tasas BCV -->
+    <div class="fixed bottom-0 left-0 right-0 z-20">
+        <div class="bg-white shadow-lg border-t border-gray-100">
+            <div class="max-w-7xl mx-auto px-4 py-2">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm font-medium text-gray-800">Tasas BCV:</div>
+                    <div class="flex items-center gap-6">
+                        @if($exchangeRates['usd']['rate'])
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium">USD:</span>
+                                <span class="text-green-600">{{ $exchangeRates['usd']['rate'] }}</span>
+                            </div>
+                        @endif
+                        @if($exchangeRates['eur']['rate'])
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium">EUR:</span>
+                                <span class="text-green-600">{{ $exchangeRates['eur']['rate'] }}</span>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

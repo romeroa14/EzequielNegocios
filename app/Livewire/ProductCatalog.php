@@ -108,6 +108,14 @@ class ProductCatalog extends Component
         $this->validate();
     }
 
+    public function getExchangeRatesProperty()
+    {
+        return [
+            'usd' => ProductListing::getUsdRate(),
+            'eur' => ProductListing::getEurRate()
+        ];
+    }
+
     public function updatedSearch()
     {
         $this->resetPage();
@@ -410,6 +418,7 @@ class ProductCatalog extends Component
             'productLines' => $this->productLines,
             'brands' => $this->brands,
             'presentations' => $this->presentations,
+            'exchangeRates' => $this->exchangeRates,
         ]);
     }
 }

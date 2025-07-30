@@ -25,15 +25,12 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Buyer\DashboardController as BuyerDashboardController;
 use App\Http\Controllers\ProductPresentationController;
 use App\Http\Controllers\CookieController;
+use App\Http\Controllers\WelcomeController;
 
 // Rutas públicas
-Route::get('/home', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
-Route::get('/', function () {
-    return view('catalog');
-})->name('catalogo');
+Route::get('/home', [WelcomeController::class, 'index'])->name('home');
 
 // Rutas del catálogo (públicas)
 Route::get('/catalogo', function() {

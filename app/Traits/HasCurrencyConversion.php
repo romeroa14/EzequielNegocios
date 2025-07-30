@@ -34,4 +34,22 @@ trait HasCurrencyConversion
         $rate = ExchangeRate::getLatestRate('USD');
         return $rate ? number_format($rate->rate, 2) : null;
     }
+
+    public static function getUsdRate()
+    {
+        $rate = ExchangeRate::getLatestRate('USD');
+        return [
+            'rate' => $rate ? number_format($rate->rate, 2) : null,
+            'fetched_at' => $rate ? $rate->fetched_at->format('d/m/Y h:i A') : null
+        ];
+    }
+
+    public static function getEurRate()
+    {
+        $rate = ExchangeRate::getLatestRate('EUR');
+        return [
+            'rate' => $rate ? number_format($rate->rate, 2) : null,
+            'fetched_at' => $rate ? $rate->fetched_at->format('d/m/Y h:i A') : null
+        ];
+    }
 } 
