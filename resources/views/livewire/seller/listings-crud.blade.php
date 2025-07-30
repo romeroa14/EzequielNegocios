@@ -1,4 +1,4 @@
-<div>
+<div >
     <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
         <!-- Header y botón de nueva publicación -->
         <div class="flex justify-between items-center mb-6">
@@ -197,7 +197,7 @@
                 <div class="absolute inset-0 bg-black bg-opacity-40"></div>
                 
                 <div class="fixed inset-0 overflow-y-auto">
-                    <div class="flex min-h-full items-center justify-center p-2">
+                    <div class="flex min-h-full items-center justify-center p-2-">
                         <div class="relative w-full max-w-3xl bg-white shadow-xl rounded-lg">
                             <!-- Header fijo -->
                             <div class="sticky top-0 bg-white px-4 py-3 border-b border-gray-200 flex justify-between items-center z-10">
@@ -238,7 +238,7 @@
 
                                     <!-- Grid de campos -->
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
+                                        <div class="col-span-2">
                                             <label class="block text-sm font-medium mb-1">Título</label>
                                             <input 
                                                 type="text" 
@@ -250,32 +250,65 @@
                                             @enderror
                                         </div>
 
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Precio Unitario</label>
-                                            <input 
-                                                type="number" 
-                                                step="0.01" 
-                                                wire:model="form.unit_price" 
-                                                class="w-full border rounded px-3 py-2 text-sm" 
-                                            />
-                                            @error('form.unit_price')
-                                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                                            @enderror
+                                        <!-- Grid de presentación, cantidad y precio en una línea -->
+                                        <div class="col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            <!-- Presentación -->
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Presentación</label>
+                                                <select 
+                                                    wire:model.live="form.product_presentation_id" 
+                                                    class="w-full border rounded px-3 py-2 text-sm bg-white"
+                                                >
+                                                    <option value="">Selecciona una presentación</option>
+                                                    @foreach($presentations as $presentation)
+                                                        <option value="{{ $presentation->id }}">{{ $presentation->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                @error('form.product_presentation_id')
+                                                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+
+                                            <!-- Cantidad por presentación -->
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">
+                                                    Cantidad en {{ $selectedPresentation?->unit_type ?? 'unidades' }}
+                                                </label>
+                                                <input 
+                                                    type="number" 
+                                                    step="0.01" 
+                                                    wire:model.live="form.presentation_quantity" 
+                                                    class="w-full border rounded px-3 py-2 text-sm" 
+                                                    min="0.01"
+                                                />
+                                                @error('form.presentation_quantity')
+                                                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+
+                                            <!-- Precio por presentación -->
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">
+                                                    Precio por {{ $selectedPresentation?->name ?? 'presentación' }}
+                                                </label>
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input 
+                                                        type="number" 
+                                                        step="0.01" 
+                                                        wire:model="form.unit_price" 
+                                                        class="w-full border rounded px-8 py-2 text-sm" 
+                                                        min="0.01"
+                                                    />
+                                                </div>
+                                                @error('form.unit_price')
+                                                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                                                @enderror
+                                            </div>
                                         </div>
 
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Cantidad Disponible</label>
-                                            <input 
-                                                type="number" 
-                                                wire:model="form.quantity_available" 
-                                                class="w-full border rounded px-3 py-2 text-sm" 
-                                            />
-                                            @error('form.quantity_available')
-                                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-
-                                        <div>
+                                        <!-- Calidad en línea separada -->
+                                        <div class="col-span-2">
                                             <label class="block text-sm font-medium mb-1">Calidad</label>
                                             <select 
                                                 wire:model="form.quality_grade" 
@@ -290,19 +323,22 @@
                                                 <span class="text-red-600 text-xs">{{ $message }}</span>
                                             @enderror
                                         </div>
+                                    </div>
+                                    <!-- Fecha de Cosecha -->
+                                    <div class="w-full mt-4">
+                                        <label class="block text-sm font-medium mb-1">Fecha de Cosecha</label>
+                                        <input 
+                                            type="date" 
+                                            wire:model="form.harvest_date" 
+                                            class="w-full border rounded px-3 py-2 text-sm" 
+                                        />
+                                        @error('form.harvest_date')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
 
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Fecha de Cosecha</label>
-                                            <input 
-                                                type="date" 
-                                                wire:model="form.harvest_date" 
-                                                class="w-full border rounded px-3 py-2 text-sm" 
-                                            />
-                                            @error('form.harvest_date')
-                                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-
+                                    <!-- Ubicación en una sola línea -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
                                         <!-- Estado -->
                                         <div>
                                             <label class="block text-sm font-medium mb-1">Estado</label>
@@ -355,54 +391,25 @@
                                                 <span class="text-red-600 text-xs">{{ $message }}</span>
                                             @enderror
                                         </div>
-
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Presentación</label>
-                                            <select 
-                                                wire:model="form.product_presentation_id" 
-                                                class="w-full border rounded px-3 py-2 text-sm bg-white"
-                                            >
-                                                <option value="">Selecciona una presentación</option>
-                                                @foreach($presentations as $presentation)
-                                                    <option value="{{ $presentation->id }}">{{ $presentation->name }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('form.product_presentation_id')
-                                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">
-                                                Cantidad por {{ $presentations->where('id', $form['product_presentation_id'])->first()?->unit_type ?? 'unidad' }}
-                                            </label>
-                                            <input 
-                                                type="number" 
-                                                step="0.01"
-                                                wire:model="form.presentation_quantity" 
-                                                class="w-full border rounded px-3 py-2 text-sm" 
-                                            />
-                                            @error('form.presentation_quantity')
-                                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Estatus</label>
-                                            <select 
-                                                wire:model="form.status" 
-                                                class="w-full border rounded px-3 py-2 text-sm bg-white"
-                                            >
-                                                <option value="pending">Pendiente</option>
-                                                <option value="active">Activo</option>
-                                                <option value="sold_out">Agotado</option>
-                                                <option value="inactive">Inactivo</option>
-                                            </select>
-                                            @error('form.status')
-                                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                                            @enderror
-                                        </div>
                                     </div>
+
+                                    <!-- Estatus -->
+                                    <div class="w-full mt-4">
+                                        <label class="block text-sm font-medium mb-1">Estatus</label>
+                                        <select 
+                                            wire:model="form.status" 
+                                            class="w-full border rounded px-3 py-2 text-sm bg-white"
+                                        >
+                                            <option value="pending">Pendiente</option>
+                                            <option value="active">Activo</option>
+                                            <option value="sold_out">Agotado</option>
+                                            <option value="inactive">Inactivo</option>
+                                        </select>
+                                        @error('form.status')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                    
 
                                     <!-- Imágenes específicas de la publicación -->
                                     <div x-data="{ 

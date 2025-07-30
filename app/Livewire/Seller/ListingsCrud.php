@@ -64,6 +64,23 @@ class ListingsCrud extends Component
         ];
     }
 
+    public function getSelectedPresentationProperty()
+    {
+        if (!empty($this->form['product_presentation_id'])) {
+            return ProductPresentation::find($this->form['product_presentation_id']);
+        }
+        return null;
+    }
+
+    public function updatedFormProductPresentationId($value)
+    {
+        // Log para debug
+        Log::info('Presentación seleccionada:', [
+            'id' => $value,
+            'presentation' => $this->selectedPresentation
+        ]);
+    }
+
     public function mount()
     {
         $this->loadListings();
@@ -429,6 +446,7 @@ class ListingsCrud extends Component
             'parishes' => $this->parishes,
             'products' => $products,
             'presentations' => $presentations,
+            'selectedPresentation' => $this->selectedPresentation,
         ]);
     }
 }
