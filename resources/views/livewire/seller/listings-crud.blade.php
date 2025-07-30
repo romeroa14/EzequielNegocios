@@ -16,7 +16,7 @@
                     <div class="relative aspect-w-16 aspect-h-9 bg-gray-100">
                         @if($listing->hasImages() && !empty($listing->images))
                             <img 
-                                src="{{ Storage::disk('public')->url($listing->images[0]) }}"
+                                src="{{ $listing->main_image_url }}"
                                 alt="{{ $listing->title }}"
                                 class="w-full h-48 object-cover cursor-pointer"
                                 wire:click="$dispatch('openListingDetail', { listingId: {{ $listing->id }} })"
