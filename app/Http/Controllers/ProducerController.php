@@ -13,7 +13,7 @@ class ProducerController extends Controller
         $producers = Person::whereHas('productListings', function($query) {
             $query->where('status', 'active');
         })->paginate(12);
-
+            
         return view('producers.index', compact('producers'));
     }
 

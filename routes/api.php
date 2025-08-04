@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\State;
 use App\Models\Municipality;
+use App\Http\Controllers\Api\ExchangeRateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,4 +30,12 @@ Route::middleware('api')->group(function () {
     Route::get('/municipalities/{municipality}/parishes', function (Municipality $municipality) {
         return $municipality->parishes()->select('id', 'name')->get();
     });
+    
+    // Rutas para tasas de cambio
+    Route::get('/exchange-rates', [ExchangeRateController::class, 'getAllRates']);
+    Route::get('/exchange-rates/{currency}', [ExchangeRateController::class, 'getRate']);
+    
+    // Ruta para actualizar tasas (protegida con throttle)
+    Route::post('/exchange-rates/update', [ExchangeRateController::class, 'forceUpdate'])
+        ->middleware('throttle:10,1'); // Máximo 10 requests por minuto
 }); 

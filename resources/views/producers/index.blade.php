@@ -8,8 +8,8 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($producers as $producer)
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="p-6">
-                        <div class="flex items-center space-x-4">
+                        <div class="p-6">
+                            <div class="flex items-center space-x-4">
                             <div class="flex-shrink-0">
                                 <div class="h-12 w-12 bg-gray-200 rounded-full flex items-center justify-center">
                                     <span class="text-xl text-gray-600">{{ substr($producer->first_name, 0, 1) }}</span>
@@ -26,10 +26,10 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
                                         {{ $producer->state->name }}, {{ $producer->municipality->name }}
-                                    </span>
+                                        </span>
                                 </p>
+                                </div>
                             </div>
-                        </div>
 
                         <div class="mt-4">
                             <a 
@@ -37,7 +37,7 @@
                                 class="block w-full bg-green-600 hover:bg-green-700 text-white text-center font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out"
                             >
                                 Ver Productos
-                            </a>
+                                </a>
                         </div>
                     </div>
                 </div>

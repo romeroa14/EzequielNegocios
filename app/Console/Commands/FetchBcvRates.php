@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Services\BcvScraperService;
 use Illuminate\Console\Command;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class FetchBcvRates extends Command
 {
@@ -17,10 +18,23 @@ class FetchBcvRates extends Command
             $currency = $this->argument('currency') ?? 'USD';
             $getAllRates = $this->option('all');
 
+            Log::info('📊 COMANDO BCV INICIADO', [
+                'currency' => $currency,
+                'get_all_rates' => $getAllRates,
+                'timestamp' => now(),
+                'environment' => app()->environment()
+            ]);
+
             $this->info('Obteniendo tasas del BCV...');
             
             if ($getAllRates) {
                 $rates = $scraper->fetchRates();
+                
+                Log::info('📈 TASAS OBTENIDAS EXITOSAMENTE', [
+                    'rates_count' => count($rates),
+                    'rates' => $rates,
+                    'timestamp' => now()
+                ]);
                 
                 $this->info('Tasas obtenidas exitosamente:');
                 foreach ($rates as $code => $rate) {
@@ -34,6 +48,12 @@ class FetchBcvRates extends Command
                 $currency = strtoupper($currency);
                 $rate = $scraper->fetchRateForCurrency($currency);
                 
+                Log::info('📈 TASA INDIVIDUAL OBTENIDA', [
+                    'currency' => $currency,
+                    'rate' => $rate,
+                    'timestamp' => now()
+                ]);
+                
                 $this->info('Tasa obtenida exitosamente:');
                 $this->line(sprintf(
                     "%s: %s Bs.",
@@ -42,8 +62,20 @@ class FetchBcvRates extends Command
                 ));
             }
             
+            Log::info('✅ COMANDO BCV COMPLETADO EXITOSAMENTE', [
+                'timestamp' => now(),
+                'status' => 'success'
+            ]);
+            
             return Command::SUCCESS;
         } catch (Exception $e) {
+            Log::error('❌ COMANDO BCV FALLÓ', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'timestamp' => now(),
+                'status' => 'failed'
+            ]);
+            
             $this->error('Error al obtener las tasas: ' . $e->getMessage());
             return Command::FAILURE;
         }

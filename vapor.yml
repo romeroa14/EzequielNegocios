@@ -32,6 +32,9 @@ environments:
         database: vapor
         cache: vapor
         storage: ${VAPOR_STORAGE_DRIVER}
+        scheduled:
+            - expression: 'schedule:run'
+              frequency: '*/5 * * * *'  # Cada 5 minutos para verificar las tareas programadas
         queues:
             - default
         warm: 5

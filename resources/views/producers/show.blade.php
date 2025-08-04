@@ -79,7 +79,7 @@
 
                             <!-- Contact Button -->
                             <a 
-                                href="https://wa.me/{{ $producer->phone }}"
+                                href="https://wa.me/+58{{ $producer->phone }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="block w-full bg-green-600 hover:bg-green-700 text-white text-center font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out"
