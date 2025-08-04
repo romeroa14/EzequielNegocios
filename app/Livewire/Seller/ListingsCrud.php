@@ -253,7 +253,12 @@ class ListingsCrud extends Component
     {
         try {
             if (!$fileData) {
-                return;
+                throw new \Exception('No se recibieron datos de archivo');
+            }
+
+            // Validar tamaño del archivo antes de procesarlo
+            if (isset($fileData['size']) && $fileData['size'] > 10 * 1024 * 1024) { // 10MB
+                throw new \Exception('El archivo es demasiado grande. Máximo 10MB permitido.');
             }
 
             // Determinar el disco a usar basado en el entorno
@@ -262,15 +267,67 @@ class ListingsCrud extends Component
             // Generar un nombre único para el archivo
             $extension = pathinfo($fileData['name'], PATHINFO_EXTENSION);
             $fileName = uniqid() . '_' . time() . '.' . $extension;
+            // SIEMPRE usar 'listings/' para las publicaciones
             $path = 'listings/' . $fileName;
 
+            Log::info('Guardando imagen de listing', [
+                'disk' => $disk,
+                'path' => $path,
+                'fileName' => $fileName,
+                'environment' => app()->environment(),
+                'file_size' => $fileData['size'] ?? 'unknown'
+            ]);
+
             // Decodificar la imagen base64 y guardarla
+            if (!isset($fileData['preview']) || empty($fileData['preview'])) {
+                throw new \Exception('No se encontraron datos de imagen válidos');
+            }
+
             $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $fileData['preview']));
             
+            if ($imageData === false) {
+                throw new \Exception('Error al decodificar la imagen base64');
+            }
+
+            // Verificar que los datos decodificados no estén vacíos
+            if (empty($imageData)) {
+                throw new \Exception('Los datos de imagen están vacíos después de decodificar');
+            }
+            
             if ($disk === 'r2') {
-                Storage::disk($disk)->put($path, $imageData, 'public');
+                // Para R2 en producción
+                Log::info('Intentando subir a R2', ['path' => $path, 'size' => strlen($imageData)]);
+                
+                $stored = Storage::disk($disk)->put($path, $imageData, 'public');
+                
+                if (!$stored) {
+                    throw new \Exception('Falló la subida a R2 - put() retornó false');
+                }
+                
+                // Verificar si el archivo se guardó correctamente
+                $exists = Storage::disk($disk)->exists($path);
+                Log::info('Verificación de almacenamiento en R2 - Listing', [
+                    'path' => $path,
+                    'exists' => $exists,
+                    'stored' => $stored
+                ]);
+
+                if (!$exists) {
+                    throw new \Exception('El archivo no se guardó correctamente en R2 - verificación falló');
+                }
             } else {
-                Storage::disk($disk)->put($path, $imageData);
+                // Para almacenamiento local en desarrollo
+                $stored = Storage::disk($disk)->put($path, $imageData);
+                
+                if (!$stored) {
+                    throw new \Exception('Falló la subida local - put() retornó false');
+                }
+                
+                Log::info('Imagen de listing almacenada localmente', [
+                    'path_resultado' => $path,
+                    'disk' => $disk,
+                    'size' => strlen($imageData)
+                ]);
             }
 
             // Agregar la imagen al array de imágenes seleccionadas
@@ -290,9 +347,21 @@ class ListingsCrud extends Component
             $this->dispatch('success', 'Imagen agregada correctamente');
             
         } catch (\Exception $e) {
-            Log::error('Error al guardar imagen', [
+            Log::error('Error detallado al guardar imagen de listing', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'fileData' => [
+                    'name' => $fileData['name'] ?? 'unknown',
+                    'size' => $fileData['size'] ?? 'unknown',
+                    'has_preview' => isset($fileData['preview']) && !empty($fileData['preview']),
+                    'preview_length' => isset($fileData['preview']) ? strlen($fileData['preview']) : 0
+                ],
+                'environment' => app()->environment(),
+                'php_limits' => [
+                    'upload_max_filesize' => ini_get('upload_max_filesize'),
+                    'post_max_size' => ini_get('post_max_size'),
+                    'memory_limit' => ini_get('memory_limit')
+                ]
             ]);
             $this->dispatch('error', 'Error al guardar la imagen: ' . $e->getMessage());
         }
