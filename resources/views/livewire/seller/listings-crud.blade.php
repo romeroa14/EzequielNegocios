@@ -226,6 +226,17 @@
 
                             <!-- Contenido scrolleable -->
                             <div class="p-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
+                                @if(session('error'))
+                                    <div class="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">
+                                        {{ session('error') }}
+                                    </div>
+                                @endif
+                                @if(session('success'))
+                                    <div class="mb-4 p-3 bg-green-100 text-green-700 rounded text-sm">
+                                        {{ session('success') }}
+                                    </div>
+                                @endif
+
                                 <form wire:submit.prevent="saveListing" class="space-y-4">
                                     <!-- Producto -->
                                     <div>
@@ -488,6 +499,9 @@
                                                 </svg>
                                             </button>
                                         </div>
+                                        @error('selectedImages')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
                                     </div>
 
                                     <!-- Descripción -->
@@ -527,4 +541,66 @@
         @endif
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Notificación de publicación agregada
+        window.addEventListener('listing-added', event => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Publicación creada!',
+                text: 'La publicación se ha creado correctamente.',
+                confirmButtonColor: '#3b82f6'
+            });
+        });
+
+        // Notificación de publicación actualizada
+        window.addEventListener('listing-updated', event => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Publicación actualizada!',
+                text: 'La publicación se ha actualizado correctamente.',
+                confirmButtonColor: '#3b82f6'
+            });
+        });
+
+        // Notificación de publicación eliminada
+        window.addEventListener('listing-deleted', event => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Publicación eliminada!',
+                text: 'La publicación se ha eliminado correctamente.',
+                confirmButtonColor: '#3b82f6'
+            });
+        });
+
+        // Confirmación de eliminación
+        window.addEventListener('show-delete-confirmation', event => {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: '¡No podrás revertir esta acción!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    @this.call('deleteListing');
+                }
+            });
+        });
+
+        // Notificación de error
+        window.addEventListener('error', event => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: event.detail || 'Ha ocurrido un error inesperado.',
+                confirmButtonColor: '#3b82f6'
+            });
+        });
+    });
+</script>
 

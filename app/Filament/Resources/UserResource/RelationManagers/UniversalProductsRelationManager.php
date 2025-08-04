@@ -93,7 +93,17 @@ class UniversalProductsRelationManager extends RelationManager
                         Forms\Components\FileUpload::make('image')
                             ->label('Imagen')
                             ->image()
-                            ->directory('products'),
+                            ->disk(app()->environment('production') ? 'r2' : 'public')
+                            ->directory('products')
+                            ->visibility('public')
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(2048)
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '16:9',
+                                '4:3',
+                                '1:1',
+                            ]),
                         Forms\Components\Toggle::make('is_active')
                             ->label('Activo')
                             ->default(true),
@@ -126,7 +136,12 @@ class UniversalProductsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('productPresentation.name')
                     ->label('Presentación'),
                 Tables\Columns\ImageColumn::make('image')
-                    ->label('Imagen'),
+                    ->label('Imagen')
+                    ->disk(app()->environment('production') ? 'r2' : 'public')
+                    ->height(60)
+                    ->width(60)
+                    ->defaultImageUrl(asset('images/placeholder.png'))
+                    ->circular(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Activo')
                     ->boolean(),

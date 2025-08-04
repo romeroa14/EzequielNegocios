@@ -41,6 +41,7 @@ class ListingsCrud extends Component
     ];
 
     public $selectedImages = []; // Array para las imágenes seleccionadas
+    public $listingIdToDelete = null; // Para almacenar el ID de la publicación a eliminar
 
     public $states;
     public $municipalities = [];
@@ -545,30 +546,24 @@ class ListingsCrud extends Component
         }
     }
 
+    protected $listeners = [
+        'refreshComponent' => '$refresh',
+        'deleteListing'
+    ];
+
     public function confirmDelete($listingId)
     {
-        $this->js("
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: 'Esta acción no se puede deshacer',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Livewire.dispatch('deleteListing', { id: {$listingId} });
-                }
-            })
-        ");
+        $this->listingIdToDelete = $listingId;
+        $this->dispatch('show-delete-confirmation');
     }
 
     #[On('deleteListing')]
-    public function deleteListing($id)
+    public function deleteListing($listingId = null)
     {
         try {
+            // Usar el ID pasado como parámetro o el almacenado en la propiedad
+            $id = $listingId ?? $this->listingIdToDelete;
+            
             if (!$id) {
                 throw new \Exception('ID de publicación no proporcionado');
             }
@@ -593,31 +588,21 @@ class ListingsCrud extends Component
             // Recargar los listings después de eliminar
             $this->loadListings();
 
-            $this->js("
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Éxito!',
-                    text: 'Publicación eliminada correctamente',
-                    confirmButtonColor: '#3b82f6'
-                }).then(() => {
-                    window.location.reload();
-                });
-            ");
+            // Resetear el ID almacenado
+            $this->listingIdToDelete = null;
+
+            // Dispatch del evento de éxito
+            $this->dispatch('listing-deleted');
 
         } catch (\Exception $e) {
             Log::error('Error al eliminar publicación', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'listing_id' => $id ?? 'no definido'
             ]);
             
-            $this->js("
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error al eliminar la publicación',
-                    confirmButtonColor: '#3b82f6'
-                });
-            ");
+            // Dispatch del evento de error
+            $this->dispatch('error', 'Error al eliminar la publicación: ' . $e->getMessage());
         }
     }
 

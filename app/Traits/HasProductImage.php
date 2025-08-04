@@ -79,19 +79,21 @@ trait HasProductImage
 
             // Almacenar el archivo
             if ($disk === 'r2') {
-                // Para R2 en producción
-                $path = $image->storePublicly($path, ['disk' => $disk]);
+                // Para R2 en producción - usar storeAs para evitar rutas dobles
+                $storedPath = $image->storeAs('products', $fileName, ['disk' => $disk, 'visibility' => 'public']);
                 
                 // Verificar si el archivo se guardó correctamente
-                $exists = Storage::disk($disk)->exists($path);
+                $exists = Storage::disk($disk)->exists($storedPath);
                 Log::info('Verificación de almacenamiento en R2', [
-                    'path' => $path,
+                    'stored_path' => $storedPath,
                     'exists' => $exists
                 ]);
 
                 if (!$exists) {
                     throw new \Exception('El archivo no se guardó correctamente en R2');
                 }
+                
+                $path = $storedPath; // Usar la ruta que devolvió storeAs
             } else {
                 // Para almacenamiento local en desarrollo
                 $path = $image->storeAs('products', $fileName, 'public');
