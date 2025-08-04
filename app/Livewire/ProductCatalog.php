@@ -181,13 +181,8 @@ class ProductCatalog extends Component
      */
     public function getFirstImageUrl($listing)
     {
-        // Verificar si la publicación tiene imágenes
-        if ($listing->hasImages()) {
-            return asset('storage/' . $listing->images[0]);
-        }
-        
-        // Si no hay imagen, devolver el placeholder
-        return asset('images/placeholder.png');
+        // Usar el método del trait que ya maneja entornos
+        return $listing->main_image_url;
     }
 
     public function getProductsProperty()

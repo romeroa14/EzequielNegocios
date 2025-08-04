@@ -106,7 +106,16 @@
                     return listing?.images || [];
                 },
                 getImageUrl(path) {
-                    return path ? '{{ Storage::disk('public')->url('') }}' + path : '{{ asset('images/placeholder.png') }}';
+                    if (!path) return '{{ asset('images/placeholder.png') }}';
+                    
+                    @if(app()->environment('production'))
+                        // En producción, usar la URL de R2
+                        const r2Url = '{{ config('filesystems.disks.r2.url') }}';
+                        return r2Url + '/' + path;
+                    @else
+                        // En desarrollo, usar storage local
+                        return '{{ asset('storage') }}' + '/' + path;
+                    @endif
                 }
             }"
             @openListingDetail.window="

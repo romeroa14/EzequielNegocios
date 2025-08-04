@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use App\Models\ProductPresentation;
 
@@ -271,6 +272,21 @@ class ListingsCrud extends Component
                 'images_array' => $listingData['images']
             ]);
 
+            // Verificar que el producto existe antes de crear
+            $productExists = \App\Models\Product::where('id', $listingData['product_id'])->exists();
+            Log::info('Verificación de producto antes de crear', [
+                'product_id' => $listingData['product_id'],
+                'exists' => $productExists,
+                'connection' => \Illuminate\Support\Facades\DB::connection()->getName()
+            ]);
+
+            if (!$productExists) {
+                throw new \Exception("El producto con ID {$listingData['product_id']} no existe en la base de datos");
+            }
+
+            // Usar transacción para asegurar consistencia
+            \Illuminate\Support\Facades\DB::beginTransaction();
+
             if ($this->editingListing) {
                 Log::info('Actualizando listing existente', ['listing_id' => $this->editingListing->id]);
                 
@@ -282,15 +298,37 @@ class ListingsCrud extends Component
             } else {
                 Log::info('Creando nuevo listing');
                 
-                // Si es nuevo, crear con las imágenes
-                $newListing = ProductListing::create($listingData);
+                try {
+                    // Si es nuevo, crear con las imágenes
+                    $newListing = ProductListing::create($listingData);
+                    
+                    Log::info('Listing creado exitosamente', [
+                        'listing_id' => $newListing->id,
+                        'images_saved' => $newListing->images
+                    ]);
+                } catch (\Illuminate\Database\QueryException $e) {
+                    Log::error('Error SQL al crear listing', [
+                        'sql_error' => $e->getMessage(),
+                        'sql_code' => $e->getCode(),
+                        'sql_info' => $e->errorInfo ?? null,
+                        'bindings' => $e->getBindings() ?? null,
+                        'sql' => $e->getSql() ?? null
+                    ]);
+                    throw new \Exception('Error de base de datos: ' . $e->getMessage());
+                } catch (\Exception $e) {
+                    Log::error('Error general al crear listing', [
+                        'error' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    throw $e;
+                }
                 
-                Log::info('Listing creado exitosamente', [
-                    'listing_id' => $newListing->id,
-                    'images_saved' => $newListing->images
-                ]);
                 $this->dispatch('listing-added');
             }
+            
+            \Illuminate\Support\Facades\DB::commit();
             
             $this->closeModal();
             $this->loadListings();
@@ -298,6 +336,8 @@ class ListingsCrud extends Component
             Log::info('saveListing completado exitosamente');
 
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            
             Log::error('Error detallado al guardar listing', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

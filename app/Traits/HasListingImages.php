@@ -16,7 +16,7 @@ trait HasListingImages
         }
 
         return array_map(function($image) {
-            return asset('storage/' . $image);
+            return $this->getImageUrl($image);
         }, $this->images);
     }
 
@@ -26,9 +26,36 @@ trait HasListingImages
     public function getMainImageUrlAttribute(): string
     {
         if ($this->hasImages()) {
-            return asset('storage/' . $this->images[0]);
+            return $this->getImageUrl($this->images[0]);
         }
         return asset('images/placeholder.png');
+    }
+
+    /**
+     * Obtiene la URL de una imagen específica
+     */
+    private function getImageUrl($imagePath): string
+    {
+        if (empty($imagePath)) {
+            return asset('images/placeholder.png');
+        }
+
+        // Determinar el disco según el entorno
+        $disk = app()->environment('production') ? 'r2' : 'public';
+        
+        if ($disk === 'r2') {
+            // Para R2 en producción, usar la URL pública del bucket
+            $publicUrl = config('filesystems.disks.r2.url');
+            if (empty($publicUrl)) {
+                return asset('images/placeholder.png');
+            }
+            
+            $path = ltrim($imagePath, '/');
+            return rtrim($publicUrl, '/') . '/' . $path;
+        }
+        
+        // Para desarrollo, usar storage local
+        return asset('storage/' . $imagePath);
     }
 
     /**
