@@ -56,7 +56,32 @@ class ListingsCrud extends Component
             'form.state_id' => 'required|exists:states,id',
             'form.municipality_id' => 'required|exists:municipalities,id',
             'form.parish_id' => 'required|exists:parishes,id',
-            'form.product_id' => 'required|exists:products,id',
+            'form.product_id' => [
+                'required',
+                'exists:products,id',
+                function ($attribute, $value, $fail) {
+                    // Verificar que el producto pertenece al usuario o es universal
+                    $product = \App\Models\Product::find($value);
+                    if (!$product) {
+                        $fail('El producto seleccionado no existe.');
+                        return;
+                    }
+                    
+                    $userId = Auth::id();
+                    if ($product->person_id !== $userId && !$product->is_universal) {
+                        $fail('No tienes permiso para usar este producto.');
+                        return;
+                    }
+                    
+                    Log::info('Validación de producto exitosa', [
+                        'product_id' => $value,
+                        'product_name' => $product->name,
+                        'product_person_id' => $product->person_id,
+                        'is_universal' => $product->is_universal,
+                        'user_id' => $userId
+                    ]);
+                }
+            ],
             'form.status' => 'required|in:pending,active,sold_out,inactive',
             'form.product_presentation_id' => 'required|exists:product_presentations,id',
             'form.presentation_quantity' => 'required|numeric|min:0.01',
@@ -551,6 +576,20 @@ class ListingsCrud extends Component
             $query->where('person_id', Auth::id())
                   ->orWhere('is_universal', true);
         })->get();
+
+        // Log para debugging - qué productos están disponibles
+        Log::info('Productos disponibles para listings', [
+            'user_id' => Auth::id(),
+            'products_count' => $products->count(),
+            'products' => $products->map(function($p) {
+                return [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'person_id' => $p->person_id,
+                    'is_universal' => $p->is_universal
+                ];
+            })->toArray()
+        ]);
 
         $presentations = ProductPresentation::where('is_active', true)->get();
         
