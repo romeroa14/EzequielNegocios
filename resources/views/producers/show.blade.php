@@ -39,7 +39,7 @@
                         <div class="aspect-w-4 aspect-h-3 bg-gray-200">
                             @if(!empty($listing->images))
                                 <img 
-                                    src="{{ asset('storage/' . $listing->images[0]) }}"
+                                    src="{{ $listing->main_image_url }}"
                                     alt="{{ $listing->title }}"
                                     class="w-full h-48 object-cover"
                                     onerror="this.src='{{ asset('images/placeholder.png') }}'"

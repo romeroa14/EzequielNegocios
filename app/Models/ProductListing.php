@@ -62,9 +62,31 @@ class ProductListing extends Model
     public function getFirstImageUrlAttribute(): string
     {
         if ($this->hasImages()) {
-            return asset('storage/' . $this->images[0]);
+            return $this->main_image_url; // Usar el accessor del trait HasListingImages
         }
         return asset('images/placeholder.png');
+    }
+
+    /**
+     * Obtiene la ubicación formateada
+     */
+    public function getFormattedLocationAttribute(): string
+    {
+        $location = [];
+        
+        if ($this->parish && $this->parish->name) {
+            $location[] = $this->parish->name;
+        }
+        
+        if ($this->municipality && $this->municipality->name) {
+            $location[] = $this->municipality->name;
+        }
+        
+        if ($this->state && $this->state->name) {
+            $location[] = $this->state->name;
+        }
+        
+        return implode(', ', $location) ?: 'Ubicación no especificada';
     }
 
     public static function rules($id = null)

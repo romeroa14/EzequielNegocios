@@ -176,12 +176,23 @@ class ListingsCrud extends Component
 
             // Cargar las imágenes existentes en selectedImages para mostrarlas en la vista
             if (!empty($this->editingListing->images)) {
-                foreach ($this->editingListing->images as $imagePath) {
+                foreach ($this->editingListing->images as $index => $imagePath) {
+                    // Usar la misma lógica que el trait HasListingImages
+                    $disk = app()->environment('production') ? 'r2' : 'public';
+                    
+                    if ($disk === 'r2') {
+                        $publicUrl = config('filesystems.disks.r2.url');
+                        $path = ltrim($imagePath, '/');
+                        $previewUrl = rtrim($publicUrl, '/') . '/' . $path;
+                    } else {
+                        $previewUrl = asset('storage/' . $imagePath);
+                    }
+                    
                     $this->selectedImages[] = [
                         'id' => uniqid(),
                         'name' => basename($imagePath),
                         'path' => $imagePath,
-                        'preview' => asset('storage/' . $imagePath)
+                        'preview' => $previewUrl
                     ];
                 }
             }

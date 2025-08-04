@@ -375,9 +375,7 @@ class ProductCatalog extends Component
                     'presentation_name' => $listing->productPresentation?->name ?? 'N/A',
                     'presentation_unit' => $listing->productPresentation?->unit_type ?? 'unidades'
                 ],
-                'images' => collect($listing->images)->map(function($image) {
-                    return asset('storage/' . $image);
-                })->values()->all(),
+                'images' => $listing->images_url, // Usar el accessor del trait HasListingImages
                 'seller' => [
                     'id' => $listing->person->id,
                     'name' => $listing->person->first_name . ' ' . $listing->person->last_name,
