@@ -204,37 +204,83 @@ class ListingsCrud extends Component
 
     public function saveListing()
     {
-        $this->validate();
+        Log::info('Iniciando saveListing()', [
+            'form_data' => $this->form,
+            'editing' => $this->editingListing ? $this->editingListing->id : null,
+            'images_count' => count($this->form['images'] ?? [])
+        ]);
+
+        try {
+            $this->validate();
+            Log::info('Validación exitosa');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Error de validación en saveListing', [
+                'errors' => $e->errors(),
+                'form_data' => $this->form
+            ]);
+            $this->dispatch('error', 'Error de validación: ' . implode(', ', \Illuminate\Support\Arr::flatten($e->errors())));
+            return;
+        }
 
         try {
             $person = Auth::user();
             if (!$person) {
+                Log::error('Usuario no autenticado en saveListing');
                 $this->dispatch('error', 'No tienes un perfil de vendedor asociado.');
                 return;
             }
+
+            Log::info('Usuario autenticado', [
+                'user_id' => $person->id,
+                'user_type' => get_class($person)
+            ]);
 
             $listingData = array_merge($this->form, [
                 'person_id' => $person->id,
                 'images' => $this->form['images'] ?? [], // Asegurarnos de que las imágenes se guarden
             ]);
 
+            Log::info('Datos preparados para guardar', [
+                'listing_data' => $listingData,
+                'images_array' => $listingData['images']
+            ]);
+
             if ($this->editingListing) {
+                Log::info('Actualizando listing existente', ['listing_id' => $this->editingListing->id]);
+                
                 // Si estamos editando, actualizar las imágenes
                 $this->editingListing->update($listingData);
+                
+                Log::info('Listing actualizado exitosamente');
                 $this->dispatch('listing-updated');
             } else {
+                Log::info('Creando nuevo listing');
+                
                 // Si es nuevo, crear con las imágenes
-                ProductListing::create($listingData);
+                $newListing = ProductListing::create($listingData);
+                
+                Log::info('Listing creado exitosamente', [
+                    'listing_id' => $newListing->id,
+                    'images_saved' => $newListing->images
+                ]);
                 $this->dispatch('listing-added');
             }
             
             $this->closeModal();
             $this->loadListings();
 
+            Log::info('saveListing completado exitosamente');
+
         } catch (\Exception $e) {
-            Log::error('Error al guardar listing', [
+            Log::error('Error detallado al guardar listing', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'form_data' => $this->form,
+                'user_id' => Auth::id(),
+                'sql_error' => $e instanceof \Illuminate\Database\QueryException ? $e->errorInfo : null,
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
             ]);
             $this->dispatch('error', 'Error al guardar la publicación: ' . $e->getMessage());
         }
