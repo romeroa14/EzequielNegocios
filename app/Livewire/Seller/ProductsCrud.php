@@ -53,6 +53,12 @@ class ProductsCrud extends Component
     {
         $productId = $this->editingProduct ? $this->editingProduct->id : null;
         
+        Log::info('🔍 GENERANDO REGLAS DE VALIDACIÓN', [
+            'product_id' => $productId,
+            'sku_base' => $this->form['sku_base'] ?? 'no definido',
+            'editing_product' => $this->editingProduct ? $this->editingProduct->sku_base : 'nuevo producto'
+        ]);
+        
         $rules = [
             'form.product_category_id' => 'required|exists:product_categories,id',
             'form.product_subcategory_id' => 'required|exists:product_subcategories,id',
@@ -64,9 +70,21 @@ class ProductsCrud extends Component
             'form.custom_quantity' => 'required|numeric|min:0.01',
             'form.seasonal_info' => 'nullable|string',
             'form.is_active' => 'boolean',
-            'form.sku_base' => 'required|string|max:50|unique:products,sku_base',
         ];
 
+        // Regla de SKU Base con exclusión del producto actual al editar
+        if ($productId) {
+            $rules['form.sku_base'] = 'required|string|max:50|unique:products,sku_base,' . $productId;
+            Log::info('📝 REGLA SKU PARA EDICIÓN', [
+                'rule' => $rules['form.sku_base'],
+                'excluding_id' => $productId
+            ]);
+        } else {
+            $rules['form.sku_base'] = 'required|string|max:50|unique:products,sku_base';
+            Log::info('📝 REGLA SKU PARA CREACIÓN', [
+                'rule' => $rules['form.sku_base']
+            ]);
+        }
         
         // Agregar regla de imagen con validación condicional
         if ($productId) {
@@ -75,6 +93,7 @@ class ProductsCrud extends Component
             $rules['form.image'] = 'required|image|max:2048';
         }
 
+        Log::info('✅ REGLAS GENERADAS', ['rules' => array_keys($rules)]);
         return $rules;
     }
 
@@ -103,7 +122,6 @@ class ProductsCrud extends Component
             'form.image.required' => 'La imagen es obligatoria.',
             'form.image.image' => 'El archivo debe ser una imagen.',
             'form.image.max' => 'La imagen no puede ser mayor a 2MB.',
-            'form.seasonal_info.string' => 'La información estacional debe ser texto.',
             'form.is_active.boolean' => 'El estado debe ser verdadero o falso.',
         ];
     }
@@ -210,44 +228,99 @@ class ProductsCrud extends Component
 
     public function openModal($productId = null)
     {
+        Log::info('🔓 ABRIENDO MODAL', [
+            'product_id' => $productId,
+            'user_id' => Auth::id()
+        ]);
+
         $this->resetForm();
         $this->changeImage = false;
+        
         if ($productId) {
-            $this->editingProduct = Product::where('id', $productId)
-                ->where('person_id', Auth::id())
-                ->firstOrFail();
-            
-            $this->form = [
-                'product_category_id' => $this->editingProduct->product_category_id,
-                'product_subcategory_id' => $this->editingProduct->product_subcategory_id,
-                'product_line_id' => $this->editingProduct->product_line_id,
-                'brand_id' => $this->editingProduct->brand_id,
-                'product_presentation_id' => $this->editingProduct->product_presentation_id,
-                'name' => $this->editingProduct->name,
-                'description' => $this->editingProduct->description,
-                'sku_base' => $this->editingProduct->sku_base,
-                'custom_quantity' => $this->editingProduct->custom_quantity ?? 1,
-                'image' => $this->editingProduct->image,
-                'seasonal_info' => $this->editingProduct->seasonal_info,
-                'is_active' => $this->editingProduct->is_active,
-            ];
-            
-            if ($this->form['product_presentation_id']) {
-                $this->selectedPresentation = ProductPresentation::find($this->form['product_presentation_id']);
-            }
+            try {
+                $this->editingProduct = Product::where('id', $productId)
+                    ->where('person_id', Auth::id())
+                    ->firstOrFail();
+                
+                Log::info('📦 PRODUCTO CARGADO PARA EDICIÓN', [
+                    'product' => [
+                        'id' => $this->editingProduct->id,
+                        'name' => $this->editingProduct->name,
+                        'sku_base' => $this->editingProduct->sku_base,
+                        'person_id' => $this->editingProduct->person_id
+                    ]
+                ]);
+                
+                $this->form = [
+                    'product_category_id' => $this->editingProduct->product_category_id,
+                    'product_subcategory_id' => $this->editingProduct->product_subcategory_id,
+                    'product_line_id' => $this->editingProduct->product_line_id,
+                    'brand_id' => $this->editingProduct->brand_id,
+                    'product_presentation_id' => $this->editingProduct->product_presentation_id,
+                    'name' => $this->editingProduct->name,
+                    'description' => $this->editingProduct->description,
+                    'sku_base' => $this->editingProduct->sku_base,
+                    'custom_quantity' => $this->editingProduct->custom_quantity ?? 1,
+                    'image' => null, // No cargar la imagen existente en el form
+                    'seasonal_info' => $this->editingProduct->seasonal_info,
+                    'is_active' => $this->editingProduct->is_active,
+                ];
+                
+                Log::info('📝 FORMULARIO CARGADO', [
+                    'form_data' => $this->form
+                ]);
+                
+                if ($this->form['product_presentation_id']) {
+                    $this->selectedPresentation = ProductPresentation::find($this->form['product_presentation_id']);
+                    Log::info('🎯 PRESENTACIÓN SELECCIONADA', [
+                        'presentation' => $this->selectedPresentation ? $this->selectedPresentation->name : 'no encontrada'
+                    ]);
+                }
 
-            // Cargar las líneas de producto basadas en la categoría y subcategoría del producto
-            if ($this->form['product_subcategory_id'] && $this->form['product_category_id']) {
-                $this->lines = ProductLine::where('product_subcategory_id', $this->form['product_subcategory_id'])
-                    ->where('product_category_id', $this->form['product_category_id'])
-                    ->where('is_active', true)
-                    ->get();
+                // Cargar subcategorías para la categoría seleccionada
+                if ($this->form['product_category_id']) {
+                    $this->subcategories = ProductSubcategory::where('product_category_id', $this->form['product_category_id'])
+                        ->where('is_active', true)
+                        ->get();
+                    
+                    Log::info('📂 SUBCATEGORÍAS CARGADAS', [
+                        'count' => $this->subcategories->count(),
+                        'category_id' => $this->form['product_category_id']
+                    ]);
+                }
+
+                // Cargar las líneas de producto basadas en la categoría y subcategoría del producto
+                if ($this->form['product_subcategory_id'] && $this->form['product_category_id']) {
+                    $this->lines = ProductLine::where('product_subcategory_id', $this->form['product_subcategory_id'])
+                        ->where('product_category_id', $this->form['product_category_id'])
+                        ->where('is_active', true)
+                        ->get();
+                    
+                    Log::info('📋 LÍNEAS CARGADAS', [
+                        'count' => $this->lines->count(),
+                        'subcategory_id' => $this->form['product_subcategory_id'],
+                        'category_id' => $this->form['product_category_id']
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('❌ ERROR AL CARGAR PRODUCTO PARA EDICIÓN', [
+                    'product_id' => $productId,
+                    'error' => $e->getMessage(),
+                    'user_id' => Auth::id()
+                ]);
+                
+                session()->flash('error', 'No se pudo cargar el producto para editar.');
+                return;
             }
         } else {
+            Log::info('➕ MODO CREACIÓN - NUEVO PRODUCTO');
             $this->editingProduct = null;
             $this->lines = collect();
+            $this->subcategories = collect();
         }
+        
         $this->showModal = true;
+        Log::info('✅ MODAL ABIERTO CORRECTAMENTE');
     }
 
     public function closeModal()
@@ -293,17 +366,25 @@ class ProductsCrud extends Component
 
     public function saveProduct()
     {
+        Log::info('🔧 INICIANDO saveProduct', [
+            'editing_product_id' => $this->editingProduct ? $this->editingProduct->id : null,
+            'form_data' => $this->form,
+            'user_id' => Auth::id()
+        ]);
+
         $this->validate();
 
         try {
             $data = collect($this->form)->except(['image'])->toArray();
             
-            // Si el usuario es un productor universal y está creando un producto universal
-            if (Auth::user()->is_universal && $this->form['is_universal']) {
-                $data['is_universal'] = true;
-            } else {
-                $data['is_universal'] = false;
-            }
+            // Los productos del vendedor nunca son universales (solo los admins pueden crear productos universales)
+            $data['is_universal'] = false;
+
+            Log::info('📊 DATOS PREPARADOS', [
+                'data' => $data,
+                'has_image' => !empty($this->form['image']),
+                'image_type' => $this->form['image'] ? get_class($this->form['image']) : null
+            ]);
 
             // Manejar la imagen antes de crear/actualizar el producto
             $imagePath = null;
@@ -316,10 +397,11 @@ class ProductsCrud extends Component
                 $fileName = uniqid() . '_' . time() . '.' . $extension;
                 $path = 'products/' . $fileName;
 
-                Log::info('Guardando imagen', [
+                Log::info('📷 GUARDANDO IMAGEN', [
                     'disk' => $disk,
                     'path' => $path,
-                    'fileName' => $fileName
+                    'fileName' => $fileName,
+                    'extension' => $extension
                 ]);
 
                 // Almacenar el archivo
@@ -329,7 +411,7 @@ class ProductsCrud extends Component
                     
                     // Verificar si el archivo se guardó correctamente
                     $exists = Storage::disk($disk)->exists($imagePath);
-                    Log::info('Verificación de almacenamiento en R2', [
+                    Log::info('✅ VERIFICACIÓN R2', [
                         'path' => $imagePath,
                         'exists' => $exists
                     ]);
@@ -340,37 +422,64 @@ class ProductsCrud extends Component
                 } else {
                     // Para almacenamiento local en desarrollo SIEMPRE usar storage/app/public/products
                     $imagePath = $this->form['image']->storeAs('products', $fileName, 'public');
-                    Log::info('Imagen almacenada en storage/app/public/products', [
+                    Log::info('✅ IMAGEN LOCAL GUARDADA', [
                         'path_resultado' => $imagePath
                     ]);
                 }
 
                 // Agregar la ruta de la imagen a los datos
                 $data['image'] = $imagePath;
+                Log::info('📷 IMAGEN AGREGADA A DATOS', ['image_path' => $imagePath]);
             }
 
             if ($this->editingProduct) {
-                // Si estamos editando, eliminar la imagen anterior si existe
+                Log::info('✏️ ACTUALIZANDO PRODUCTO', [
+                    'product_id' => $this->editingProduct->id,
+                    'data' => $data
+                ]);
+
+                // Si estamos editando, eliminar la imagen anterior si existe y hay una nueva
                 if ($imagePath && $this->editingProduct->image) {
+                    Log::info('🗑️ ELIMINANDO IMAGEN ANTERIOR', [
+                        'old_image' => $this->editingProduct->image
+                    ]);
                     $this->editingProduct->deleteImage();
                 }
+                
                 $this->editingProduct->update($data);
                 $product = $this->editingProduct;
+                
+                Log::info('✅ PRODUCTO ACTUALIZADO', [
+                    'product_id' => $product->id,
+                    'name' => $product->name
+                ]);
             } else {
+                Log::info('➕ CREANDO NUEVO PRODUCTO');
                 $data['person_id'] = Auth::id();
                 $product = Product::create($data);
+                
+                Log::info('✅ PRODUCTO CREADO', [
+                    'product_id' => $product->id,
+                    'name' => $product->name
+                ]);
             }
 
             $this->dispatch('product-' . ($this->editingProduct ? 'updated' : 'added'));
             $this->closeModal();
             $this->loadProducts();
 
+            Log::info('🎉 SAVEPRODUCT COMPLETADO EXITOSAMENTE');
+
         } catch (\Exception $e) {
-            Log::error('Error al guardar producto', [
+            Log::error('❌ ERROR EN SAVEPRODUCT', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'form_data' => $this->form,
+                'editing_product_id' => $this->editingProduct ? $this->editingProduct->id : null
             ]);
+            
             $this->dispatch('error', $e->getMessage());
+            session()->flash('error', 'Error al guardar el producto: ' . $e->getMessage());
         }
     }
 

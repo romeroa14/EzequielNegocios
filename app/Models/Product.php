@@ -85,7 +85,6 @@ class Product extends Model
             'custom_quantity.min' => 'La cantidad personalizada debe ser mayor a 0.',
             'image.image' => 'El archivo debe ser una imagen.',
             'image.max' => 'La imagen no puede ser mayor a 2MB.',
-            'seasonal_info.array' => 'La información estacional debe ser un arreglo.',
             'is_active.boolean' => 'El estado debe ser verdadero o falso.',
             'creator_user_id.exists' => 'El usuario creador no existe.',
             'is_universal.boolean' => 'El campo universal debe ser verdadero o falso.'
