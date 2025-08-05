@@ -249,7 +249,7 @@ class ListingsCrud extends Component
         ]);
 
         try {
-            $this->validate();
+        $this->validate();
             Log::info('Validación exitosa');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -262,20 +262,20 @@ class ListingsCrud extends Component
         }
 
         try {
-            $person = Auth::user();
-            if (!$person) {
+        $person = Auth::user();
+        if (!$person) {
                 Log::error('Usuario no autenticado en saveListing');
-                $this->dispatch('error', 'No tienes un perfil de vendedor asociado.');
-                return;
-            }
+            $this->dispatch('error', 'No tienes un perfil de vendedor asociado.');
+            return;
+        }
 
             Log::info('Usuario autenticado', [
                 'user_id' => $person->id,
                 'user_type' => get_class($person)
             ]);
 
-            $listingData = array_merge($this->form, [
-                'person_id' => $person->id,
+        $listingData = array_merge($this->form, [
+            'person_id' => $person->id,
                 'images' => $this->form['images'] ?? [], // Asegurarnos de que las imágenes se guarden
             ]);
 
@@ -299,15 +299,15 @@ class ListingsCrud extends Component
             // Usar transacción para asegurar consistencia
             \Illuminate\Support\Facades\DB::beginTransaction();
 
-            if ($this->editingListing) {
+        if ($this->editingListing) {
                 Log::info('Actualizando listing existente', ['listing_id' => $this->editingListing->id]);
                 
                 // Si estamos editando, actualizar las imágenes
-                $this->editingListing->update($listingData);
+            $this->editingListing->update($listingData);
                 
                 Log::info('Listing actualizado exitosamente');
-                $this->dispatch('listing-updated');
-            } else {
+            $this->dispatch('listing-updated');
+        } else {
                 Log::info('Creando nuevo listing');
                 
                 try {
@@ -337,13 +337,13 @@ class ListingsCrud extends Component
                     throw $e;
                 }
                 
-                $this->dispatch('listing-added');
-            }
+            $this->dispatch('listing-added');
+        }
             
             \Illuminate\Support\Facades\DB::commit();
-            
-            $this->closeModal();
-            $this->loadListings();
+        
+        $this->closeModal();
+        $this->loadListings();
 
             Log::info('saveListing completado exitosamente');
 
@@ -438,7 +438,7 @@ class ListingsCrud extends Component
                 if (!$exists) {
                     throw new \Exception('El archivo no se guardó correctamente en R2 - verificación falló');
                 }
-            } else {
+        } else {
                 // Para almacenamiento local en desarrollo
                 $stored = Storage::disk($disk)->put($path, $imageData);
                 
@@ -511,7 +511,7 @@ class ListingsCrud extends Component
     public function removeImage($index)
     {
         try {
-            if (isset($this->selectedImages[$index])) {
+        if (isset($this->selectedImages[$index])) {
                 $image = $this->selectedImages[$index];
                 
                 // Si la imagen ya existe en el servidor (tiene path), eliminarla
@@ -532,8 +532,8 @@ class ListingsCrud extends Component
                 }
 
                 // Eliminar de selectedImages
-                unset($this->selectedImages[$index]);
-                $this->selectedImages = array_values($this->selectedImages);
+            unset($this->selectedImages[$index]);
+            $this->selectedImages = array_values($this->selectedImages);
 
                 $this->dispatch('success', 'Imagen eliminada correctamente');
             }

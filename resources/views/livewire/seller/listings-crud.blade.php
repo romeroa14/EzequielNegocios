@@ -1,16 +1,16 @@
 <div >
-    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
-        <!-- Header y botón de nueva publicación -->
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold">Mis Publicaciones</h2>
-            <button wire:click="openModal" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded shadow">
-                + Nueva Publicación
-            </button>
-        </div>
+<div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+    <!-- Header y botón de nueva publicación -->
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Mis Publicaciones</h2>
+        <button wire:click="openModal" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded shadow">
+            + Nueva Publicación
+        </button>
+    </div>
 
-        <!-- Listado de publicaciones -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @forelse($listings as $listing)
+    <!-- Listado de publicaciones -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @forelse($listings as $listing)
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                     <!-- Imagen Principal -->
                     <div class="relative aspect-w-16 aspect-h-9 bg-gray-100">
@@ -48,12 +48,12 @@
                         <p class="text-sm text-gray-600 mb-2">{{ $listing->product->name }}</p>
                         
                         <div class="flex justify-between items-center mb-2">
-                            <div>
+                <div>
                                 <span class="text-lg font-bold text-green-600">${{ number_format($listing->unit_price, 2) }}</span>
                                 @if($listing->current_rate)
                                     <div class="text-sm text-gray-500">≈ Bs.D {{ $listing->formatted_bs_price }}</div>
                                     <div class="text-xs text-gray-400">Tasa BCV: {{ $listing->current_rate }}</div>
-                                @endif
+                                    @endif
                             </div>
                             <span class="text-sm text-gray-500">{{ $listing->formatted_presentation }}</span>
                         </div>
@@ -201,31 +201,31 @@
                                 Cerrar
                             </button>
                         </div>
-                    </div>
+                </div>
                 </div>
             </div>
-        </div>
+    </div>
 
-        <!-- Modal para crear/editar publicación -->
-        @if($showModal)
-            <div class="fixed inset-0 z-50 overflow-hidden">
-                <div class="absolute inset-0 bg-black bg-opacity-40"></div>
-                
-                <div class="fixed inset-0 overflow-y-auto">
+    <!-- Modal para crear/editar publicación -->
+    @if($showModal)
+        <div class="fixed inset-0 z-50 overflow-hidden">
+            <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+            
+            <div class="fixed inset-0 overflow-y-auto">
                     <div class="flex min-h-full items-center justify-center p-2-">
-                        <div class="relative w-full max-w-3xl bg-white shadow-xl rounded-lg">
-                            <!-- Header fijo -->
-                            <div class="sticky top-0 bg-white px-4 py-3 border-b border-gray-200 flex justify-between items-center z-10">
-                                <h2 class="text-lg font-semibold truncate">{{ $editingListing ? 'Editar Publicación' : 'Nueva Publicación' }}</h2>
-                                <button wire:click="closeModal" class="text-gray-400 hover:text-gray-700">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
+                    <div class="relative w-full max-w-3xl bg-white shadow-xl rounded-lg">
+                        <!-- Header fijo -->
+                        <div class="sticky top-0 bg-white px-4 py-3 border-b border-gray-200 flex justify-between items-center z-10">
+                            <h2 class="text-lg font-semibold truncate">{{ $editingListing ? 'Editar Publicación' : 'Nueva Publicación' }}</h2>
+                            <button wire:click="closeModal" class="text-gray-400 hover:text-gray-700">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
 
-                            <!-- Contenido scrolleable -->
-                            <div class="p-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
+                        <!-- Contenido scrolleable -->
+                        <div class="p-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
                                 @if(session('error'))
                                     <div class="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">
                                         {{ session('error') }}
@@ -237,44 +237,44 @@
                                     </div>
                                 @endif
 
-                                <form wire:submit.prevent="saveListing" class="space-y-4">
-                                    <!-- Producto -->
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Producto</label>
-                                        <select 
-                                            wire:model="form.product_id" 
-                                            class="w-full border rounded px-3 py-2 text-sm bg-white"
-                                        >
-                                            <option value="">Selecciona un producto</option>
-                                            <optgroup label="Productos Universales">
-                                                @foreach($products->where('is_universal', true) as $product)
-                                                    <option value="{{ $product->id }}">🌎 {{ $product->name }}</option>
-                                                @endforeach
-                                            </optgroup>
-                                            <optgroup label="Mis Productos">
-                                                @foreach($products->where('person_id', Auth::id()) as $product)
-                                                    <option value="{{ $product->id }}">📦 {{ $product->name }}</option>
-                                                @endforeach
-                                            </optgroup>
-                                        </select>
-                                        @error('form.product_id')
+                            <form wire:submit.prevent="saveListing" class="space-y-4">
+                                <!-- Producto -->
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Producto</label>
+                                    <select 
+                                        wire:model="form.product_id" 
+                                        class="w-full border rounded px-3 py-2 text-sm bg-white"
+                                    >
+                                        <option value="">Selecciona un producto</option>
+                                        <optgroup label="Productos Universales">
+                                            @foreach($products->where('is_universal', true) as $product)
+                                                <option value="{{ $product->id }}">🌎 {{ $product->name }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                        <optgroup label="Mis Productos">
+                                            @foreach($products->where('person_id', Auth::id()) as $product)
+                                                <option value="{{ $product->id }}">📦 {{ $product->name }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    </select>
+                                    @error('form.product_id')
+                                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <!-- Grid de campos -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div class="col-span-2">
+                                        <label class="block text-sm font-medium mb-1">Título</label>
+                                        <input 
+                                            type="text" 
+                                            wire:model="form.title" 
+                                            class="w-full border rounded px-3 py-2 text-sm" 
+                                        />
+                                        @error('form.title')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
                                         @enderror
                                     </div>
-
-                                    <!-- Grid de campos -->
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div class="col-span-2">
-                                            <label class="block text-sm font-medium mb-1">Título</label>
-                                            <input 
-                                                type="text" 
-                                                wire:model="form.title" 
-                                                class="w-full border rounded px-3 py-2 text-sm" 
-                                            />
-                                            @error('form.title')
-                                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                                            @enderror
-                                        </div>
 
                                         <!-- Grid de presentación, cantidad y precio en una línea -->
                                         <div class="col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -296,59 +296,59 @@
                                             </div>
 
                                             <!-- Cantidad por presentación -->
-                                            <div>
+                                    <div>
                                                 <label class="block text-sm font-medium mb-1">
                                                     Cantidad en {{ $selectedPresentation?->unit_type ?? 'unidades' }}
                                                 </label>
-                                                <input 
-                                                    type="number" 
-                                                    step="0.01" 
+                                        <input 
+                                            type="number" 
+                                            step="0.01" 
                                                     wire:model.live="form.presentation_quantity" 
-                                                    class="w-full border rounded px-3 py-2 text-sm" 
+                                            class="w-full border rounded px-3 py-2 text-sm" 
                                                     min="0.01"
-                                                />
+                                        />
                                                 @error('form.presentation_quantity')
-                                                    <span class="text-red-600 text-xs">{{ $message }}</span>
-                                                @enderror
-                                            </div>
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
 
                                             <!-- Precio por presentación -->
-                                            <div>
+                                    <div>
                                                 <label class="block text-sm font-medium mb-1">
                                                     Precio por {{ $selectedPresentation?->name ?? 'presentación' }}
                                                 </label>
                                                 <div class="relative">
                                                     <span class="absolute left-3 top-2 text-gray-500">$</span>
-                                                    <input 
-                                                        type="number" 
+                                        <input 
+                                            type="number" 
                                                         step="0.01" 
                                                         wire:model="form.unit_price" 
                                                         class="w-full border rounded px-8 py-2 text-sm" 
                                                         min="0.01"
-                                                    />
+                                        />
                                                 </div>
                                                 @error('form.unit_price')
-                                                    <span class="text-red-600 text-xs">{{ $message }}</span>
-                                                @enderror
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
                                             </div>
-                                        </div>
+                                    </div>
 
                                         <!-- Calidad en línea separada -->
                                         <div class="col-span-2">
-                                            <label class="block text-sm font-medium mb-1">Calidad</label>
-                                            <select 
-                                                wire:model="form.quality_grade" 
-                                                class="w-full border rounded px-3 py-2 text-sm bg-white"
-                                            >
-                                                <option value="">Selecciona una calidad</option>
-                                                <option value="premium">Premium</option>
-                                                <option value="standard">Estándar</option>
-                                                <option value="economic">Económico</option>
-                                            </select>
-                                            @error('form.quality_grade')
-                                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                                            @enderror
-                                        </div>
+                                        <label class="block text-sm font-medium mb-1">Calidad</label>
+                                        <select 
+                                            wire:model="form.quality_grade" 
+                                            class="w-full border rounded px-3 py-2 text-sm bg-white"
+                                        >
+                                            <option value="">Selecciona una calidad</option>
+                                            <option value="premium">Premium</option>
+                                            <option value="standard">Estándar</option>
+                                            <option value="economic">Económico</option>
+                                        </select>
+                                        @error('form.quality_grade')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
                                     </div>
                                     <!-- Fecha de Cosecha -->
                                     <div class="w-full mt-4">
@@ -365,57 +365,57 @@
 
                                     <!-- Ubicación en una sola línea -->
                                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-                                        <!-- Estado -->
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Estado</label>
-                                            <select 
-                                                wire:model.live="form.state_id"
-                                                class="w-full border rounded px-3 py-2 text-sm"
-                                            >
-                                                <option value="">Seleccione un estado</option>
-                                                @foreach($states as $state)
-                                                    <option value="{{ $state->id }}">{{ $state->name }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('form.state_id')
-                                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                                            @enderror
-                                        </div>
+                                    <!-- Estado -->
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Estado</label>
+                                        <select 
+                                            wire:model.live="form.state_id"
+                                            class="w-full border rounded px-3 py-2 text-sm"
+                                        >
+                                            <option value="">Seleccione un estado</option>
+                                            @foreach($states as $state)
+                                                <option value="{{ $state->id }}">{{ $state->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('form.state_id')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
 
-                                        <!-- Municipio -->
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Municipio</label>
-                                            <select 
-                                                wire:model.live="form.municipality_id"
-                                                class="w-full border rounded px-3 py-2 text-sm"
-                                                @if(!$form['state_id']) disabled @endif
-                                            >
-                                                <option value="">Seleccione un municipio</option>
-                                                @foreach($municipalities as $municipality)
-                                                    <option value="{{ $municipality->id }}">{{ $municipality->name }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('form.municipality_id')
-                                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                                            @enderror
-                                        </div>
+                                    <!-- Municipio -->
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Municipio</label>
+                                        <select 
+                                            wire:model.live="form.municipality_id"
+                                            class="w-full border rounded px-3 py-2 text-sm"
+                                            @if(!$form['state_id']) disabled @endif
+                                        >
+                                            <option value="">Seleccione un municipio</option>
+                                            @foreach($municipalities as $municipality)
+                                                <option value="{{ $municipality->id }}">{{ $municipality->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('form.municipality_id')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
+                                    </div>
 
-                                        <!-- Parroquia -->
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Parroquia</label>
-                                            <select 
-                                                wire:model="form.parish_id"
-                                                class="w-full border rounded px-3 py-2 text-sm"
-                                                @if(!$form['municipality_id']) disabled @endif
-                                            >
-                                                <option value="">Seleccione una parroquia</option>
-                                                @foreach($parishes as $parish)
-                                                    <option value="{{ $parish->id }}">{{ $parish->name }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('form.parish_id')
-                                                <span class="text-red-600 text-xs">{{ $message }}</span>
-                                            @enderror
+                                    <!-- Parroquia -->
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Parroquia</label>
+                                        <select 
+                                            wire:model="form.parish_id"
+                                            class="w-full border rounded px-3 py-2 text-sm"
+                                            @if(!$form['municipality_id']) disabled @endif
+                                        >
+                                            <option value="">Seleccione una parroquia</option>
+                                            @foreach($parishes as $parish)
+                                                <option value="{{ $parish->id }}">{{ $parish->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('form.parish_id')
+                                            <span class="text-red-600 text-xs">{{ $message }}</span>
+                                        @enderror
                                         </div>
                                     </div>
 
@@ -437,7 +437,7 @@
                                     </div>
                                     
 
-                                    <!-- Imágenes específicas de la publicación -->
+                                <!-- Imágenes específicas de la publicación -->
                                     <div x-data="{ 
                                         handleFileSelect(event) {
                                             const file = event.target.files[0];
@@ -454,9 +454,9 @@
                                             }
                                         }
                                     }">
-                                        <label class="block text-sm font-medium mb-1">Imágenes de la Publicación</label>
+                                    <label class="block text-sm font-medium mb-1">Imágenes de la Publicación</label>
                                         <p class="text-xs text-gray-500 mb-2">Estas imágenes serán expuestas en el catálogo.</p>
-
+                                    
                                         <!-- Input de archivo oculto -->
                                         <input 
                                             type="file" 
@@ -466,27 +466,27 @@
                                             x-ref="fileInput"
                                             @change="handleFileSelect($event)"
                                         />
-
+                                    
                                         <!-- Área de imágenes seleccionadas -->
                                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
-                                            @foreach($selectedImages as $index => $image)
-                                                <div class="relative group">
-                                                    <img 
-                                                        src="{{ $image['preview'] }}" 
+                                                @foreach($selectedImages as $index => $image)
+                                                    <div class="relative group">
+                                                        <img 
+                                                            src="{{ $image['preview'] }}" 
                                                         alt="Imagen {{ $index + 1 }}"
                                                         class="w-full h-32 object-cover rounded-lg shadow-sm"
                                                     >
-                                                    <button 
-                                                        type="button"
+                                                        <button 
+                                                            type="button" 
                                                         wire:click.prevent="removeImage({{ $index }})"
                                                         class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    >
+                                                        >
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                                         </svg>
-                                                    </button>
-                                                </div>
-                                            @endforeach
+                                                        </button>
+                                                    </div>
+                                                @endforeach
 
                                             <!-- Botón para agregar imagen -->
                                             <button 
@@ -502,43 +502,43 @@
                                         @error('selectedImages')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>
                                         @enderror
-                                    </div>
+                                </div>
 
-                                    <!-- Descripción -->
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Descripción</label>
-                                        <textarea 
-                                            wire:model="form.description" 
-                                            class="w-full border rounded px-3 py-2 text-sm h-20"
-                                        ></textarea>
-                                        @error('form.description')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                                <!-- Descripción -->
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Descripción</label>
+                                    <textarea 
+                                        wire:model="form.description" 
+                                        class="w-full border rounded px-3 py-2 text-sm h-20"
+                                    ></textarea>
+                                    @error('form.description')
+                                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                                    @enderror
+                                </div>
 
-                                    <!-- Botones -->
-                                    <div class="flex justify-end pt-4 border-t border-gray-200">
-                                        <button 
-                                            type="button" 
-                                            wire:click="closeModal"
-                                            class="px-4 py-2 text-sm font-medium bg-gray-300 hover:bg-gray-400 text-gray-800 rounded mr-2"
-                                        >
-                                            Cancelar
-                                        </button>
-                                        <button 
-                                            type="submit"
-                                            class="px-4 py-2 text-sm font-medium bg-blue-500 hover:bg-blue-600 text-white rounded"
-                                        >
-                                            Guardar
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
+                                <!-- Botones -->
+                                <div class="flex justify-end pt-4 border-t border-gray-200">
+                                    <button 
+                                        type="button" 
+                                        wire:click="closeModal"
+                                        class="px-4 py-2 text-sm font-medium bg-gray-300 hover:bg-gray-400 text-gray-800 rounded mr-2"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button 
+                                        type="submit"
+                                        class="px-4 py-2 text-sm font-medium bg-blue-500 hover:bg-blue-600 text-white rounded"
+                                    >
+                                        Guardar
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
-        @endif
+        </div>
+    @endif
     </div>
 </div>
 

@@ -238,10 +238,10 @@ class ProductsCrud extends Component
         
         if ($productId) {
             try {
-                $this->editingProduct = Product::where('id', $productId)
-                    ->where('person_id', Auth::id())
-                    ->firstOrFail();
-                
+            $this->editingProduct = Product::where('id', $productId)
+                ->where('person_id', Auth::id())
+                ->firstOrFail();
+            
                 Log::info('📦 PRODUCTO CARGADO PARA EDICIÓN', [
                     'product' => [
                         'id' => $this->editingProduct->id,
@@ -251,27 +251,27 @@ class ProductsCrud extends Component
                     ]
                 ]);
                 
-                $this->form = [
-                    'product_category_id' => $this->editingProduct->product_category_id,
-                    'product_subcategory_id' => $this->editingProduct->product_subcategory_id,
-                    'product_line_id' => $this->editingProduct->product_line_id,
-                    'brand_id' => $this->editingProduct->brand_id,
-                    'product_presentation_id' => $this->editingProduct->product_presentation_id,
-                    'name' => $this->editingProduct->name,
-                    'description' => $this->editingProduct->description,
-                    'sku_base' => $this->editingProduct->sku_base,
-                    'custom_quantity' => $this->editingProduct->custom_quantity ?? 1,
+            $this->form = [
+                'product_category_id' => $this->editingProduct->product_category_id,
+                'product_subcategory_id' => $this->editingProduct->product_subcategory_id,
+                'product_line_id' => $this->editingProduct->product_line_id,
+                'brand_id' => $this->editingProduct->brand_id,
+                'product_presentation_id' => $this->editingProduct->product_presentation_id,
+                'name' => $this->editingProduct->name,
+                'description' => $this->editingProduct->description,
+                'sku_base' => $this->editingProduct->sku_base,
+                'custom_quantity' => $this->editingProduct->custom_quantity ?? 1,
                     'image' => null, // No cargar la imagen existente en el form
-                    'seasonal_info' => $this->editingProduct->seasonal_info,
-                    'is_active' => $this->editingProduct->is_active,
-                ];
+                'seasonal_info' => $this->editingProduct->seasonal_info,
+                'is_active' => $this->editingProduct->is_active,
+            ];
                 
                 Log::info('📝 FORMULARIO CARGADO', [
                     'form_data' => $this->form
                 ]);
-                
-                if ($this->form['product_presentation_id']) {
-                    $this->selectedPresentation = ProductPresentation::find($this->form['product_presentation_id']);
+            
+            if ($this->form['product_presentation_id']) {
+                $this->selectedPresentation = ProductPresentation::find($this->form['product_presentation_id']);
                     Log::info('🎯 PRESENTACIÓN SELECCIONADA', [
                         'presentation' => $this->selectedPresentation ? $this->selectedPresentation->name : 'no encontrada'
                     ]);
@@ -287,14 +287,14 @@ class ProductsCrud extends Component
                         'count' => $this->subcategories->count(),
                         'category_id' => $this->form['product_category_id']
                     ]);
-                }
+            }
 
-                // Cargar las líneas de producto basadas en la categoría y subcategoría del producto
-                if ($this->form['product_subcategory_id'] && $this->form['product_category_id']) {
-                    $this->lines = ProductLine::where('product_subcategory_id', $this->form['product_subcategory_id'])
-                        ->where('product_category_id', $this->form['product_category_id'])
-                        ->where('is_active', true)
-                        ->get();
+            // Cargar las líneas de producto basadas en la categoría y subcategoría del producto
+            if ($this->form['product_subcategory_id'] && $this->form['product_category_id']) {
+                $this->lines = ProductLine::where('product_subcategory_id', $this->form['product_subcategory_id'])
+                    ->where('product_category_id', $this->form['product_category_id'])
+                    ->where('is_active', true)
+                    ->get();
                     
                     Log::info('📋 LÍNEAS CARGADAS', [
                         'count' => $this->lines->count(),
@@ -378,7 +378,7 @@ class ProductsCrud extends Component
             $data = collect($this->form)->except(['image'])->toArray();
             
             // Los productos del vendedor nunca son universales (solo los admins pueden crear productos universales)
-            $data['is_universal'] = false;
+                $data['is_universal'] = false;
 
             Log::info('📊 DATOS PREPARADOS', [
                 'data' => $data,
