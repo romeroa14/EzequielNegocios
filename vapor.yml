@@ -51,3 +51,13 @@ environments:
             - 'public/build'
         assets:
             - 'public/build' 
+
+functions:
+  update-exchange-rates:
+    handler: UpdateExchangeRatesHandler
+    runtime: php-81
+    timeout: 60
+    memory: 512
+    schedule: 'rate(24 hours)'
+    environment:
+      APP_ENV: production 
