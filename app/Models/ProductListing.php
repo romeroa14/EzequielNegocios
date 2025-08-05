@@ -22,6 +22,7 @@ class ProductListing extends Model
         'title',
         'description',
         'unit_price',
+        'currency_type',
         'quality_grade',
         'harvest_date',
         'images',
@@ -35,6 +36,7 @@ class ProductListing extends Model
 
     protected $casts = [
         'unit_price' => 'decimal:2',
+        'currency_type' => 'string',
         'harvest_date' => 'datetime',
         'images' => 'array',
         'presentation_quantity' => 'decimal:2',

@@ -49,12 +49,19 @@
                         
                         <div class="flex justify-between items-center mb-2">
                 <div>
-                                <span class="text-lg font-bold text-green-600">${{ number_format($listing->unit_price, 2) }}</span>
-                                @if($listing->current_rate)
-                                    <div class="text-sm text-gray-500">≈ Bs.D {{ $listing->formatted_bs_price }}</div>
-                                    <div class="text-xs text-gray-400">Tasa BCV: {{ $listing->current_rate }}</div>
-                                    @endif
-                            </div>
+                    <!-- Precio en moneda original -->
+                    <span class="text-lg font-bold text-green-600">{{ $listing->formatted_price }}</span>
+                    
+                    <!-- Precio convertido -->
+                    @if($listing->current_rate)
+                        @if($listing->currency_type === 'USD')
+                            <div class="text-sm text-gray-500">≈ {{ $listing->formatted_bs_price }}</div>
+                        @else
+                            <div class="text-sm text-gray-500">≈ {{ $listing->formatted_usd_price }}</div>
+                        @endif
+                        <div class="text-xs text-gray-400">Tasa BCV: {{ $listing->current_rate }}</div>
+                    @endif
+                </div>
                             <span class="text-sm text-gray-500">{{ $listing->formatted_presentation }}</span>
                         </div>
 
@@ -313,24 +320,44 @@
                                     </div>
 
                                             <!-- Precio por presentación -->
-                                    <div>
-                                                <label class="block text-sm font-medium mb-1">
-                                                    Precio por {{ $selectedPresentation?->name ?? 'presentación' }}
-                                                </label>
-                                                <div class="relative">
-                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">
+                                        Precio por {{ $selectedPresentation?->name ?? 'presentación' }}
+                                    </label>
+                                    <div class="flex">
+                                        <!-- Selector de moneda -->
+                                        <select wire:model.live="form.currency_type" class="border rounded-l px-3 py-2 text-sm bg-white border-r-0 min-w-20">
+                                            <option value="USD">$</option>
+                                            <option value="VES">Bs.D</option>
+                                        </select>
+                                        <!-- Input de precio -->
                                         <input 
                                             type="number" 
-                                                        step="0.01" 
-                                                        wire:model="form.unit_price" 
-                                                        class="w-full border rounded px-8 py-2 text-sm" 
-                                                        min="0.01"
+                                            step="0.01" 
+                                            wire:model="form.unit_price" 
+                                            class="w-full border rounded-r px-3 py-2 text-sm border-l-0" 
+                                            min="0.01"
+                                            placeholder="Ingrese el precio"
                                         />
-                                                </div>
-                                                @error('form.unit_price')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                            </div>
+                                    </div>
+                                    @error('form.unit_price')
+                                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                                    @enderror
+                                    @error('form.currency_type')
+                                        <span class="text-red-600 text-xs">{{ $message }}</span>
+                                    @enderror
+                                    
+                                    <!-- Información de conversión -->
+                                    @if($form['unit_price'] && $form['currency_type'])
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            @if($form['currency_type'] === 'USD')
+                                                ≈ Bs.D {{ number_format($form['unit_price'] * ($this->currentUsdRate ?? 0), 2) }}
+                                            @else
+                                                ≈ ${{ number_format($form['unit_price'] / ($this->currentUsdRate ?? 1), 2) }}
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
                                     </div>
 
                                         <!-- Calidad en línea separada -->

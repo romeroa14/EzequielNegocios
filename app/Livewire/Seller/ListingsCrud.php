@@ -29,6 +29,7 @@ class ListingsCrud extends Component
         'title' => '',
         'description' => '',
         'unit_price' => '',
+        'currency_type' => 'USD',
         'quality_grade' => '',
         'harvest_date' => '',
         'state_id' => '',
@@ -53,6 +54,7 @@ class ListingsCrud extends Component
             'form.title' => 'required|string|max:255',
             'form.description' => 'required|string',
             'form.unit_price' => 'required|numeric|min:0',
+            'form.currency_type' => 'required|in:USD,VES',
             'form.quality_grade' => 'required|in:premium,standard,economic',
             'form.harvest_date' => 'required|date',
             'form.state_id' => 'required|exists:states,id',
@@ -97,6 +99,11 @@ class ListingsCrud extends Component
             return ProductPresentation::find($this->form['product_presentation_id']);
         }
         return null;
+    }
+
+    public function getCurrentUsdRateProperty()
+    {
+        return \App\Models\ProductListing::getUsdRate()['rate'] ?? 0;
     }
 
     public function updatedFormProductPresentationId($value)
@@ -164,6 +171,7 @@ class ListingsCrud extends Component
                 'title' => $this->editingListing->title,
                 'description' => $this->editingListing->description,
                 'unit_price' => $this->editingListing->unit_price,
+                'currency_type' => $this->editingListing->currency_type,
                 'quality_grade' => $this->editingListing->quality_grade,
                 'harvest_date' => $this->editingListing->harvest_date ? $this->editingListing->harvest_date->format('Y-m-d') : '',
                 'state_id' => $this->editingListing->state_id,
@@ -226,6 +234,7 @@ class ListingsCrud extends Component
             'title' => '',
             'description' => '',
             'unit_price' => '',
+            'currency_type' => 'USD',
             'quality_grade' => '',
             'harvest_date' => '',
             'state_id' => '',

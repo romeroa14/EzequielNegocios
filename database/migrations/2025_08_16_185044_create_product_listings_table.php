@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->decimal('unit_price', 10, 2);
+            $table->enum('currency_type', ['USD', 'VES'])->default('USD')->comment('Moneda en la que está expresado el precio');
             $table->enum('quality_grade', ['premium', 'standard', 'economic']);
             $table->date('harvest_date');
             $table->json('images')->nullable();

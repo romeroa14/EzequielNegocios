@@ -116,9 +116,16 @@
                                     <div class="flex items-center justify-between mb-3">
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <span class="text-lg font-bold text-green-600">${{ number_format($product->unit_price, 2) }}</span>
+                                                <!-- Precio en moneda original -->
+                                                <span class="text-lg font-bold text-green-600">{{ $product->formatted_price }}</span>
+                                                
+                                                <!-- Precio convertido -->
                                                 @if($product->current_rate)
-                                                    <span class="text-sm text-gray-500">≈ Bs.D {{ $product->formatted_bs_price }}</span>
+                                                    @if($product->currency_type === 'USD')
+                                                        <span class="text-sm text-gray-500">≈ {{ $product->formatted_bs_price }}</span>
+                                                    @else
+                                                        <span class="text-sm text-gray-500">≈ {{ $product->formatted_usd_price }}</span>
+                                                    @endif
                                                 @endif
                                             </div>
                                             <div class="flex items-center gap-2 text-sm text-gray-500">
@@ -128,7 +135,7 @@
                                             </div>
                                         </div>
                                         <div class="text-sm text-gray-500">
-                                            {{ $product->quantity_available }} disponibles
+                                            disponibles
                                         </div>
                                     </div>
 

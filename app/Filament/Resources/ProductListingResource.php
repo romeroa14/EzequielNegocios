@@ -170,7 +170,7 @@ class ProductListingResource extends Resource
                 Forms\Components\Section::make('Detalles del Producto')
                     ->description('Especifica la presentación y precio del producto')
                     ->schema([
-                        Forms\Components\Grid::make(3)
+                        Forms\Components\Grid::make(4)
                             ->schema([
                                 Forms\Components\Select::make('product_presentation_id')
                                     ->label('Presentación')
@@ -199,17 +199,33 @@ class ProductListingResource extends Resource
                                     ->minValue(0.01)
                                     ->step(0.01),
 
+                                Forms\Components\Select::make('currency_type')
+                                    ->label('Moneda')
+                                    ->options([
+                                        'USD' => 'USD ($)',
+                                        'VES' => 'VES (Bs.D)'
+                                    ])
+                                    ->default('USD')
+                                    ->required()
+                                    ->live(),
+
                                 Forms\Components\TextInput::make('unit_price')
                                     ->label(function (Forms\Get $get) {
                                         $presentationId = $get('product_presentation_id');
-                                        if (!$presentationId) return 'Precio';
+                                        $currencyType = $get('currency_type') ?? 'USD';
+                                        $symbol = $currencyType === 'USD' ? '$' : 'Bs.D';
+                                        
+                                        if (!$presentationId) return "Precio ({$symbol})";
                                         
                                         $presentation = ProductPresentation::find($presentationId);
-                                        return $presentation ? "Precio por {$presentation->name}" : 'Precio';
+                                        return $presentation ? "Precio por {$presentation->name} ({$symbol})" : "Precio ({$symbol})";
                                     })
                                     ->required()
                                     ->numeric()
-                                    ->prefix('$'),
+                                    ->prefix(function (Forms\Get $get) {
+                                        $currencyType = $get('currency_type') ?? 'USD';
+                                        return $currencyType === 'USD' ? '$' : 'Bs.D';
+                                    }),
                             ]),
                             
                         Forms\Components\Select::make('quality_grade')
