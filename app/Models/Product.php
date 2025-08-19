@@ -42,7 +42,7 @@ class Product extends Model
     public static function rules($id = null)
     {
         return [
-            'person_id' => 'required|exists:people,id',
+            'person_id' => 'nullable|exists:people,id',
             'product_category_id' => 'required|exists:product_categories,id',
             'product_subcategory_id' => 'required|exists:product_subcategories,id',
             'product_line_id' => 'required|exists:product_lines,id',
@@ -58,6 +58,24 @@ class Product extends Model
             'creator_user_id' => 'nullable|exists:users,id',
             'is_universal' => 'boolean'
         ];
+    }
+
+    /**
+     * Reglas de validación condicionales
+     */
+    public static function conditionalRules($data)
+    {
+        $rules = self::rules();
+        
+        // Si el producto es universal, person_id no es requerido
+        if (isset($data['is_universal']) && $data['is_universal']) {
+            $rules['person_id'] = 'nullable|exists:people,id';
+        } else {
+            // Si no es universal, person_id es requerido
+            $rules['person_id'] = 'required|exists:people,id';
+        }
+        
+        return $rules;
     }
 
     public static function validationMessages()

@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -28,8 +29,21 @@ return new class extends Migration
             $table->json('seasonal_info')->nullable();
             $table->boolean('is_active');
             $table->boolean('is_universal')->default(false);
+            
             $table->timestamps();
         });
+
+        // Asegurar que los productos universales tengan creator_user_id
+        // Este código se ejecutará después de que se ejecuten los seeders
+        DB::statement("
+            UPDATE products 
+            SET creator_user_id = (
+                SELECT id FROM users 
+                WHERE role = 'producer' AND is_universal = true 
+                LIMIT 1
+            ) 
+            WHERE is_universal = true AND creator_user_id IS NULL
+        ");
     }
 
     /**

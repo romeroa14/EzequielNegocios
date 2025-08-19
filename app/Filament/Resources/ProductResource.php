@@ -44,7 +44,8 @@ class ProductResource extends Resource
                         ->where('is_active', true)
                         ->get()
                         ->mapWithKeys(fn ($person) => [$person->id => $person->full_name]))
-                    ->required()
+                    ->required(fn (Forms\Get $get) => !$get('is_universal'))
+                    ->visible(fn (Forms\Get $get) => !$get('is_universal'))
                     ->searchable()
                     ->preload(),
                     
@@ -213,6 +214,16 @@ class ProductResource extends Resource
                 Forms\Components\Toggle::make('is_active')
                     ->label('Activo')
                     ->default(true),
+                Forms\Components\Toggle::make('is_universal')
+                    ->label('Universal')
+                    ->default(false)
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                        if ($state) {
+                            // Si es universal, no debe tener vendedor específico
+                            $set('person_id', null);
+                        }
+                    }),
             ]);
     }
 
