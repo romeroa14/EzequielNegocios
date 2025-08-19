@@ -1,0 +1,18 @@
+# =====================================================
+# CRONJOB PARA OBTENER TASAS BCV CADA 12 HORAS
+# =====================================================
+
+# Ejecutar cada 12 horas (a las 00:00 y 12:00)
+0 */12 * * * cd /var/www/html/ezequiel_negocios && php artisan bcv:fetch-rates --all >> /var/log/bcv_rates.log 2>&1
+
+# Alternativa: ejecutar a horas específicas (00:00 y 12:00)
+# 0 0,12 * * * cd /var/www/html/ezequiel_negocios && php artisan bcv:fetch-rates --all >> /var/log/bcv_rates.log 2>&1
+
+# =====================================================
+# EXPLICACIÓN DEL CRONJOB:
+# =====================================================
+# 0 */12 * * * = cada 12 horas (minuto 0 de cada 12 horas)
+# cd /var/www/html/ezequiel_negocios = cambiar al directorio del proyecto
+# php artisan bcv:fetch-rates --all = ejecutar el comando con todas las tasas
+# >> /var/log/bcv_rates.log 2>&1 = guardar la salida en un archivo de log
+# =====================================================
