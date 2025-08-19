@@ -37,6 +37,33 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Toggle::make('is_universal')
+                    ->label('Universal')
+                    ->default(false)
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                        if ($state) {
+                            // Si es universal, limpiar el person_id
+                            $set('person_id', null);
+                        }
+                    }),
+
+                Forms\Components\Select::make('creator_user_id')
+                    ->label('Productor Universal')
+                    ->options(function () {
+                        return \App\Models\User::query()
+                            ->where('role', 'producer')
+                            ->where('is_universal', true)
+                            ->where('is_active', true)
+                            ->get()
+                            ->mapWithKeys(fn ($user) => [$user->id => $user->name . ' (' . $user->email . ')']);
+                    })
+                    ->required(fn (Forms\Get $get) => $get('is_universal'))
+                    ->visible(fn (Forms\Get $get) => $get('is_universal'))
+                    ->searchable()
+                    ->preload()
+                    ->helperText('Selecciona el productor universal que será responsable de este producto'),
+
                 Forms\Components\Select::make('person_id')
                     ->label('Vendedor')
                     ->options(Person::query()
@@ -214,16 +241,6 @@ class ProductResource extends Resource
                 Forms\Components\Toggle::make('is_active')
                     ->label('Activo')
                     ->default(true),
-                Forms\Components\Toggle::make('is_universal')
-                    ->label('Universal')
-                    ->default(false)
-                    ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
-                        if ($state) {
-                            // Si es universal, no debe tener vendedor específico
-                            $set('person_id', null);
-                        }
-                    }),
             ]);
     }
 
@@ -249,6 +266,16 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('productPresentation.name')
                     ->label('Unidad')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('creator.name')
+                    ->label('Productor Universal')
+                    ->visible(fn ($record) => $record && $record->is_universal)
+                    ->searchable()
+                    ->default('N/A'),
+                Tables\Columns\TextColumn::make('person.full_name')
+                    ->label('Vendedor')
+                    ->visible(fn ($record) => $record && !$record->is_universal)
+                    ->searchable()
+                    ->default('N/A'),
                 Tables\Columns\ImageColumn::make('image')
                     ->label('Imagen')
                     ->disk('public')
