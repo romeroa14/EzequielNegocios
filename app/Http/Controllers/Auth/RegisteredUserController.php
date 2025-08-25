@@ -81,16 +81,16 @@ class RegisteredUserController extends Controller
             'parish_id.exists' => 'La parroquia seleccionada no es válida.',
         ];
 
-        if ($request->role === 'seller') {
-            $rules['company_name'] = ['required', 'string', 'max:255'];
-            $rules['company_rif'] = ['required', 'string', 'max:20', 'unique:people,company_rif'];
+        // if ($request->role === 'seller') {
+        //     $rules['company_name'] = ['required', 'string', 'max:255'];
+        //     $rules['company_rif'] = ['required', 'string', 'max:20', 'unique:people,company_rif'];
             
-            $messages['company_name.required'] = 'El nombre de la empresa es obligatorio.';
-            $messages['company_name.max'] = 'El nombre de la empresa no puede tener más de 255 caracteres.';
-            $messages['company_rif.required'] = 'El RIF de la empresa es obligatorio.';
-            $messages['company_rif.max'] = 'El RIF de la empresa no puede tener más de 20 caracteres.';
-            $messages['company_rif.unique'] = 'Este RIF ya está registrado.';
-        }
+        //     $messages['company_name.required'] = 'El nombre de la empresa es obligatorio.';
+        //     $messages['company_name.max'] = 'El nombre de la empresa no puede tener más de 255 caracteres.';
+        //     $messages['company_rif.required'] = 'El RIF de la empresa es obligatorio.';
+        //     $messages['company_rif.max'] = 'El RIF de la empresa no puede tener más de 20 caracteres.';
+        //     $messages['company_rif.unique'] = 'Este RIF ya está registrado.';
+        // }
 
         $request->validate($rules, $messages);
 
@@ -109,8 +109,8 @@ class RegisteredUserController extends Controller
                 'state_id' => $request->state_id,
                 'municipality_id' => $request->municipality_id,
                 'parish_id' => $request->parish_id,
-                'company_name' => $request->company_name,
-                'company_rif' => $request->company_rif,
+                // 'company_name' => $request->company_name,
+                // 'company_rif' => $request->company_rif,
                 'is_active' => true,
                 'is_verified' => false,
             ]);
