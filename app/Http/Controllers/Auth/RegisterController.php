@@ -63,10 +63,10 @@ class RegisterController extends Controller
             'parish_id' => ['required', 'exists:parishes,id'],
         ];
 
-        if (request('role') === 'seller') {
-            $rules['company_name'] = ['required', 'string', 'max:255'];
-            $rules['company_rif'] = ['required', 'string', 'max:20'];
-        }
+        // if (request('role') === 'seller') {
+        //     $rules['company_name'] = ['required', 'string', 'max:255'];
+        //     $rules['company_rif'] = ['required', 'string', 'max:20'];
+        // }
 
         return Validator::make($data, $rules);
     }
@@ -90,8 +90,8 @@ class RegisterController extends Controller
                 'state_id' => $data['state_id'],
                 'municipality_id' => $data['municipality_id'],
                 'parish_id' => $data['parish_id'],
-                'company_name' => $data['company_name'] ?? null,
-                'company_rif' => $data['company_rif'] ?? null,
+                // 'company_name' => $data['company_name'] ?? null,
+                // 'company_rif' => $data['company_rif'] ?? null,
                 'is_active' => true,
                 'is_verified' => false,
             ]);
