@@ -1,0 +1,123 @@
+{
+  "Laravel Artisan Commands": {
+    "prefix": "laravel",
+    "body": [
+      "// Comandos de Laravel Artisan útiles",
+      "php artisan serve --host=0.0.0.0 --port=8000",
+      "php artisan migrate",
+      "php artisan migrate:rollback",
+      "php artisan db:seed",
+      "php artisan config:clear",
+      "php artisan cache:clear",
+      "php artisan route:clear",
+      "php artisan view:clear"
+    ],
+    "description": "Comandos básicos de Laravel Artisan"
+  },
+  "BCV Commands": {
+    "prefix": "bcv",
+    "body": [
+      "// Comandos relacionados con BCV",
+      "php artisan bcv:fetch-rates --all",
+      "php artisan laravel-cloud:setup-cron install",
+      "php artisan laravel-cloud:setup-cron check",
+      "php artisan laravel-cloud:setup-cron test",
+      "php artisan schedule:run",
+      "php artisan schedule:list"
+    ],
+    "description": "Comandos para gestión de BCV y cronjobs"
+  },
+  "Database Commands": {
+    "prefix": "db",
+    "body": [
+      "// Comandos de base de datos",
+      "php artisan migrate",
+      "php artisan migrate:rollback",
+      "php artisan migrate:refresh",
+      "php artisan migrate:fresh --seed",
+      "php artisan db:seed --class=AdminUserSeeder",
+      "php artisan db:seed --class=ProductLineSeeder",
+      "php artisan db:seed --class=BrandSeeder"
+    ],
+    "description": "Comandos para gestión de base de datos"
+  },
+  "Production DB Commands": {
+    "prefix": "prod",
+    "body": [
+      "// Comandos para base de datos de producción",
+      "php artisan db:production status",
+      "php artisan db:production migrate",
+      "php artisan db:production seed",
+      "php artisan db:psql",
+      "php artisan db:psql --query=\"SELECT * FROM products LIMIT 5;\""
+    ],
+    "description": "Comandos para gestión de base de datos de producción"
+  },
+  "Cronjob Commands": {
+    "prefix": "cron",
+    "body": [
+      "// Comandos para gestión de cronjobs",
+      "crontab -l",
+      "crontab -e",
+      "sudo systemctl status cron",
+      "sudo systemctl restart cron",
+      "tail -f /var/log/bcv_rates.log",
+      "tail -f storage/logs/laravel.log | grep -E \"(HEARTBEAT|BCV|TASAS)\""
+    ],
+    "description": "Comandos para gestión de cronjobs y logs"
+  },
+  "Git Commands": {
+    "prefix": "git",
+    "body": [
+      "// Comandos de Git útiles",
+      "git status",
+      "git add .",
+      "git commit -m \"$1\"",
+      "git push origin master",
+      "git pull origin master",
+      "git checkout -b $1",
+      "git merge $1"
+    ],
+    "description": "Comandos de Git frecuentemente usados"
+  },
+  "Composer Commands": {
+    "prefix": "composer",
+    "body": [
+      "// Comandos de Composer",
+      "composer install",
+      "composer update",
+      "composer dump-autoload",
+      "composer require $1",
+      "composer remove $1"
+    ],
+    "description": "Comandos de Composer para gestión de dependencias"
+  },
+  "Node Commands": {
+    "prefix": "node",
+    "body": [
+      "// Comandos de Node.js/NPM",
+      "npm install",
+      "npm run dev",
+      "npm run build",
+      "npm run watch",
+      "npm audit",
+      "npm audit fix"
+    ],
+    "description": "Comandos de Node.js y NPM"
+  },
+  "Debug Commands": {
+    "prefix": "debug",
+    "body": [
+      "// Comandos para debugging",
+      "php artisan tinker",
+      "php artisan route:list",
+      "php artisan config:show",
+      "php artisan cache:table",
+      "php artisan make:command $1",
+      "php artisan make:model $1 -m",
+      "php artisan make:controller $1"
+    ],
+    "description": "Comandos útiles para debugging y desarrollo"
+  }
+}
+

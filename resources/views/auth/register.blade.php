@@ -149,7 +149,7 @@
 
             <!-- Información de Empresa (solo para vendedores) -->
             <div id="company-info" class="hidden border-t border-gray-200 pt-4">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Información de la Empresa</h3>
+                <!-- <h3 class="text-lg font-medium text-gray-900 mb-4">Información de la Empresa</h3>
 
                 <div>
                     <x-input-label for="company_name" :value="__('Nombre de la Empresa')" />
@@ -162,7 +162,7 @@
                     <x-text-input id="company_rif" class="block mt-1 w-full" type="text" name="company_rif" :value="old('company_rif')" />
                     <x-input-error :messages="$errors->get('company_rif')" class="mt-2" />
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Contraseña -->
             <div class="border-t border-gray-200 pt-4">
@@ -202,14 +202,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const parishSelect = document.getElementById('parish_id');
     const companyInfo = document.getElementById('company-info');
 
-    roleSelect.addEventListener('change', function() {
-        const role = this.value;
-        if (role === 'seller') {
-            companyInfo.classList.remove('hidden');
-        } else {
-            companyInfo.classList.add('hidden');
-        }
-    });
+    // roleSelect.addEventListener('change', function() {
+    //     const role = this.value;
+    //     if (role === 'seller') {
+    //         companyInfo.classList.remove('hidden');
+    //     } else {
+    //         companyInfo.classList.add('hidden');
+    //     }
+    // });
 
     stateSelect.addEventListener('change', function() {
         const stateId = this.value;

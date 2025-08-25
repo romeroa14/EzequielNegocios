@@ -1,0 +1,70 @@
+{
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.cwd": "/var/www/html/ezequiel_negocios",
+  "emmet.includeLanguages": {
+    "blade": "html",
+    "php": "html"
+  },
+  "files.associations": {
+    "*.blade.php": "blade",
+    "*.php": "php"
+  },
+  "php.validate.enable": true,
+  "php.suggest.basic": false,
+  "phpcs.standard": "PSR2",
+  "phpcs.executablePath": "/usr/bin/phpcs",
+  "phpcs.ignorePatterns": [
+    "*/vendor/*",
+    "*/node_modules/*"
+  ],
+  "git.enableSmartCommit": true,
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "workbench.editor.enablePreview": false,
+  "search.exclude": {
+    "**/vendor": true,
+    "**/node_modules": true,
+    "**/storage/logs": true,
+    "**/storage/framework/cache": true,
+    "**/storage/framework/sessions": true,
+    "**/storage/framework/views": true,
+    "**/.git": true
+  },
+  "files.exclude": {
+    "**/vendor": true,
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
+  },
+  "editor.wordWrap": "on",
+  "editor.rulers": [120],
+  "editor.minimap.enabled": false,
+  "breadcrumbs.enabled": true,
+  "explorer.compactFolders": false,
+  "workbench.colorTheme": "Default Dark+",
+  "workbench.iconTheme": "material-icon-theme",
+  "material-icon-theme.folders.associations": {
+    "app": "laravel",
+    "config": "laravel",
+    "database": "laravel",
+    "resources": "laravel",
+    "routes": "laravel",
+    "storage": "laravel",
+    "tests": "laravel"
+  },
+  "material-icon-theme.files.associations": {
+    "*.blade.php": "laravel",
+    "artisan": "laravel"
+  }
+}
+

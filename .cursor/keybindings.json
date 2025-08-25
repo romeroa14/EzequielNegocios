@@ -1,0 +1,87 @@
+[
+  {
+    "key": "ctrl+shift+l",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "php artisan serve --host=0.0.0.0 --port=8000\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+m",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "php artisan migrate\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+s",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "php artisan db:seed\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+c",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "php artisan config:clear && php artisan cache:clear\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+b",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "php artisan bcv:fetch-rates --all\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+r",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "php artisan schedule:run\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+p",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "php artisan laravel-cloud:setup-cron check\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+g",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "git status\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+n",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "npm run dev\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+d",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "composer install\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+/",
+    "command": "editor.action.commentLine",
+    "when": "editorTextFocus && !editorReadonly"
+  }
+]
