@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //     } else {
     //         companyInfo.classList.add('hidden');
     //     }
-    });
+    // });
 
     stateSelect.addEventListener('change', function() {
         const stateId = this.value;
