@@ -148,7 +148,7 @@
             
 
             <!-- Información de Empresa (solo para vendedores) -->
-            <div id="company-info" class="hidden border-t border-gray-200 pt-4">
+            <!-- <div id="company-info" class="hidden border-t border-gray-200 pt-4"> -->
                 <!-- <h3 class="text-lg font-medium text-gray-900 mb-4">Información de la Empresa</h3>
 
                 <div>
