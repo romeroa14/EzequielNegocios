@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const stateSelect = document.getElementById('state_id');
     const municipalitySelect = document.getElementById('municipality_id');
     const parishSelect = document.getElementById('parish_id');
-    const companyInfo = document.getElementById('company-info');
+    // const companyInfo = document.getElementById('company-info');
 
     // roleSelect.addEventListener('change', function() {
     //     const role = this.value;
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //     } else {
     //         companyInfo.classList.add('hidden');
     //     }
-    // });
+    });
 
     stateSelect.addEventListener('change', function() {
         const stateId = this.value;
