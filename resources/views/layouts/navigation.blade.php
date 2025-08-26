@@ -20,7 +20,7 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('home') }}" class="text-2xl font-bold text-yellow-600">
+                    <a href="{{ route('welcome.page') }}" class="text-2xl font-bold text-yellow-600">
                         🌱 EzequielNegocios
                         <span class="text-xs text-gray-500">
                             Beta

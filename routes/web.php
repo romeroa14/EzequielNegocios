@@ -28,9 +28,27 @@ use App\Http\Controllers\CookieController;
 use App\Http\Controllers\WelcomeController;
 
 // Rutas públicas
-Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
+Route::get('/', function() {
+    return view('catalog');
+})->name('welcome');
 
-Route::get('/home', [WelcomeController::class, 'index'])->name('home');
+Route::get('/welcome', function() {
+    // Obtener las tasas de cambio BCV
+    $exchangeRates = [
+        'usd' => [
+            'rate' => \App\Models\ExchangeRate::where('currency_code', 'USD')->latest()->first()?->rate ?? null
+        ],
+        'eur' => [
+            'rate' => \App\Models\ExchangeRate::where('currency_code', 'EUR')->latest()->first()?->rate ?? null
+        ]
+    ];
+    
+    return view('welcome', compact('exchangeRates'));
+})->name('welcome.page');
+
+Route::get('/home', function() {
+    return view('catalog');
+})->name('home');
 
 // Rutas del catálogo (públicas)
 Route::get('/catalogo', function() {
