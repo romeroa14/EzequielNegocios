@@ -7,6 +7,9 @@
 
     <title>@yield('title', config('app.name', 'Laravel'))</title>
 
+    <!-- Google Analytics -->
+    <x-google-analytics />
+
     <!-- Google Tag Manager -->
     <x-google-tag-manager />
 
