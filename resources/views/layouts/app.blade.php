@@ -173,6 +173,9 @@
     @livewireScripts
     @stack('scripts')
     
+    <!-- Form Tracking -->
+    <x-form-tracking />
+    
     <!-- Cookie Banner -->
     <x-cookie-banner />
 </body>
