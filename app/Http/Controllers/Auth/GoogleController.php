@@ -238,6 +238,7 @@ class GoogleController extends Controller
      */
     public function completeProfile(Request $request)
     {
+        /** @var \App\Models\Person $person */
         $person = Auth::guard('person')->user();
 
         if (!$person) {
@@ -256,10 +257,11 @@ class GoogleController extends Controller
             'parish_id' => 'required|exists:parishes,id',
             'address' => 'required|string|max:255',
             'sector' => 'required|string|max:255',
+            'password' => 'nullable|string|min:8|confirmed',
         ]);
 
-        // Actualizar persona
-        $person->update([
+        // Preparar datos para actualizar
+        $updateData = [
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'phone' => $request->phone,
@@ -271,15 +273,29 @@ class GoogleController extends Controller
             'address' => $request->address,
             'sector' => $request->sector,
             'is_verified' => true,
-        ]);
+        ];
+
+        // Si se proporcionó una contraseña, hashearla y agregarla
+        if (!empty($request->password)) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        // Actualizar persona
+        $person->update($updateData);
+
+        // Preparar mensaje de éxito
+        $successMessage = '¡Perfil completado exitosamente! Tu cuenta ha sido verificada.';
+        if (!empty($request->password)) {
+            $successMessage .= ' Contraseña configurada exitosamente.';
+        }
 
         // Redirigir según el rol después de completar el perfil
         if ($person->role === 'seller') {
             return redirect()->route('seller.dashboard')
-                ->with('success', '¡Perfil completado exitosamente! Tu cuenta ha sido verificada.');
+                ->with('success', $successMessage);
         } else {
             return redirect()->route('catalog')
-                ->with('success', '¡Perfil completado exitosamente! Tu cuenta ha sido verificada.');
+                ->with('success', $successMessage);
         }
     }
 }

@@ -112,7 +112,30 @@
                         <x-input-error class="mt-2" :messages="$errors->get('sector')" />
                     </div>
 
+                    <!-- Contraseña (solo para usuarios de Google OAuth sin contraseña) -->
+                    @if($person->google_id && !$person->password)
+                    <div class="border-t border-gray-200 pt-4">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Configurar Contraseña</h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Como te registraste con Google, puedes crear una contraseña para acceder también con email y contraseña.
+                        </p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <x-input-label for="password" :value="__('Nueva Contraseña')" />
+                                <x-text-input id="password" name="password" type="password" class="mt-1 block w-full" minlength="8" />
+                                <x-input-error class="mt-2" :messages="$errors->get('password')" />
+                                <p class="text-xs text-gray-500 mt-1">Mínimo 8 caracteres</p>
+                            </div>
 
+                            <div>
+                                <x-input-label for="password_confirmation" :value="__('Confirmar Contraseña')" />
+                                <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" minlength="8" />
+                                <x-input-error class="mt-2" :messages="$errors->get('password_confirmation')" />
+                            </div>
+                        </div>
+                    </div>
+                    @endif
 
                     <div class="flex items-center gap-4">
                         <x-primary-button type="submit">{{ __('Guardar') }}</x-primary-button>

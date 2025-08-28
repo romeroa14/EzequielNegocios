@@ -8,12 +8,14 @@ use App\Models\Municipality;
 use App\Models\Parish;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
     public function edit()
     {
+        /** @var \App\Models\Person $person */
         $person = Auth::guard('person')->user();
         
         if (!$person) {
@@ -52,6 +54,7 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
+        /** @var \App\Models\Person $person */
         $person = Auth::guard('person')->user();
         
         if (!$person) {
@@ -71,6 +74,7 @@ class ProfileController extends Controller
             'state_id' => ['required', 'exists:states,id'],
             'municipality_id' => ['required', 'exists:municipalities,id'],
             'parish_id' => ['required', 'exists:parishes,id'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];
 
 
@@ -99,12 +103,27 @@ class ProfileController extends Controller
             'municipality_id.exists' => 'El municipio seleccionado no es válido.',
             'parish_id.required' => 'La parroquia es obligatoria.',
             'parish_id.exists' => 'La parroquia seleccionada no es válida.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed' => 'La confirmación de contraseña no coincide.',
         ];
 
         $validated = $request->validate($rules, $messages);
 
-            $person->update($validated);
+        // Si se proporcionó una contraseña, hashearla
+        if (!empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            // Si no se proporcionó contraseña, remover del array para no actualizar
+            unset($validated['password']);
+        }
 
-        return redirect()->route('profile.edit')->with('success', 'Perfil actualizado correctamente.');
+        $person->update($validated);
+
+        $successMessage = 'Perfil actualizado correctamente.';
+        if (!empty($request->password)) {
+            $successMessage .= ' Contraseña configurada exitosamente.';
+        }
+
+        return redirect()->route('profile.edit')->with('success', $successMessage);
     }
 }

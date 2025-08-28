@@ -44,7 +44,7 @@ class LoginRequest extends FormRequest
         $email = $this->input('email');
         $password = $this->input('password');
 
-        // Verificar si es un usuario de Google OAuth (sin contraseña)
+        // Verificar si es un usuario de Google OAuth sin contraseña
         if (empty($password)) {
             $person = \App\Models\Person::where('email', $email)
                 ->whereNotNull('google_id')
@@ -52,9 +52,9 @@ class LoginRequest extends FormRequest
                 ->first();
 
             if ($person) {
-                // Usuario de Google OAuth, mostrar mensaje para usar Google
+                // Usuario de Google OAuth sin contraseña, mostrar mensaje para usar Google
                 throw ValidationException::withMessages([
-                    'email' => 'Este usuario se registró con Google. Por favor usa el botón "Iniciar sesión con Google" para acceder.',
+                    'email' => 'Este usuario se registró con Google y no tiene contraseña configurada. Por favor usa el botón "Iniciar sesión con Google" para acceder, o configura una contraseña en tu perfil.',
                 ]);
             }
         }
