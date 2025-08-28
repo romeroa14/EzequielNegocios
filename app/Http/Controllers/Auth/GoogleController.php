@@ -137,7 +137,7 @@ class GoogleController extends Controller
                 'first_name' => explode(' ', $googleUser->name)[0] ?? $googleUser->name,
                 'last_name' => explode(' ', $googleUser->name)[1] ?? '',
                 'email' => $googleUser->email,
-                'password' => Hash::make(Str::random(16)),
+                'password' => null, // No se crea contraseña para usuarios de Google OAuth
                 'role' => $role,
                 'google_id' => $googleUser->id,
                 'is_active' => true,

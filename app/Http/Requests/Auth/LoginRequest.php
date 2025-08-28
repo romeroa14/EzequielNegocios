@@ -28,7 +28,7 @@ class LoginRequest extends FormRequest
     {
         return [
             'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
+            'password' => ['nullable', 'string'], // Permitir nulo para usuarios de Google OAuth
         ];
     }
 
@@ -40,6 +40,24 @@ class LoginRequest extends FormRequest
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
+
+        $email = $this->input('email');
+        $password = $this->input('password');
+
+        // Verificar si es un usuario de Google OAuth (sin contraseña)
+        if (empty($password)) {
+            $person = \App\Models\Person::where('email', $email)
+                ->whereNotNull('google_id')
+                ->whereNull('password')
+                ->first();
+
+            if ($person) {
+                // Usuario de Google OAuth, mostrar mensaje para usar Google
+                throw ValidationException::withMessages([
+                    'email' => 'Este usuario se registró con Google. Por favor usa el botón "Iniciar sesión con Google" para acceder.',
+                ]);
+            }
+        }
 
         // Intentar autenticar como persona (comprador/vendedor)
         if (Auth::guard('person')->attempt($this->only('email', 'password'), $this->boolean('remember'))) {

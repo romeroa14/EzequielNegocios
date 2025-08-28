@@ -61,7 +61,7 @@ class Person extends Authenticatable
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|' . $unique_email,
-            'password' => $id ? 'nullable|min:8' : 'required|min:8',
+            'password' => 'nullable|min:8',
             'identification_type' => 'required|in:V,E,J,G',
             'identification_number' => 'required|string|' . $unique_identification,
             'state_id' => 'required|exists:states,id',
