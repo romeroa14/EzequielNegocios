@@ -10,7 +10,12 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $person = Auth::user(); // El vendedor autenticado
+        $person = Auth::guard('person')->user(); // El vendedor autenticado
+        
+        if (!$person) {
+            return redirect()->route('login')
+                ->with('error', 'Debes iniciar sesión para acceder al dashboard.');
+        }
     
         // Cantidad de productos creados por este vendedor
         $productsCount = \App\Models\Product::where('person_id', $person->id)->count();

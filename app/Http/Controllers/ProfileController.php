@@ -14,10 +14,26 @@ class ProfileController extends Controller
 {
     public function edit()
     {
-        $person = Auth::guard('web')->user();
+        $person = Auth::guard('person')->user();
+        
+        if (!$person) {
+            return redirect()->route('login')
+                ->with('error', 'Debes iniciar sesión para acceder al perfil.');
+        }
+        
         $states = State::where('country_id', 296)->get();
-        $municipalities = Municipality::where('state_id', $person->state_id)->get();
-        $parishes = Parish::where('municipality_id', $person->municipality_id)->get();
+        
+        // Solo obtener municipalities y parishes si el usuario tiene state_id y municipality_id
+        $municipalities = collect();
+        $parishes = collect();
+        
+        if ($person->state_id) {
+            $municipalities = Municipality::where('state_id', $person->state_id)->get();
+        }
+        
+        if ($person->municipality_id) {
+            $parishes = Parish::where('municipality_id', $person->municipality_id)->get();
+        }
         
         return view('profile.edit', compact('person', 'states', 'municipalities', 'parishes'));
     }
@@ -36,7 +52,12 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
-        $person = Auth::guard('web')->user();
+        $person = Auth::guard('person')->user();
+        
+        if (!$person) {
+            return redirect()->route('login')
+                ->with('error', 'Debes iniciar sesión para actualizar el perfil.');
+        }
 
         $rules = [
             'first_name' => ['required', 'string', 'max:255'],

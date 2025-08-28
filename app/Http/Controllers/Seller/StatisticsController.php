@@ -12,7 +12,12 @@ class StatisticsController extends Controller
 {
     public function index()
     {
-        $seller = Auth::guard('web')->user()->person;
+        $seller = Auth::guard('person')->user();
+        
+        if (!$seller) {
+            return redirect()->route('login')
+                ->with('error', 'Debes iniciar sesión para ver las estadísticas.');
+        }
         
         // Estadísticas generales
         $generalStats = [

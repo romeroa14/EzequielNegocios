@@ -38,6 +38,7 @@ class Person extends Authenticatable
         'company_rif',
         'is_active',
         'is_verified',
+        'google_id',
     ];
 
     protected $hidden = [

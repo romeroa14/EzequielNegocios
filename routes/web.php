@@ -107,6 +107,16 @@ Route::middleware('guest')->group(function () {
     // Las rutas de autenticación se manejan en routes/auth.php
 });
 
+// Rutas de Google OAuth
+Route::get('/auth/google', [App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
+Route::get('/auth/google/callback', [App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+// Rutas para completar perfil (requieren autenticación)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile/complete', [App\Http\Controllers\Auth\GoogleController::class, 'showCompleteProfile'])->name('profile.complete');
+    Route::post('/profile/complete', [App\Http\Controllers\Auth\GoogleController::class, 'completeProfile'])->name('profile.complete.store');
+});
+
 
 
 // Rutas para usuarios autenticados

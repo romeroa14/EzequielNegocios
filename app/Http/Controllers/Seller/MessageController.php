@@ -12,7 +12,14 @@ class MessageController extends Controller
 {
     public function index()
     {
-        $conversations = Auth::guard('web')->user()->person->conversations()
+        $seller = Auth::guard('person')->user();
+        
+        if (!$seller) {
+            return redirect()->route('login')
+                ->with('error', 'Debes iniciar sesión para ver los mensajes.');
+        }
+        
+        $conversations = $seller->conversations()
             ->with(['lastMessage', 'buyer'])
             ->latest('updated_at')
             ->paginate(10);
@@ -43,8 +50,10 @@ class MessageController extends Controller
             'message' => 'required|string|max:1000',
         ]);
 
+        $seller = Auth::guard('person')->user();
+        
         $message = $conversation->messages()->create([
-            'sender_id' => Auth::guard('web')->user()->person->id,
+            'sender_id' => $seller->id,
             'content' => $request->message,
             'read' => false,
         ]);

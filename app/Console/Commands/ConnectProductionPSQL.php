@@ -11,7 +11,7 @@ class ConnectProductionPSQL extends Command
      *
      * @var string
      */
-    protected $signature = 'db:psql {--query= : SQL query to execute}';
+    protected $signature = 'db:psql {--query= : SQL query to execute} {--direct : Connect directly without confirmations}';
 
     /**
      * The console command description.
@@ -37,11 +37,12 @@ class ConnectProductionPSQL extends Command
     public function handle()
     {
         $query = $this->option('query');
+        $direct = $this->option('direct');
         
         if ($query) {
             $this->executeQuery($query);
         } else {
-            $this->connectInteractive();
+            $this->connectInteractive($direct);
         }
         
         return 0;
@@ -50,7 +51,7 @@ class ConnectProductionPSQL extends Command
     /**
      * Conectar interactivamente a psql
      */
-    private function connectInteractive()
+    private function connectInteractive($direct = false)
     {
         $this->info('🔗 Conectando a la base de datos de producción...');
         $this->line('');
@@ -63,20 +64,33 @@ class ConnectProductionPSQL extends Command
         // Construir comando psql
         $command = "PGPASSWORD={$this->productionConfig['password']} psql -h {$this->productionConfig['host']} -p {$this->productionConfig['port']} -U {$this->productionConfig['username']} -d {$this->productionConfig['database']}";
         
-        $this->warn('⚠️  Conectando a PRODUCCIÓN - Ten cuidado con los comandos que ejecutes!');
-        
-        if ($this->confirm('¿Continuar con la conexión?')) {
-            $this->info('🔧 Abriendo psql...');
-            $this->line('Comandos útiles:');
-            $this->line('  \\dt - Listar tablas');
-            $this->line('  \\d table_name - Ver estructura de tabla');
-            $this->line('  \\q - Salir');
-            $this->line('');
+        if (!$direct) {
+            $this->warn('⚠️  Conectando a PRODUCCIÓN - Ten cuidado con los comandos que ejecutes!');
             
-            passthru($command);
+            if ($this->confirm('¿Continuar con la conexión?')) {
+                $this->connectToPSQL($command);
+            } else {
+                $this->info('Conexión cancelada');
+            }
         } else {
-            $this->info('Conexión cancelada');
+            $this->warn('⚠️  Conectando directamente a PRODUCCIÓN!');
+            $this->connectToPSQL($command);
         }
+    }
+
+    /**
+     * Conectar a psql
+     */
+    private function connectToPSQL($command)
+    {
+        $this->info('🔧 Abriendo psql...');
+        $this->line('Comandos útiles:');
+        $this->line('  \\dt - Listar tablas');
+        $this->line('  \\d table_name - Ver estructura de tabla');
+        $this->line('  \\q - Salir');
+        $this->line('');
+        
+        passthru($command);
     }
 
     /**

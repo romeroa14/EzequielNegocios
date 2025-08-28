@@ -61,19 +61,27 @@
                         <x-slot name="trigger">
                             <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                                 <div>
-                                    @if(auth()->user()->person)
-                                        {{ auth()->user()->person->first_name }} {{ auth()->user()->person->last_name }}
-                                    @else
-                                        {{ auth()->user()->first_name }} {{ auth()->user()->last_name }} 
-                                    @endif
+                                    @if(auth()->guard('person')->check())
+                                        @php $person = auth()->guard('person')->user(); @endphp
+                                        {{ $person->first_name }} {{ $person->last_name }}
 
-                                    @if (!auth()->user()->email_verified_at)
-                                        <span title="Cuenta no verificada" class="ml-2 text-xs text-red-500 font-semibold">
-                                            <svg class="inline h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
-                                            </svg>
-                                            No verificado
-                                        </span>
+                                        @if (!$person->is_verified)
+                                            <span title="Cuenta no verificada" class="ml-2 inline-flex items-center text-xs text-red-600 font-medium bg-red-50 px-2 py-1 rounded-full">
+                                                <svg class="inline h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
+                                                </svg>
+                                                No verificado
+                                            </span>
+                                        @else
+                                            <span title="Cuenta verificada" class="ml-2 inline-flex items-center text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full">
+                                                <svg class="inline h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                Verificado
+                                            </span>
+                                        @endif
+                                    @else
+                                        {{ auth()->user()->name ?? 'Usuario' }}
                                     @endif
                                 </div>
 
@@ -86,25 +94,49 @@
                         </x-slot>
 
                         <x-slot name="content">
-                            @if(auth()->user()->person && auth()->user()->person->role === 'seller')
-                                <x-dropdown-link :href="route('seller.dashboard')">
-                                    {{ __('Dashboard') }}
+                            @if(auth()->guard('person')->check())
+                                @php $person = auth()->guard('person')->user(); @endphp
+                                
+                                @if($person->role === 'seller')
+                                    <x-dropdown-link :href="route('seller.dashboard')">
+                                        {{ __('Dashboard') }}
+                                    </x-dropdown-link>
+                                @endif
+
+                                <x-dropdown-link :href="route('profile.edit')">
+                                    {{ __('Perfil') }}
                                 </x-dropdown-link>
+
+                                @if(!$person->is_verified)
+                                    <x-dropdown-link :href="route('profile.complete')" class="text-yellow-600 hover:text-yellow-700">
+                                        {{ __('Completar Perfil') }}
+                                    </x-dropdown-link>
+                                @endif
+
+                                <!-- Authentication -->
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <x-dropdown-link :href="route('logout')"
+                                            onclick="event.preventDefault();
+                                                        this.closest('form').submit();">
+                                        {{ __('Cerrar Sesión') }}
+                                    </x-dropdown-link>
+                                </form>
+                            @else
+                                <x-dropdown-link :href="route('profile.edit')">
+                                    {{ __('Perfil') }}
+                                </x-dropdown-link>
+
+                                <!-- Authentication -->
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <x-dropdown-link :href="route('logout')"
+                                            onclick="event.preventDefault();
+                                                        this.closest('form').submit();">
+                                        {{ __('Cerrar Sesión') }}
+                                    </x-dropdown-link>
+                                </form>
                             @endif
-
-                            <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Perfil') }}
-                            </x-dropdown-link>
-
-                            <!-- Authentication -->
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')"
-                                        onclick="event.preventDefault();
-                                                    this.closest('form').submit();">
-                                    {{ __('Cerrar Sesión') }}
-                                </x-dropdown-link>
-                            </form>
                         </x-slot>
                     </x-dropdown>
                 @else
