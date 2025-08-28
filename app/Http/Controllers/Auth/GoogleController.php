@@ -91,11 +91,27 @@ class GoogleController extends Controller
                 
                 // Persona existe, verificar si está verificado
                 if (!$person->is_verified) {
-                    Log::info('Persona no verificado, redirigiendo a completar perfil');
-                    // Persona no verificado, redirigir a completar perfil
-                    Auth::guard('person')->login($person);
-                    return redirect()->route('profile.complete')
-                        ->with('warning', 'Por favor completa tu perfil para verificar tu cuenta.');
+                    // Verificar si ya tiene datos completos
+                    if ($person->hasCompleteData()) {
+                        Log::info('Persona tiene datos completos, marcando como verificado automáticamente');
+                        $person->markAsVerifiedIfComplete();
+                        
+                        Auth::guard('person')->login($person);
+                        
+                        if ($person->role === 'seller') {
+                            return redirect()->route('seller.dashboard')
+                                ->with('success', '¡Bienvenido de vuelta! Tu cuenta ha sido verificada automáticamente.');
+                        } else {
+                            return redirect()->route('catalog')
+                                ->with('success', '¡Bienvenido de vuelta! Tu cuenta ha sido verificada automáticamente.');
+                        }
+                    } else {
+                        Log::info('Persona no verificado y sin datos completos, redirigiendo a completar perfil');
+                        // Persona no verificado, redirigir a completar perfil
+                        Auth::guard('person')->login($person);
+                        return redirect()->route('profile.complete')
+                            ->with('warning', 'Por favor completa tu perfil para verificar tu cuenta.');
+                    }
                 }
 
                 Log::info('Persona verificado, iniciando sesión');
@@ -181,14 +197,40 @@ class GoogleController extends Controller
     {
         $person = Auth::guard('person')->user();
         
+        // Verificar si ya está verificado
         if ($person->is_verified) {
             return redirect()->intended(RouteServiceProvider::HOME);
+        }
+        
+        // Verificar si ya tiene datos completos y marcarlo como verificado automáticamente
+        if ($person->hasCompleteData()) {
+            $person->markAsVerifiedIfComplete();
+            
+            if ($person->role === 'seller') {
+                return redirect()->route('seller.dashboard')
+                    ->with('success', '¡Tu cuenta ha sido verificada automáticamente!');
+            } else {
+                return redirect()->route('catalog')
+                    ->with('success', '¡Tu cuenta ha sido verificada automáticamente!');
+            }
         }
 
         // Obtener los estados de Venezuela para el formulario
         $states = \App\Models\State::where('country_id', 296)->orderBy('name')->get();
+        
+        // Obtener municipios y parroquias si el usuario ya tiene state_id y municipality_id
+        $municipalities = collect();
+        $parishes = collect();
+        
+        if ($person->state_id) {
+            $municipalities = \App\Models\Municipality::where('state_id', $person->state_id)->get();
+        }
+        
+        if ($person->municipality_id) {
+            $parishes = \App\Models\Parish::where('municipality_id', $person->municipality_id)->get();
+        }
 
-        return view('auth.complete-profile', compact('person', 'states'));
+        return view('auth.complete-profile', compact('person', 'states', 'municipalities', 'parishes'));
     }
 
     /**

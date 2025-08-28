@@ -47,7 +47,7 @@
                     <!-- Apellido -->
                     <div>
                         <x-input-label for="last_name" :value="__('Apellidos')" />
-                        <x-text-input id="last_name" class="block mt-1 w-full" type="text" name="last_name" :value="old('last_name')" required />
+                        <x-text-input id="last_name" class="block mt-1 w-full" type="text" name="last_name" :value="old('last_name', $person->last_name)" required />
                         <x-input-error :messages="$errors->get('last_name')" class="mt-2" />
                     </div>
                 </div>
@@ -55,7 +55,7 @@
                 <!-- Teléfono -->
                 <div class="mt-4">
                     <x-input-label for="phone" :value="__('Teléfono')" />
-                    <x-text-input id="phone" class="block mt-1 w-full" type="tel" name="phone" :value="old('phone')" required />
+                    <x-text-input id="phone" class="block mt-1 w-full" type="tel" name="phone" :value="old('phone', $person->phone)" required />
                     <x-input-error :messages="$errors->get('phone')" class="mt-2" />
                 </div>
 
@@ -64,10 +64,10 @@
                     <div>
                         <x-input-label for="identification_type" :value="__('Tipo de Identificación')" />
                         <select id="identification_type" name="identification_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                            <option value="V" {{ old('identification_type') == 'V' ? 'selected' : '' }}>V</option>
-                            <option value="E" {{ old('identification_type') == 'E' ? 'selected' : '' }}>E</option>
-                            <option value="J" {{ old('identification_type') == 'J' ? 'selected' : '' }}>J</option>
-                            <option value="G" {{ old('identification_type') == 'G' ? 'selected' : '' }}>G</option>
+                            <option value="V" {{ old('identification_type', $person->identification_type) == 'V' ? 'selected' : '' }}>V</option>
+                            <option value="E" {{ old('identification_type', $person->identification_type) == 'E' ? 'selected' : '' }}>E</option>
+                            <option value="J" {{ old('identification_type', $person->identification_type) == 'J' ? 'selected' : '' }}>J</option>
+                            <option value="G" {{ old('identification_type', $person->identification_type) == 'G' ? 'selected' : '' }}>G</option>
                         </select>
                         <x-input-error :messages="$errors->get('identification_type')" class="mt-2" />
                     </div>
@@ -75,7 +75,7 @@
                     <!-- Número de Identificación -->
                     <div>
                         <x-input-label for="identification_number" :value="__('Número de Identificación')" />
-                        <x-text-input id="identification_number" class="block mt-1 w-full" type="text" name="identification_number" :value="old('identification_number')" required />
+                        <x-text-input id="identification_number" class="block mt-1 w-full" type="text" name="identification_number" :value="old('identification_number', $person->identification_number)" required />
                         <x-input-error :messages="$errors->get('identification_number')" class="mt-2" />
                     </div>
                 </div>
@@ -93,7 +93,7 @@
                         <select id="state_id" name="state_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                             <option value="">Selecciona un estado</option>
                             @foreach ($states ?? [] as $state)
-                                <option value="{{ $state->id }}" {{ old('state_id') == $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
+                                <option value="{{ $state->id }}" {{ old('state_id', $person->state_id) == $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
                             @endforeach
                         </select>
                         <x-input-error :messages="$errors->get('state_id')" class="mt-2" />
@@ -104,6 +104,13 @@
                         <x-input-label for="municipality_id" :value="__('Municipio')" />
                         <select id="municipality_id" name="municipality_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                             <option value="">Selecciona un municipio</option>
+                            @if($person->municipality_id)
+                                @foreach($municipalities ?? [] as $municipality)
+                                    <option value="{{ $municipality->id }}" {{ old('municipality_id', $person->municipality_id) == $municipality->id ? 'selected' : '' }}>
+                                        {{ $municipality->name }}
+                                    </option>
+                                @endforeach
+                            @endif
                         </select>
                         <x-input-error :messages="$errors->get('municipality_id')" class="mt-2" />
                     </div>
@@ -113,6 +120,13 @@
                         <x-input-label for="parish_id" :value="__('Parroquia')" />
                         <select id="parish_id" name="parish_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                             <option value="">Selecciona una parroquia</option>
+                            @if($person->parish_id)
+                                @foreach($parishes ?? [] as $parish)
+                                    <option value="{{ $parish->id }}" {{ old('parish_id', $person->parish_id) == $parish->id ? 'selected' : '' }}>
+                                        {{ $parish->name }}
+                                    </option>
+                                @endforeach
+                            @endif
                         </select>
                         <x-input-error :messages="$errors->get('parish_id')" class="mt-2" />
                     </div>
@@ -121,13 +135,13 @@
                 <!-- Dirección -->
                 <div class="mt-4">
                     <x-input-label for="address" :value="__('Dirección')" />
-                    <x-text-input id="address" class="block mt-1 w-full" type="text" name="address" :value="old('address')" required />
+                    <x-text-input id="address" class="block mt-1 w-full" type="text" name="address" :value="old('address', $person->address)" required />
                     <x-input-error :messages="$errors->get('address')" class="mt-2" />
                 </div>
 
                 <div class="mt-4">
                     <x-input-label for="sector" :value="__('Sector')" />
-                    <x-text-input id="sector" class="block mt-1 w-full" type="text" name="sector" :value="old('sector')" required />
+                    <x-text-input id="sector" class="block mt-1 w-full" type="text" name="sector" :value="old('sector', $person->sector)" required />
                     <x-input-error :messages="$errors->get('sector')" class="mt-2" />
                 </div>
             </div>

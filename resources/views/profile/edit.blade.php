@@ -112,20 +112,7 @@
                         <x-input-error class="mt-2" :messages="$errors->get('sector')" />
                     </div>
 
-                    @if($person->role === 'seller')
-                        <!-- Información de Empresa -->
-                        <div>
-                            <x-input-label for="company_name" :value="__('Nombre de la Empresa')" />
-                            <x-text-input id="company_name" name="company_name" type="text" class="mt-1 block w-full" :value="old('company_name', $person->company_name)" required />
-                            <x-input-error class="mt-2" :messages="$errors->get('company_name')" />
-                        </div>
 
-                        <div>
-                            <x-input-label for="company_rif" :value="__('RIF de la Empresa')" />
-                            <x-text-input id="company_rif" name="company_rif" type="text" class="mt-1 block w-full" :value="old('company_rif', $person->company_rif)" required />
-                            <x-input-error class="mt-2" :messages="$errors->get('company_rif')" />
-                        </div>
-                    @endif
 
                     <div class="flex items-center gap-4">
                         <x-primary-button type="submit">{{ __('Guardar') }}</x-primary-button>

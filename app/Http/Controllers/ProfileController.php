@@ -73,10 +73,7 @@ class ProfileController extends Controller
             'parish_id' => ['required', 'exists:parishes,id'],
         ];
 
-        if ($person->role === 'seller') {
-            $rules['company_name'] = ['required', 'string', 'max:255'];
-            $rules['company_rif'] = ['required', 'string', 'max:20', Rule::unique('people')->ignore($person->id)];
-        }
+
 
         $messages = [
             'first_name.required' => 'El nombre es obligatorio.',
@@ -102,11 +99,6 @@ class ProfileController extends Controller
             'municipality_id.exists' => 'El municipio seleccionado no es válido.',
             'parish_id.required' => 'La parroquia es obligatoria.',
             'parish_id.exists' => 'La parroquia seleccionada no es válida.',
-            'company_name.required' => 'El nombre de la empresa es obligatorio.',
-            'company_name.max' => 'El nombre de la empresa no puede tener más de 255 caracteres.',
-            'company_rif.required' => 'El RIF es obligatorio.',
-            'company_rif.max' => 'El RIF no puede tener más de 20 caracteres.',
-            'company_rif.unique' => 'Este RIF ya está registrado.',
         ];
 
         $validated = $request->validate($rules, $messages);

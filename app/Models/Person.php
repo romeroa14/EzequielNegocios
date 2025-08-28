@@ -291,4 +291,45 @@ class Person extends Authenticatable
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Verificar si el usuario tiene todos los datos requeridos para ser considerado verificado
+     */
+    public function hasCompleteData()
+    {
+        $requiredFields = [
+            'first_name',
+            'last_name', 
+            'phone',
+            'identification_type',
+            'identification_number',
+            'state_id',
+            'municipality_id',
+            'parish_id',
+            'address',
+            'sector'
+        ];
+
+
+
+        foreach ($requiredFields as $field) {
+            if (empty($this->$field)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Marcar como verificado si tiene datos completos
+     */
+    public function markAsVerifiedIfComplete()
+    {
+        if ($this->hasCompleteData() && !$this->is_verified) {
+            $this->update(['is_verified' => true]);
+            return true;
+        }
+        return false;
+    }
 } 
