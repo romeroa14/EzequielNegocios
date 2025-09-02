@@ -41,4 +41,10 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'bcv' => [
+        'webhook_secret' => env('BCV_WEBHOOK_SECRET'),
+        'update_frequency' => env('BCV_UPDATE_FREQUENCY', 'hourly'), // hourly, daily, custom
+        'enabled_currencies' => env('BCV_ENABLED_CURRENCIES', 'USD,EUR,CNY,TRY,RUB'),
+    ],
+
 ];

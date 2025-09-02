@@ -51,6 +51,9 @@
                     <x-nav-link :href="route('productores.index')" :active="request()->routeIs('productores.*')">
                         {{ __('Productores') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('market.index')" :active="request()->routeIs('market.*')">
+                        {{ __('Precios de Mercado') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -185,6 +188,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('productores.index')" :active="request()->routeIs('productores.index')">
                 {{ __('Productores') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('market.index')" :active="request()->routeIs('market.*')">
+                {{ __('Precios de Mercado') }}
             </x-responsive-nav-link>
 
             @guest

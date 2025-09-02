@@ -6,6 +6,7 @@ use App\Traits\HasProductImage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
@@ -148,6 +149,16 @@ class Product extends Model
     public function priceHistory()
     {
         return $this->hasMany(PriceHistory::class);
+    }
+
+    public function marketPrices(): HasMany
+    {
+        return $this->hasMany(MarketPrice::class);
+    }
+
+    public function marketPriceHistory(): HasMany
+    {
+        return $this->hasMany(MarketPriceHistory::class);
     }
 
     public function creator()

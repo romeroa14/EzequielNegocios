@@ -26,6 +26,7 @@ use App\Http\Controllers\Buyer\DashboardController as BuyerDashboardController;
 use App\Http\Controllers\ProductPresentationController;
 use App\Http\Controllers\CookieController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\MarketController;
 
 // Rutas públicas
 Route::get('/', function() {
@@ -98,6 +99,16 @@ Route::post('/contact-producer/{producer}', [ProducerController::class, 'contact
 // Rutas de políticas y cookies
 Route::get('/politica-privacidad', [CookieController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/politica-cookies', [CookieController::class, 'cookiePolicy'])->name('cookie-policy');
+
+// Rutas de precios de mercado (públicas)
+Route::get('/mercado', [MarketController::class, 'index'])->name('market.index');
+Route::get('/mercado/semanal', [MarketController::class, 'weekly'])->name('market.weekly');
+Route::get('/mercado/producto/{product}/historial', [MarketController::class, 'productHistory'])->name('market.product.history');
+
+// Webhooks para automatización
+Route::post('/webhook/bcv/update-rates', [App\Http\Controllers\WebhookController::class, 'updateBcvRates'])->name('webhook.bcv.update-rates');
+Route::get('/webhook/health', [App\Http\Controllers\WebhookController::class, 'healthCheck'])->name('webhook.health');
+Route::post('/webhook/bcv/cleanup', [App\Http\Controllers\WebhookController::class, 'cleanupBcvRates'])->name('webhook.bcv.cleanup');
 Route::get('/preferencias-cookies', [CookieController::class, 'showPreferences'])->name('cookie.preferences.show');
 Route::post('/cookie-preferences', [CookieController::class, 'storePreferences'])->name('cookie.preferences');
 Route::patch('/cookie-preferences', [CookieController::class, 'updatePreferences'])->name('cookie.preferences.update');
