@@ -21,12 +21,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Webhooks para automatización (sin CSRF, sin sesiones)
-Route::post('/webhook/bcv/update-rates', [App\Http\Controllers\WebhookController::class, 'updateBcvRates'])->name('api.webhook.bcv.update-rates');
-Route::get('/webhook/health', [App\Http\Controllers\WebhookController::class, 'healthCheck'])->name('api.webhook.health');
-Route::post('/webhook/bcv/cleanup', [App\Http\Controllers\WebhookController::class, 'cleanupBcvRates'])->name('api.webhook.bcv.cleanup');
-
 Route::middleware('api')->group(function () {
+    // Webhooks para automatización (sin CSRF, sin sesiones)
+    Route::post('/webhook/bcv/update-rates', [App\Http\Controllers\WebhookController::class, 'updateBcvRates'])->name('api.webhook.bcv.update-rates');
+    Route::get('/webhook/health', [App\Http\Controllers\WebhookController::class, 'healthCheck'])->name('api.webhook.health');
+    Route::post('/webhook/bcv/cleanup', [App\Http\Controllers\WebhookController::class, 'cleanupBcvRates'])->name('api.webhook.bcv.cleanup');
+    
+    // Rutas para los selects en cascada de ubicación
     // Rutas para los selects en cascada de ubicación
     Route::get('/states/{state}/municipalities', function (State $state) {
         return $state->municipalities()->select('id', 'name')->get();
