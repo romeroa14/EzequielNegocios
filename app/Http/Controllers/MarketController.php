@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MarketPrice;
 use App\Models\Product;
+use App\Models\BcvRate;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -28,12 +29,30 @@ class MarketController extends Controller
             })
             ->values();
 
-        // Estadísticas
+        // Obtener la tasa más reciente del BCV para USD
+        $usdRate = BcvRate::getLatestRate('USD');
+        
+        // Calcular precios en USD para productos en VES
+        $marketPrices->each(function ($price) use ($usdRate) {
+            if ($price->currency === 'VES' && $usdRate) {
+                $price->price_usd = round($price->price / $usdRate->rate, 2);
+                $price->usd_rate = $usdRate->rate;
+                $price->usd_rate_fetched = $usdRate->fetched_at;
+            } elseif ($price->currency === 'USD') {
+                $price->price_usd = $price->price;
+                $price->usd_rate = 1;
+                $price->usd_rate_fetched = now();
+            }
+        });
+
+        // Estadísticas con conversiones USD
         $stats = [
             'total_products' => $marketPrices->count(),
             'total_value_ves' => $marketPrices->where('currency', 'VES')->sum('price'),
-            'total_value_usd' => $marketPrices->where('currency', 'USD')->sum('price'),
+            'total_value_usd' => $marketPrices->sum('price_usd'),
             'last_update' => $marketPrices->max('updated_at'),
+            'usd_rate' => $usdRate ? $usdRate->rate : null,
+            'usd_rate_fetched' => $usdRate ? $usdRate->fetched_at : null,
         ];
 
         return view('market.index', compact('marketPrices', 'stats'));

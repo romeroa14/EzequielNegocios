@@ -100,6 +100,17 @@ class MarketPrice extends Model
     }
 
     /**
+     * Formatear precio USD para mostrar
+     */
+    public function getFormattedPriceUsdAttribute()
+    {
+        if (isset($this->price_usd)) {
+            return '$ ' . number_format($this->price_usd, 2, ',', '.');
+        }
+        return '-';
+    }
+
+    /**
      * Obtener el nombre del producto
      */
     public function getProductNameAttribute()

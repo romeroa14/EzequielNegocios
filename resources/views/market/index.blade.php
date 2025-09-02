@@ -16,6 +16,12 @@
                         <p class="text-gray-600 mt-2">
                             Actualizaciones semanales de precios desde Coche
                         </p>
+                        @if($stats['usd_rate'])
+                            <div class="mt-2 text-sm text-blue-600">
+                                💱 Tasa BCV USD: Bs. {{ number_format($stats['usd_rate'], 2, ',', '.') }} 
+                                <span class="text-gray-500">({{ $stats['usd_rate_fetched']->format('d/m/Y H:i') }})</span>
+                            </div>
+                        @endif
                     </div>
                     <div class="text-right">
                         <div class="text-sm text-gray-500">Última actualización</div>
@@ -129,7 +135,10 @@
                                         Producto
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Precio
+                                        Precio VES
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Precio USD
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Moneda
@@ -174,6 +183,11 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-semibold text-gray-900">
                                                 {{ $price->formatted_price }}
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-semibold text-blue-600">
+                                                {{ $price->formatted_price_usd }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
