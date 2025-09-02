@@ -13,5 +13,7 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'webhook/*', // Excluir todas las rutas de webhook del CSRF
+        'webhook/bcv/*', // Excluir específicamente las rutas del BCV
+        'webhook/bcv/update-rates', // Excluir la ruta específica del BCV
     ];
 } 
