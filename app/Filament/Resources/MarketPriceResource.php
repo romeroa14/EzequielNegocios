@@ -41,9 +41,28 @@ class MarketPriceResource extends Resource
                 Forms\Components\TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->prefix('Bs.')
+                    ->prefix(function ($get) {
+                        return $get('currency') === 'USD' ? '$' : 'Bs.';
+                    })
                     ->label('Precio')
-                    ->columnSpan(1),
+                    ->columnSpan(1)
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, $set, $get) {
+                        $currency = $get('currency');
+                        $usdRate = \App\Models\ExchangeRate::getLatestRate('USD');
+                        
+                        if ($usdRate && $state > 0) {
+                            if ($currency === 'VES') {
+                                $conversion = round($state / $usdRate->rate, 2);
+                                $set('conversion_display', "Equivalente: $ " . number_format($conversion, 2, ',', '.'));
+                            } elseif ($currency === 'USD') {
+                                $conversion = round($state * $usdRate->rate, 2);
+                                $set('conversion_display', "Equivalente: Bs. " . number_format($conversion, 2, ',', '.'));
+                            }
+                        } else {
+                            $set('conversion_display', '');
+                        }
+                    }),
 
                 Forms\Components\Select::make('currency')
                     ->options([
@@ -53,7 +72,62 @@ class MarketPriceResource extends Resource
                     ->default('VES')
                     ->required()
                     ->label('Moneda')
+                    ->columnSpan(1)
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, $set, $get) {
+                        $usdRate = \App\Models\ExchangeRate::getLatestRate('USD');
+                        if ($usdRate) {
+                            $set('exchange_rate_info', "Tasa actual: $1 = Bs. " . number_format($usdRate->rate, 2, ',', '.'));
+                        }
+                        
+                        // Limpiar conversión cuando cambia la moneda
+                        $set('conversion_display', '');
+                        $set('price', '');
+                        
+                        // Recalcular conversión si ya hay un precio
+                        $price = $get('price');
+                        if ($price > 0 && $usdRate) {
+                            if ($state === 'VES') {
+                                $conversion = round($price / $usdRate->rate, 2);
+                                $set('conversion_display', "Equivalente: $ " . number_format($conversion, 2, ',', '.'));
+                            } elseif ($state === 'USD') {
+                                $conversion = round($price * $usdRate->rate, 2);
+                                $set('conversion_display', "Equivalente: Bs. " . number_format($conversion, 2, ',', '.'));
+                            }
+                        }
+                    }),
+
+                Forms\Components\Placeholder::make('conversion_display')
+                    ->label('Conversión en Tiempo Real')
+                    ->content(function ($get) {
+                        $currency = $get('currency');
+                        $price = $get('price');
+                        $usdRate = \App\Models\ExchangeRate::getLatestRate('USD');
+                        
+                        if ($usdRate && $price > 0) {
+                            if ($currency === 'VES') {
+                                $conversion = round($price / $usdRate->rate, 2);
+                                return "💱 $ " . number_format($conversion, 2, ',', '.') . " USD";
+                            } elseif ($currency === 'USD') {
+                                $conversion = round($price * $usdRate->rate, 2);
+                                return "💱 Bs. " . number_format($conversion, 2, ',', '.') . " VES";
+                            }
+                        }
+                        return "💱 Ingresa un precio para ver la conversión";
+                    })
                     ->columnSpan(1),
+
+                Forms\Components\Placeholder::make('exchange_rate_info')
+                    ->label('Información de Tasa')
+                    ->content(function () {
+                        $usdRate = \App\Models\ExchangeRate::getLatestRate('USD');
+                        if ($usdRate) {
+                            return "💱 Tasa de cambio actual: $1 = Bs. " . number_format($usdRate->rate, 2, ',', '.') . 
+                                   " (Actualizada: " . $usdRate->fetched_at->format('d/m/Y H:i') . ")";
+                        }
+                        return "⚠️ No hay tasa de cambio disponible";
+                    })
+                    ->columnSpanFull(),
 
                 Forms\Components\DatePicker::make('price_date')
                     ->required()
@@ -87,12 +161,35 @@ class MarketPriceResource extends Resource
 
                 Tables\Columns\TextColumn::make('price')
                     ->label('Precio')
-                    ->money('VES')
-                    ->sortable(),
+                    ->money(fn (MarketPrice $record): string => $record->currency)
+                    ->sortable()
+                    ->description('Precio en la moneda original'),
+
+                Tables\Columns\TextColumn::make('conversion_display')
+                    ->label('Precio Convertido')
+                    ->html()
+                    ->description('Equivalente en la otra moneda')
+                    ->getStateUsing(function (MarketPrice $record): string {
+                        $usdRate = \App\Models\ExchangeRate::getLatestRate('USD');
+                        
+                        if ($record->currency === 'VES' && $usdRate) {
+                            $priceUsd = round($record->price / $usdRate->rate, 2);
+                            return "<div class='text-blue-600 font-medium'>$ " . number_format($priceUsd, 2, ',', '.') . "</div>
+                                    <div class='text-xs text-gray-500'>Equivalente USD</div>";
+                        } elseif ($record->currency === 'USD' && $usdRate) {
+                            $priceVes = round($record->price * $usdRate->rate, 2);
+                            return "<div class='text-green-600 font-medium'>Bs. " . number_format($priceVes, 2, ',', '.') . "</div>
+                                    <div class='text-xs text-gray-500'>Equivalente VES</div>";
+                        }
+                        
+                        return "<span class='text-gray-400'>Sin conversión</span>";
+                    })
+                    ->sortable(false),
 
                 Tables\Columns\TextColumn::make('currency')
                     ->label('Moneda')
                     ->badge()
+                    ->description('Moneda del precio original')
                     ->color(fn (string $state): string => match ($state) {
                         'VES' => 'success',
                         'USD' => 'warning',
@@ -120,6 +217,14 @@ class MarketPriceResource extends Resource
                     ->searchable()
                     ->preload(),
 
+                Tables\Filters\SelectFilter::make('currency')
+                    ->options([
+                        'VES' => 'Bolívares (VES)',
+                        'USD' => 'Dólares (USD)',
+                    ])
+                    ->label('Moneda')
+                    ->multiple(),
+
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Solo Activos'),
             ])
@@ -135,9 +240,37 @@ class MarketPriceResource extends Resource
                             ->label('Nuevo Precio')
                             ->required()
                             ->numeric()
-                            ->prefix('Bs.')
+                            ->prefix(fn (MarketPrice $record) => $record->currency === 'VES' ? 'Bs.' : '$')
                             ->rules(['min:0'])
-                            ->default(fn (MarketPrice $record) => $record->price),
+                            ->default(fn (MarketPrice $record) => $record->price)
+                            ->afterStateUpdated(function ($state, $set, MarketPrice $record) {
+                                $usdRate = \App\Models\ExchangeRate::getLatestRate('USD');
+                                if ($usdRate && $state > 0) {
+                                    if ($record->currency === 'VES') {
+                                        $conversion = round($state / $usdRate->rate, 2);
+                                        $set('conversion_info', "Equivalente: $ " . number_format($conversion, 2, ',', '.'));
+                                    } elseif ($record->currency === 'USD') {
+                                        $conversion = round($state * $usdRate->rate, 2);
+                                        $set('conversion_info', "Equivalente: Bs. " . number_format($conversion, 2, ',', '.'));
+                                    }
+                                }
+                            }),
+                        
+                        Forms\Components\Placeholder::make('conversion_info')
+                            ->label('Conversión')
+                            ->content(function (MarketPrice $record) {
+                                $usdRate = \App\Models\ExchangeRate::getLatestRate('USD');
+                                if ($usdRate) {
+                                    if ($record->currency === 'VES') {
+                                        $conversion = round($record->price / $usdRate->rate, 2);
+                                        return "💱 $ " . number_format($conversion, 2, ',', '.') . " USD";
+                                    } elseif ($record->currency === 'USD') {
+                                        $conversion = round($record->price * $usdRate->rate, 2);
+                                        return "💱 Bs. " . number_format($conversion, 2, ',', '.') . " VES";
+                                    }
+                                }
+                                return "⚠️ No hay tasa disponible";
+                            }),
                         
                         Forms\Components\Textarea::make('notes')
                             ->label('Notas de Cambio')
@@ -195,5 +328,19 @@ class MarketPriceResource extends Resource
             'create' => Pages\CreateMarketPrice::route('/create'),
             'edit' => Pages\EditMarketPrice::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $usdRate = \App\Models\ExchangeRate::getLatestRate('USD');
+        if ($usdRate) {
+            return '$1 = Bs.' . number_format($usdRate->rate, 0);
+        }
+        return null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'success';
     }
 }

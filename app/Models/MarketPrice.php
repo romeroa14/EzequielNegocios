@@ -111,6 +111,38 @@ class MarketPrice extends Model
     }
 
     /**
+     * Formatear precio VES equivalente para mostrar
+     */
+    public function getFormattedPriceVesEquivalentAttribute()
+    {
+        if (isset($this->price_ves_equivalent)) {
+            return 'Bs. ' . number_format($this->price_ves_equivalent, 2, ',', '.');
+        }
+        return '-';
+    }
+
+    /**
+     * Obtener conversión bidireccional
+     */
+    public function getConversionDisplayAttribute()
+    {
+        if ($this->currency === 'VES' && isset($this->price_usd)) {
+            return [
+                'original' => $this->formatted_price,
+                'conversion' => '$ ' . number_format($this->price_usd, 2, ',', '.'),
+                'rate_info' => '1 USD = Bs. ' . number_format($this->exchange_rate ?? 0, 2, ',', '.')
+            ];
+        } elseif ($this->currency === 'USD' && isset($this->price_ves_equivalent)) {
+            return [
+                'original' => $this->formatted_price,
+                'conversion' => 'Bs. ' . number_format($this->price_ves_equivalent, 2, ',', '.'),
+                'rate_info' => '1 USD = Bs. ' . number_format($this->exchange_rate ?? 0, 2, ',', '.')
+            ];
+        }
+        return null;
+    }
+
+    /**
      * Obtener el nombre del producto
      */
     public function getProductNameAttribute()

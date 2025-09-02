@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MarketPrice;
 use App\Models\Product;
+use App\Models\ExchangeRate;
 use App\Models\BcvRate;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -29,26 +30,28 @@ class MarketController extends Controller
             })
             ->values();
 
-        // Obtener la tasa más reciente del BCV para USD
-        $usdRate = BcvRate::getLatestRate('USD');
+        // Obtener la tasa más reciente del scraping para USD
+        $usdRate = ExchangeRate::getLatestRate('USD');
         
-        // Calcular precios en USD para productos en VES
+        // Calcular precios en USD para productos en VES y viceversa
         $marketPrices->each(function ($price) use ($usdRate) {
             if ($price->currency === 'VES' && $usdRate) {
                 $price->price_usd = round($price->price / $usdRate->rate, 2);
-                $price->usd_rate = $usdRate->rate;
-                $price->usd_rate_fetched = $usdRate->fetched_at;
-            } elseif ($price->currency === 'USD') {
-                $price->price_usd = $price->price;
-                $price->usd_rate = 1;
-                $price->usd_rate_fetched = now();
+                $price->price_ves_equivalent = $price->price; // Ya está en VES
+                $price->exchange_rate = $usdRate->rate;
+                $price->rate_fetched = $usdRate->fetched_at;
+            } elseif ($price->currency === 'USD' && $usdRate) {
+                $price->price_usd = $price->price; // Ya está en USD
+                $price->price_ves_equivalent = round($price->price * $usdRate->rate, 2);
+                $price->exchange_rate = $usdRate->rate;
+                $price->rate_fetched = $usdRate->fetched_at;
             }
         });
 
-        // Estadísticas con conversiones USD
+        // Estadísticas con conversiones bidireccionales
         $stats = [
             'total_products' => $marketPrices->count(),
-            'total_value_ves' => $marketPrices->where('currency', 'VES')->sum('price'),
+            'total_value_ves' => $marketPrices->sum('price_ves_equivalent'),
             'total_value_usd' => $marketPrices->sum('price_usd'),
             'last_update' => $marketPrices->max('updated_at'),
             'usd_rate' => $usdRate ? $usdRate->rate : null,

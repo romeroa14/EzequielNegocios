@@ -18,7 +18,7 @@
                         </p>
                         @if($stats['usd_rate'])
                             <div class="mt-2 text-sm text-blue-600">
-                                💱 Tasa BCV USD: Bs. {{ number_format($stats['usd_rate'], 2, ',', '.') }} 
+                                💱 Tasa de Cambio: $1 = Bs. {{ number_format($stats['usd_rate'], 2, ',', '.') }} 
                                 <span class="text-gray-500">({{ $stats['usd_rate_fetched']->format('d/m/Y H:i') }})</span>
                             </div>
                         @endif
@@ -135,10 +135,10 @@
                                         Producto
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Precio VES
+                                        Precio Original
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Precio USD
+                                        Conversión
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Moneda
@@ -160,13 +160,15 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
                                                 <div class="flex-shrink-0 h-10 w-10">
-                                                    @if($price->product->image)
-                                                        <img class="h-10 w-10 rounded-full object-cover" src="{{ asset('storage/' . $price->product->image) }}" alt="{{ $price->product->name }}">
+                                                    @if(\App\Helpers\ImageHelper::imageExists($price->product->image))
+                                                        <img class="h-10 w-10 rounded-full object-cover" 
+                                                             src="{{ \App\Helpers\ImageHelper::getProductImageUrl($price->product->image, $price->product->name) }}" 
+                                                             alt="{{ $price->product->name }}">
                                                     @else
                                                         <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                                            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                                            </svg>
+                                                            <img src="{{ asset('images/default-product.svg') }}" 
+                                                                 alt="Imagen por defecto" 
+                                                                 class="h-6 w-6 text-gray-400">
                                                         </div>
                                                     @endif
                                                 </div>
@@ -187,7 +189,19 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-semibold text-blue-600">
-                                                {{ $price->formatted_price_usd }}
+                                                @if($price->currency === 'VES' && isset($price->price_usd))
+                                                    <div class="font-medium">$ {{ number_format($price->price_usd, 2, ',', '.') }}</div>
+                                                    <div class="text-xs text-gray-500 mt-1">
+                                                        Equivalente en USD
+                                                    </div>
+                                                @elseif($price->currency === 'USD' && isset($price->price_ves_equivalent))
+                                                    <div class="font-medium">Bs. {{ number_format($price->price_ves_equivalent, 2, ',', '.') }}</div>
+                                                    <div class="text-xs text-gray-500 mt-1">
+                                                        Equivalente en VES
+                                                    </div>
+                                                @else
+                                                    <span class="text-gray-400">Sin conversión</span>
+                                                @endif
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
