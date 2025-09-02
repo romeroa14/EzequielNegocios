@@ -39,10 +39,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
 
-        'webhook' => [
-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            // Sin CSRF, sin sesiones, solo lógica pura
-        ],
+
 
         'api' => [
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',

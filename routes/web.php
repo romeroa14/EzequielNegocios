@@ -105,8 +105,8 @@ Route::get('/mercado', [MarketController::class, 'index'])->name('market.index')
 Route::get('/mercado/semanal', [MarketController::class, 'weekly'])->name('market.weekly');
 Route::get('/mercado/producto/{product}/historial', [MarketController::class, 'productHistory'])->name('market.product.history');
 
-// Webhooks para automatización (sin CSRF, sin sesiones)
-Route::middleware('webhook')->group(function () {
+// Webhooks para automatización (usando grupo API sin CSRF)
+Route::middleware('api')->group(function () {
     Route::post('/webhook/bcv/update-rates', [App\Http\Controllers\WebhookController::class, 'updateBcvRates'])->name('webhook.bcv.update-rates');
     Route::get('/webhook/health', [App\Http\Controllers\WebhookController::class, 'healthCheck'])->name('webhook.health');
     Route::post('/webhook/bcv/cleanup', [App\Http\Controllers\WebhookController::class, 'cleanupBcvRates'])->name('webhook.bcv.cleanup');
