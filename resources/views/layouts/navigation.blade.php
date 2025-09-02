@@ -190,7 +190,7 @@
                 {{ __('Productores') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('market.index')" :active="request()->routeIs('market.*')">
-                {{ __('Precios de Mercado') }}
+                {{ __('Precios de Mercados') }}
             </x-responsive-nav-link>
 
             @guest

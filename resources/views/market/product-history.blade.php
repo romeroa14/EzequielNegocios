@@ -42,13 +42,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="flex items-center">
                         <div class="flex-shrink-0 h-16 w-16">
-                            @if($product->image)
-                                <img class="h-16 w-16 rounded-lg object-cover" src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
+                            @if(\App\Helpers\ImageHelper::imageExists($product->image))
+                                <img class="h-16 w-16 rounded-lg object-cover" 
+                                     src="{{ \App\Helpers\ImageHelper::getProductImageUrl($product->image, $product->name) }}" 
+                                     alt="{{ $product->name }}">
                             @else
                                 <div class="h-16 w-16 rounded-lg bg-gray-200 flex items-center justify-center">
-                                    <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
+                                    <img src="{{ asset('images/default-product.svg') }}" 
+                                         alt="Imagen por defecto" 
+                                         class="h-8 w-8">
                                 </div>
                             @endif
                         </div>
