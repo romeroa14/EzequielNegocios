@@ -20,23 +20,7 @@ class GoogleController extends Controller
      */
     public function redirectToGoogle(Request $request)
     {
-        Log::info('Google OAuth redirect iniciado', [
-            'role' => $request->role,
-            'all_params' => $request->all()
-        ]);
-
-        // Validar que se haya seleccionado un rol
-        $request->validate([
-            'role' => 'required|in:buyer,seller'
-        ]);
-
-        // Guardar el rol en la sesión para usarlo después
-        session(['oauth_role' => $request->role]);
-
-        Log::info('Redirigiendo a Google OAuth', [
-            'role' => $request->role,
-            'session_role' => session('oauth_role')
-        ]);
+        Log::info('Google OAuth redirect iniciado');
 
         return Socialite::driver('google')->redirect();
     }
@@ -49,8 +33,19 @@ class GoogleController extends Controller
         try {
             Log::info('Google OAuth callback iniciado', [
                 'request_params' => $request->all(),
-                'session_role' => session('oauth_role')
+                'request_url' => $request->fullUrl()
             ]);
+
+            // Verificar si hay un error en la respuesta de Google
+            if ($request->has('error')) {
+                Log::error('Error de Google OAuth', [
+                    'error' => $request->get('error'),
+                    'error_description' => $request->get('error_description')
+                ]);
+                
+                return redirect()->route('register')
+                    ->with('error', 'Error de autorización: ' . $request->get('error_description', 'Acceso denegado'));
+            }
 
             // Obtener los datos del usuario de Google
             $googleUser = Socialite::driver('google')->user();
@@ -58,12 +53,8 @@ class GoogleController extends Controller
             Log::info('Datos de Google recibidos', [
                 'google_id' => $googleUser->id,
                 'email' => $googleUser->email,
-                'name' => $googleUser->name,
-                'role' => session('oauth_role', 'buyer')
+                'name' => $googleUser->name
             ]);
-
-            // Obtener el rol guardado en la sesión
-            $role = session('oauth_role', 'buyer');
 
             // Buscar si la persona ya existe (solo usamos Person, no User)
             $person = Person::where('email', $googleUser->email)->first();
@@ -125,7 +116,7 @@ class GoogleController extends Controller
                         ->with('success', '¡Bienvenido de vuelta!');
                 } else {
                     Log::info('Redirigiendo al catálogo para compradores existentes');
-                    return redirect()->route('catalog')
+                    return redirect()->route('catalogo')
                         ->with('success', '¡Bienvenido de vuelta!');
                 }
             }
@@ -138,10 +129,10 @@ class GoogleController extends Controller
                 'last_name' => explode(' ', $googleUser->name)[1] ?? '',
                 'email' => $googleUser->email,
                 'password' => null, // No se crea contraseña para usuarios de Google OAuth
-                'role' => $role,
+                'role' => 'buyer', // Asignar rol por defecto como buyer
                 'google_id' => $googleUser->id,
                 'is_active' => true,
-                'is_verified' => false, // Necesita completar perfil
+                'is_verified' => false, // No verificado hasta completar perfil
                 'email_verified_at' => now(), // Google ya verificó el email
             ]);
 
@@ -168,25 +159,35 @@ class GoogleController extends Controller
                     ->with('error', 'Error al iniciar sesión. Por favor intenta de nuevo.');
             }
 
-            // Redirigir al dashboard según el rol
-            if ($role === 'seller') {
-                Log::info('Redirigiendo al dashboard del seller');
-                return redirect()->route('seller.dashboard')
-                    ->with('success', '¡Bienvenido! Tu cuenta ha sido creada exitosamente.');
-            } else {
-                Log::info('Redirigiendo al catálogo para compradores');
-                return redirect()->route('catalog')
-                    ->with('success', '¡Bienvenido! Tu cuenta ha sido creada exitosamente.');
-            }
+            // Redirigir al catálogo para nuevos usuarios
+            Log::info('Redirigiendo al catálogo para nueva persona');
+            return redirect()->route('catalogo')
+                ->with('success', '¡Bienvenido! Te has registrado exitosamente con Google.')
+                ->with('info', 'Completa tu perfil cuando gustes para acceder a todas las funciones.');
 
         } catch (\Exception $e) {
             Log::error('Error en Google OAuth callback', [
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
             
+            // Mensaje más específico según el tipo de error
+            $errorMessage = 'Error al autenticarse con Google. ';
+            
+            if (str_contains($e->getMessage(), 'redirect_uri_mismatch')) {
+                $errorMessage .= 'Error de configuración: La URL de redirección no coincide.';
+            } elseif (str_contains($e->getMessage(), 'invalid_client')) {
+                $errorMessage .= 'Error de configuración: Cliente no válido.';
+            } elseif (str_contains($e->getMessage(), 'access_denied')) {
+                $errorMessage .= 'Acceso denegado por el usuario.';
+            } else {
+                $errorMessage .= 'Por favor intenta de nuevo.';
+            }
+            
             return redirect()->route('register')
-                ->with('error', 'Error al autenticarse con Google. Por favor intenta de nuevo.');
+                ->with('error', $errorMessage);
         }
     }
 
@@ -258,6 +259,7 @@ class GoogleController extends Controller
             'address' => 'required|string|max:255',
             'sector' => 'required|string|max:255',
             'password' => 'nullable|string|min:8|confirmed',
+            'role' => 'required_if:person.role,null|in:buyer,seller',
         ]);
 
         // Preparar datos para actualizar
@@ -274,6 +276,11 @@ class GoogleController extends Controller
             'sector' => $request->sector,
             'is_verified' => true,
         ];
+
+        // Si no tiene rol asignado, asignar el rol seleccionado
+        if (!$person->role && $request->role) {
+            $updateData['role'] = $request->role;
+        }
 
         // Si se proporcionó una contraseña, hashearla y agregarla
         if (!empty($request->password)) {

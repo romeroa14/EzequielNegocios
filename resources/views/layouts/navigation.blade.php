@@ -143,7 +143,7 @@
                         </x-slot>
                     </x-dropdown>
                 @else
-                    <div class="hidden sm:flex sm:items-center">
+                    <div class="hidden sm:flex sm:items-center nav-buttons">
                         <a href="{{ route('login') }}" class="text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
                             {{ __('Iniciar Sesión') }}
                         </a>

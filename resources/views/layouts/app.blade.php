@@ -50,11 +50,38 @@
             bottom: 0;
             left: 0;
         }
+        
+        /* Fix para botones de navegación */
+        nav {
+            position: relative;
+            z-index: 1000;
+            background: white;
+        }
+        
+        .nav-buttons {
+            position: relative;
+            z-index: 1001;
+        }
+        
+        /* Asegurar que los botones sean clickeables */
+        .nav-buttons a {
+            position: relative;
+            z-index: 1002;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        
+        /* Asegurar que no haya elementos superpuestos */
+        .nav-buttons a:hover {
+            z-index: 1003;
+        }
 
         /* Clases para que AdSense identifique mejor las ubicaciones */
         .ad-banner {
             min-height: 90px;
             margin: 20px 0;
+            position: relative;
+            z-index: 1;
             background: #f8f9fa;
             border: 1px dashed #dee2e6;
             display: flex;
@@ -208,6 +235,40 @@
             </header>
         @endif
 
+        <!-- Notificación suave para usuarios no verificados -->
+        @auth('person')
+            @if(!auth('person')->user()->is_verified)
+            <div id="profile-completion-banner" class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400 p-4 mb-4 mx-4 rounded-r-lg shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <span class="font-medium">¡Completa tu perfil!</span> 
+                                Agrega más información para acceder a todas las funciones.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <a href="{{ route('profile.complete') }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                            Completar
+                        </a>
+                        <button onclick="closeProfileBanner()" type="button" class="text-blue-400 hover:text-blue-500">
+                            <span class="sr-only">Cerrar</span>
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @endif
+        @endauth
+
         <!-- Page Content -->
         <main>
             <div class="max-w-full mx-auto px-4">
@@ -240,6 +301,16 @@
                 notification.style.animation = 'fadeOutUp 0.5s ease-out forwards';
                 setTimeout(() => {
                     notification.remove();
+                }, 500);
+            }
+        }
+
+        function closeProfileBanner() {
+            const banner = document.getElementById('profile-completion-banner');
+            if (banner) {
+                banner.style.animation = 'fadeOutUp 0.5s ease-out forwards';
+                setTimeout(() => {
+                    banner.remove();
                 }, 500);
             }
         }

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignId('municipality_id')->nullable()->constrained('municipalities');
             $table->foreignId('parish_id')->nullable()->constrained('parishes');
             $table->string('sector')->nullable(); // sector o urbanización
-            $table->enum('role', ['buyer', 'seller'])->default('buyer');
+            $table->enum('role', ['buyer', 'seller'])->nullable();
             $table->string('company_name')->nullable();
             $table->string('company_rif')->nullable();
             $table->boolean('is_verified')->default(false);

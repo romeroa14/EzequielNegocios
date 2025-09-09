@@ -36,6 +36,55 @@
             <div class="border-t border-gray-200 pt-4">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Información Personal</h3>
                 
+                <!-- Selección de Rol (solo si no tiene rol asignado) -->
+                @if(!$person->role)
+                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 class="text-md font-medium text-blue-900 mb-3">¿Cómo quieres usar la plataforma?</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="relative flex items-center p-4 border-2 border-blue-300 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-100">
+                            <input type="radio" name="role" value="buyer" class="absolute opacity-0 w-0 h-0" {{ old('role') == 'buyer' ? 'checked' : '' }}>
+                            <div class="flex items-center w-full">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-blue-900">Comprador</div>
+                                    <div class="text-xs text-blue-700">Buscar y comprar productos</div>
+                                </div>
+                                <div class="ml-auto">
+                                    <div class="w-4 h-4 border-2 border-blue-300 rounded-full flex items-center justify-center">
+                                        <div class="w-2 h-2 bg-blue-600 rounded-full opacity-0 has-[:checked]:opacity-100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <label class="relative flex items-center p-4 border-2 border-green-300 rounded-lg cursor-pointer hover:bg-green-100 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-100">
+                            <input type="radio" name="role" value="seller" class="absolute opacity-0 w-0 h-0" {{ old('role') == 'seller' ? 'checked' : '' }}>
+                            <div class="flex items-center w-full">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-green-900">Vendedor</div>
+                                    <div class="text-xs text-green-700">Vender productos y gestionar inventario</div>
+                                </div>
+                                <div class="ml-auto">
+                                    <div class="w-4 h-4 border-2 border-green-300 rounded-full flex items-center justify-center">
+                                        <div class="w-2 h-2 bg-green-600 rounded-full opacity-0 has-[:checked]:opacity-100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    <x-input-error :messages="$errors->get('role')" class="mt-2" />
+                </div>
+                @endif
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Nombre -->
                     <div>
@@ -186,6 +235,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const stateSelect = document.getElementById('state_id');
     const municipalitySelect = document.getElementById('municipality_id');
     const parishSelect = document.getElementById('parish_id');
+
+    // Manejar la selección de rol
+    const roleInputs = document.querySelectorAll('input[name="role"]');
+    roleInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // Remover clases de selección de todos los labels
+            document.querySelectorAll('label[for*="role"]').forEach(label => {
+                label.classList.remove('ring-2', 'ring-blue-500', 'ring-green-500');
+            });
+            
+            // Agregar clase de selección al label actual
+            const currentLabel = this.closest('label');
+            if (this.value === 'buyer') {
+                currentLabel.classList.add('ring-2', 'ring-blue-500');
+            } else if (this.value === 'seller') {
+                currentLabel.classList.add('ring-2', 'ring-green-500');
+            }
+        });
+    });
 
     stateSelect.addEventListener('change', function() {
         const stateId = this.value;
