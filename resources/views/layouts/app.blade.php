@@ -119,23 +119,26 @@
 
         <!-- Notificaciones Flotantes -->
         @if (session('success'))
-        <div id="notification-success" class="fixed top-4 right-4 z-50 animate-fade-in-down">
-            <div class="max-w-sm bg-green-50 border border-green-200 rounded-lg shadow-lg p-4">
+        <div id="notification-success" class="fixed top-4 right-4 z-[9999] animate-fade-in-down">
+            <div class="max-w-lg bg-green-50 border border-green-200 rounded-lg shadow-lg p-6">
                 <div class="flex items-start">
                     <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <svg class="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <div class="ml-3 w-0 flex-1">
-                        <p class="text-sm font-medium text-green-800">
+                    <div class="ml-4 w-0 flex-1">
+                        <h3 class="text-lg font-semibold text-green-900 mb-1">
+                            ¡Éxito!
+                        </h3>
+                        <p class="text-base text-green-800 leading-relaxed">
                             {{ session('success') }}
                         </p>
                     </div>
                     <div class="ml-4 flex flex-shrink-0">
-                        <button onclick="closeNotification('notification-success')" type="button" class="inline-flex text-green-400 hover:text-green-500">
+                        <button onclick="closeNotification('notification-success')" type="button" class="inline-flex text-green-400 hover:text-green-600 transition-colors duration-200">
                             <span class="sr-only">Cerrar</span>
-                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
                             </svg>
                         </button>
@@ -146,7 +149,7 @@
         @endif
 
         @if (session('error'))
-        <div id="notification-error" class="fixed top-4 right-4 z-50 animate-fade-in-down">
+        <div id="notification-error" class="fixed top-4 right-4 z-[9999] animate-fade-in-down">
             <div class="max-w-sm bg-red-50 border border-red-200 rounded-lg shadow-lg p-4">
                 <div class="flex items-start">
                     <div class="flex-shrink-0">
@@ -173,7 +176,7 @@
         @endif
 
         @if (session('warning'))
-        <div id="notification-warning" class="fixed top-4 right-4 z-50 animate-fade-in-down">
+        <div id="notification-warning" class="fixed top-4 right-4 z-[9999] animate-fade-in-down">
             <div class="max-w-sm bg-yellow-50 border border-yellow-200 rounded-lg shadow-lg p-4">
                 <div class="flex items-start">
                     <div class="flex-shrink-0">
@@ -200,23 +203,26 @@
         @endif
 
         @if (session('info'))
-        <div id="notification-info" class="fixed top-4 right-4 z-50 animate-fade-in-down">
-            <div class="max-w-sm bg-blue-50 border border-blue-200 rounded-lg shadow-lg p-4">
+        <div id="notification-info" class="fixed top-20 right-4 z-[9998] animate-fade-in-down">
+            <div class="max-w-lg bg-blue-50 border border-blue-200 rounded-lg shadow-lg p-6">
                 <div class="flex items-start">
                     <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <svg class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                         </svg>
                     </div>
-                    <div class="ml-3 w-0 flex-1">
-                        <p class="text-sm font-medium text-blue-800">
+                    <div class="ml-4 w-0 flex-1">
+                        <h3 class="text-lg font-semibold text-blue-900 mb-1">
+                            Información
+                        </h3>
+                        <p class="text-base text-blue-800 leading-relaxed">
                             {{ session('info') }}
                         </p>
                     </div>
                     <div class="ml-4 flex flex-shrink-0">
-                        <button onclick="closeNotification('notification-info')" type="button" class="inline-flex text-blue-400 hover:text-blue-500">
+                        <button onclick="closeNotification('notification-info')" type="button" class="inline-flex text-blue-400 hover:text-blue-600 transition-colors duration-200">
                             <span class="sr-only">Cerrar</span>
-                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
                             </svg>
                         </button>
@@ -290,6 +296,30 @@
             100% {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        /* Estilos para notificaciones más anchas */
+        #notification-success,
+        #notification-info,
+        #notification-error,
+        #notification-warning {
+            min-width: 400px;
+            max-width: 500px;
+            z-index: 9999 !important;
+            position: fixed !important;
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 640px) {
+            #notification-success,
+            #notification-info,
+            #notification-error,
+            #notification-warning {
+                min-width: 300px;
+                max-width: 350px;
+                right: 1rem;
+                left: 1rem;
             }
         }
     </style>

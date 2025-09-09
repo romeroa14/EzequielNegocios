@@ -48,7 +48,31 @@ class GoogleController extends Controller
             }
 
             // Obtener los datos del usuario de Google
-            $googleUser = Socialite::driver('google')->user();
+            try {
+                $googleUser = Socialite::driver('google')->user();
+            } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
+                Log::error('Error de estado inválido en Google OAuth', [
+                    'error' => $e->getMessage(),
+                    'request_params' => $request->all()
+                ]);
+                return redirect()->route('register')
+                    ->with('error', 'Error de sesión. Por favor intenta de nuevo.');
+            } catch (\GuzzleHttp\Exception\ClientException $e) {
+                Log::error('Error de cliente HTTP en Google OAuth', [
+                    'error' => $e->getMessage(),
+                    'response' => $e->getResponse()->getBody()->getContents()
+                ]);
+                return redirect()->route('register')
+                    ->with('error', 'Error de comunicación con Google. Por favor intenta de nuevo.');
+            } catch (\Exception $e) {
+                Log::error('Error general en Google OAuth', [
+                    'error' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]);
+                return redirect()->route('register')
+                    ->with('error', 'Error al autenticarse con Google. Por favor intenta de nuevo.');
+            }
             
             Log::info('Datos de Google recibidos', [
                 'google_id' => $googleUser->id,
@@ -162,8 +186,7 @@ class GoogleController extends Controller
             // Redirigir al catálogo para nuevos usuarios
             Log::info('Redirigiendo al catálogo para nueva persona');
             return redirect()->route('catalogo')
-                ->with('success', '¡Bienvenido! Te has registrado exitosamente con Google.')
-                ->with('info', 'Completa tu perfil cuando gustes para acceder a todas las funciones.');
+                ->with('success', '¡Bienvenido! Te has registrado exitosamente con Google.');
 
         } catch (\Exception $e) {
             Log::error('Error en Google OAuth callback', [
@@ -301,7 +324,7 @@ class GoogleController extends Controller
             return redirect()->route('seller.dashboard')
                 ->with('success', $successMessage);
         } else {
-            return redirect()->route('catalog')
+            return redirect()->route('catalogo')
                 ->with('success', $successMessage);
         }
     }
