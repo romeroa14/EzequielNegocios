@@ -117,7 +117,7 @@ class GoogleController extends Controller
                             return redirect()->route('seller.dashboard')
                                 ->with('success', '¡Bienvenido de vuelta! Tu cuenta ha sido verificada automáticamente.');
                         } else {
-                            return redirect()->route('catalog')
+                            return redirect()->route('catalogo')
                                 ->with('success', '¡Bienvenido de vuelta! Tu cuenta ha sido verificada automáticamente.');
                         }
                     } else {
@@ -282,7 +282,7 @@ class GoogleController extends Controller
             'address' => 'required|string|max:255',
             'sector' => 'required|string|max:255',
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required_if:person.role,null|in:buyer,seller',
+            'role' => 'required|in:buyer,seller',
         ]);
 
         // Preparar datos para actualizar
@@ -297,13 +297,9 @@ class GoogleController extends Controller
             'parish_id' => $request->parish_id,
             'address' => $request->address,
             'sector' => $request->sector,
+            'role' => $request->role, // Siempre actualizar el rol seleccionado
             'is_verified' => true,
         ];
-
-        // Si no tiene rol asignado, asignar el rol seleccionado
-        if (!$person->role && $request->role) {
-            $updateData['role'] = $request->role;
-        }
 
         // Si se proporcionó una contraseña, hashearla y agregarla
         if (!empty($request->password)) {

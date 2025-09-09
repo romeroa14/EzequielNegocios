@@ -36,13 +36,12 @@
             <div class="border-t border-gray-200 pt-4">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Información Personal</h3>
                 
-                <!-- Selección de Rol (solo si no tiene rol asignado) -->
-                @if(!$person->role)
+                <!-- Selección de Rol -->
                 <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <h4 class="text-md font-medium text-blue-900 mb-3">¿Cómo quieres usar la plataforma?</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="relative flex items-center p-4 border-2 border-blue-300 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-100">
-                            <input type="radio" name="role" value="buyer" class="absolute opacity-0 w-0 h-0" {{ old('role') == 'buyer' ? 'checked' : '' }}>
+                            <input type="radio" name="role" value="buyer" class="absolute opacity-0 w-0 h-0" {{ old('role', $person->role) == 'buyer' ? 'checked' : '' }}>
                             <div class="flex items-center w-full">
                                 <div class="flex-shrink-0">
                                     <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +61,7 @@
                         </label>
                         
                         <label class="relative flex items-center p-4 border-2 border-green-300 rounded-lg cursor-pointer hover:bg-green-100 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-100">
-                            <input type="radio" name="role" value="seller" class="absolute opacity-0 w-0 h-0" {{ old('role') == 'seller' ? 'checked' : '' }}>
+                            <input type="radio" name="role" value="seller" class="absolute opacity-0 w-0 h-0" {{ old('role', $person->role) == 'seller' ? 'checked' : '' }}>
                             <div class="flex items-center w-full">
                                 <div class="flex-shrink-0">
                                     <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +82,6 @@
                     </div>
                     <x-input-error :messages="$errors->get('role')" class="mt-2" />
                 </div>
-                @endif
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Nombre -->
