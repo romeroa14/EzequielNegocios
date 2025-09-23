@@ -90,12 +90,12 @@
                                 <!-- Product Image -->
                                 <div 
                                     wire:click="showProductDetail({{ $product->id }})"
-                                    class="aspect-w-4 aspect-h-3 bg-gray-200 relative group cursor-pointer"
+                                    class="bg-gray-200 relative group cursor-pointer"
                                 >
                                     <img 
                                         src="{{ $this->getFirstImageUrl($product) }}"
                                         alt="{{ $product->title }}"
-                                        class="w-full h-48 object-cover"
+                                        class="w-full h-64 object-cover"
                                         onerror="this.src='{{ asset('images/placeholder.png') }}'"
                                     />
                                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-200"></div>
