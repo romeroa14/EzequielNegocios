@@ -7,11 +7,7 @@
                 class="inline-flex items-center bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow">
                 <span class="mr-1">+</span> Nuevo Producto
             </button>
-            <!-- Botón de prueba temporal -->
-            <button onclick="window.testScroll()" 
-                class="inline-flex items-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded shadow text-sm">
-                🧪 Test Scroll
-            </button>
+            
         </div>
     </div>
 
@@ -389,20 +385,7 @@
     // Variable global para almacenar el ID del producto que necesita scroll
     window.pendingScrollProductId = null;
 
-    // Función de prueba para scroll (scope global)
-    window.testScroll = function() {
-        console.log('🧪 Probando scroll...');
-        const products = document.querySelectorAll('[id^="product-"]');
-        if (products.length > 0) {
-            const firstProduct = products[0];
-            const productId = firstProduct.id.replace('product-', '');
-            console.log('🎯 Probando scroll al producto:', productId);
-            window.window.scrollToProduct(productId);
-        } else {
-            console.log('❌ No se encontraron productos para probar');
-            alert('No hay productos para probar el scroll');
-        }
-    }
+    
 
     // Función para hacer scroll y destacar producto (scope global)
     window.scrollToProduct = function(productId) {
