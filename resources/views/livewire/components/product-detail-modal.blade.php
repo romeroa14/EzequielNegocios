@@ -72,11 +72,11 @@
 
                 <!-- Content -->
                 @if($listing)
-                <div class="flex flex-col md:flex-row max-h-[90vh] overflow-y-auto">
+                <div class="flex flex-col lg:flex-row max-h-[90vh] overflow-y-auto">
                     <!-- Left side - Images -->
-                    <div class="w-full md:w-2/3 p-4 md:p-6 bg-white">
+                    <div class="w-full lg:w-3/5 p-4 md:p-6 bg-white">
                         <!-- Main image -->
-                        <div class="relative bg-gray-50 rounded-lg mb-4 overflow-hidden" style="height: 300px; min-height: 250px;">
+                        <div class="relative bg-gray-50 rounded-lg mb-4 overflow-hidden" style="height: 400px; min-height: 300px;">
                             @if($listing && !empty($listing['images']))
                                 <img 
                                     src="{{ $listing['images'][$selectedImageIndex ?? 0] }}"
@@ -113,7 +113,7 @@
                     </div>
 
                     <!-- Right side - Info -->
-                    <div class="w-full md:w-1/3 p-6 bg-gray-50 border-l">
+                    <div class="w-full lg:w-2/5 p-6 bg-gray-50 border-l">
                         <!-- Status and category -->
                         <div class="mb-4">
                             <span 
