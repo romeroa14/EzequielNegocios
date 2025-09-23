@@ -533,13 +533,16 @@
                                     }">
                                     <label class="block text-sm font-medium mb-1">Imágenes de la Publicación</label>
                                         <p class="text-xs text-gray-500 mb-2">Estas imágenes serán expuestas en el catálogo.</p>
+                                        <p class="text-xs text-blue-600 mb-2">
+                                            📏 <strong>Medidas recomendadas:</strong> De 300x400px a 400px para mantener consistencia.
+                                        </p>
                                     
                                         <!-- Input de archivo oculto -->
                                         <input 
                                             type="file" 
                                             id="imageInput" 
                                             class="hidden"
-                                            accept="image/*"
+                                            accept=".png,.jpg,.jpeg,.webp"
                                             x-ref="fileInput"
                                             @change="handleFileSelect($event)"
                                         />

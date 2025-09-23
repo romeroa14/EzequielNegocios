@@ -323,7 +323,8 @@
                             <input 
                                 type="file" 
                                 wire:model="form.image" 
-                                            class="w-full border rounded px-3 py-2 text-sm" 
+                                accept=".png,.jpg,.jpeg,.webp"
+                                class="w-full border rounded px-3 py-2 text-sm" 
                             />
                             @error('form.image')
                                             <span class="text-red-600 text-xs">{{ $message }}</span>

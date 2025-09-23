@@ -88,9 +88,9 @@ class ProductsCrud extends Component
         
         // Agregar regla de imagen con validación condicional
         if ($productId) {
-            $rules['form.image'] = 'nullable|image|max:2048';
+            $rules['form.image'] = 'nullable|image|mimes:png,jpg,jpeg,webp|max:2048';
         } else {
-            $rules['form.image'] = 'required|image|max:2048';
+            $rules['form.image'] = 'required|image|mimes:png,jpg,jpeg,webp|max:2048';
         }
 
         Log::info('✅ REGLAS GENERADAS', ['rules' => array_keys($rules)]);
@@ -121,6 +121,7 @@ class ProductsCrud extends Component
             'form.custom_quantity.min' => 'La cantidad debe ser mayor a 0.',
             'form.image.required' => 'La imagen es obligatoria.',
             'form.image.image' => 'El archivo debe ser una imagen.',
+            'form.image.mimes' => 'La imagen debe ser de tipo: PNG, JPG, JPEG o WEBP.',
             'form.image.max' => 'La imagen no puede ser mayor a 2MB.',
             'form.is_active.boolean' => 'El estado debe ser verdadero o falso.',
         ];

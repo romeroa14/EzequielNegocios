@@ -406,6 +406,14 @@ class ListingsCrud extends Component
                 throw new \Exception('No se recibieron datos de archivo');
             }
 
+            // Validar extensión del archivo
+            $allowedExtensions = ['png', 'jpg', 'jpeg', 'webp'];
+            $extension = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
+            
+            if (!in_array($extension, $allowedExtensions)) {
+                throw new \Exception('Formato de imagen no válido. Solo se permiten: PNG, JPG, JPEG, WEBP');
+            }
+
             // Validar tamaño del archivo antes de procesarlo
             if (isset($fileData['size']) && $fileData['size'] > 10 * 1024 * 1024) { // 10MB
                 throw new \Exception('El archivo es demasiado grande. Máximo 10MB permitido.');
