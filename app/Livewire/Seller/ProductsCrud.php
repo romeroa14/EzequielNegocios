@@ -224,6 +224,9 @@ class ProductsCrud extends Component
             'universal' => $universalProducts,
             'seller' => $sellerProducts,
         ];
+        
+        // Disparar evento después de cargar productos
+        $this->dispatch('products-loaded');
     }
 
     public function openModal($productId = null)
@@ -328,6 +331,9 @@ class ProductsCrud extends Component
         $this->showModal = false;
         $this->editingProduct = null;
         $this->resetForm();
+        
+        // Disparar evento para que el JavaScript sepa que el modal se cerró
+        $this->dispatch('modal-closed');
     }
 
     public function resetForm()
@@ -464,7 +470,19 @@ class ProductsCrud extends Component
                 ]);
             }
 
-            $this->dispatch('product-' . ($this->editingProduct ? 'updated' : 'added'));
+            $this->dispatch('product-' . ($this->editingProduct ? 'updated' : 'added'), ['productId' => $product->id]);
+            
+            // Disparar evento adicional para scroll
+            $this->dispatch('scroll-to-product', ['productId' => $product->id]);
+            
+            // Disparar evento JavaScript directo
+            $this->js("
+                setTimeout(() => {
+                    if (window.scrollToProduct) {
+                        window.scrollToProduct({$product->id});
+                    }
+                }, 2000);
+            ");
             $this->closeModal();
             $this->loadProducts();
 

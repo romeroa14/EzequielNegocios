@@ -2,10 +2,17 @@
     <!-- Header y botón de nuevo producto -->
     <div class="flex flex-wrap gap-4 items-center justify-between mb-6">
         <h2 class="text-2xl font-bold">Mis Productos</h2>
-        <button wire:click="openModal"
-            class="inline-flex items-center bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow">
-            <span class="mr-1">+</span> Nuevo Producto
-        </button>
+        <div class="flex gap-2">
+            <button wire:click="openModal"
+                class="inline-flex items-center bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow">
+                <span class="mr-1">+</span> Nuevo Producto
+            </button>
+            <!-- Botón de prueba temporal -->
+            <button onclick="window.testScroll()" 
+                class="inline-flex items-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded shadow text-sm">
+                🧪 Test Scroll
+            </button>
+        </div>
     </div>
 
     <!-- Listado de productos -->
@@ -69,8 +76,8 @@
         <div>
             <h3 class="text-xl font-semibold mb-4">📦 Mis Productos</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @forelse($products['seller'] as $product)
-            <div class="bg-white rounded-lg shadow p-4 flex flex-col">
+                        @forelse($products['seller'] as $product)
+            <div id="product-{{ $product->id }}" class="bg-white rounded-lg shadow p-4 flex flex-col">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-yellow-600 text-2xl">📦</span>
                 <h3 class="text-lg font-semibold">{{ $product->name }}</h3>
@@ -379,22 +386,178 @@
 </div>
 
 <script>
+    // Variable global para almacenar el ID del producto que necesita scroll
+    window.pendingScrollProductId = null;
+
+    // Función de prueba para scroll (scope global)
+    window.testScroll = function() {
+        console.log('🧪 Probando scroll...');
+        const products = document.querySelectorAll('[id^="product-"]');
+        if (products.length > 0) {
+            const firstProduct = products[0];
+            const productId = firstProduct.id.replace('product-', '');
+            console.log('🎯 Probando scroll al producto:', productId);
+            window.window.scrollToProduct(productId);
+        } else {
+            console.log('❌ No se encontraron productos para probar');
+            alert('No hay productos para probar el scroll');
+        }
+    }
+
+    // Función para hacer scroll y destacar producto (scope global)
+    window.scrollToProduct = function(productId) {
+        console.log('🔍 Buscando producto con ID:', productId);
+        
+        // Intentar múltiples veces para encontrar el elemento
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        const findAndScroll = () => {
+            attempts++;
+            const productElement = document.getElementById(`product-${productId}`);
+            
+            if (productElement) {
+                console.log('✅ Producto encontrado, haciendo scroll...');
+                
+                // Scroll suave al producto
+                productElement.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center',
+                    inline: 'center'
+                });
+                
+                // Destacar el producto con una animación
+                productElement.style.transition = 'all 0.3s ease';
+                productElement.style.transform = 'scale(1.05)';
+                productElement.style.boxShadow = '0 15px 35px rgba(245, 158, 66, 0.3)';
+                productElement.style.border = '2px solid #f59e42';
+                
+                // Remover el destaque después de 3 segundos
+                setTimeout(() => {
+                    productElement.style.transform = 'scale(1)';
+                    productElement.style.boxShadow = '';
+                    productElement.style.border = '';
+                }, 3000);
+                
+                return true;
+            } else if (attempts < maxAttempts) {
+                console.log(`⏳ Intento ${attempts}/${maxAttempts} - Elemento no encontrado, reintentando...`);
+                setTimeout(findAndScroll, 200);
+                return false;
+            } else {
+                console.log('❌ No se pudo encontrar el producto después de', maxAttempts, 'intentos');
+                return false;
+            }
+        };
+        
+        findAndScroll();
+    }
+
+    // Listener adicional para Livewire (fuera de DOMContentLoaded)
+    document.addEventListener('livewire:init', () => {
+        console.log('⚡ Livewire inicializado, configurando listeners adicionales...');
+        
+        Livewire.on('product-added', (event) => {
+            console.log('🎉 Livewire event product-added:', event);
+            const productId = event[0]?.productId;
+            if (productId) {
+                console.log('💾 Almacenando ID del producto para scroll:', productId);
+                window.pendingScrollProductId = productId;
+            }
+        });
+        
+        Livewire.on('product-updated', (event) => {
+            console.log('🔄 Livewire event product-updated:', event);
+            const productId = event[0]?.productId;
+            if (productId) {
+                console.log('💾 Almacenando ID del producto actualizado para scroll:', productId);
+                window.pendingScrollProductId = productId;
+            }
+        });
+        
+        // Listener específico para scroll
+        Livewire.on('scroll-to-product', (event) => {
+            console.log('🎯 Evento scroll-to-product recibido:', event);
+            const productId = event[0]?.productId;
+            if (productId) {
+                setTimeout(() => {
+                    window.scrollToProduct(productId);
+                }, 2000); // Delay más largo para asegurar que el DOM se actualice
+            }
+        });
+        
+        // Listener para cuando se cierra el modal
+        Livewire.on('modal-closed', () => {
+            console.log('🚪 Modal cerrado, verificando si hay productos nuevos...');
+            // Este listener se ejecutará después de que se cierre el modal
+        });
+        
+        // Listener para cuando se cargan los productos
+        Livewire.on('products-loaded', () => {
+            console.log('📦 Productos cargados, verificando si hay scroll pendiente...');
+            if (window.pendingScrollProductId) {
+                console.log('🎯 Haciendo scroll al producto pendiente:', window.pendingScrollProductId);
+                setTimeout(() => {
+                    window.scrollToProduct(window.pendingScrollProductId);
+                    window.pendingScrollProductId = null; // Limpiar después de usar
+                }, 1000);
+            }
+        });
+    });
+
+    // Listener global para scroll (funciona en cualquier momento)
+    window.addEventListener('scroll-to-product', event => {
+        console.log('🎯 Evento global scroll-to-product:', event.detail);
+        const productId = event.detail?.productId;
+        if (productId) {
+            setTimeout(() => {
+                window.scrollToProduct(productId);
+            }, 2000);
+        }
+    });
+
+    // Notificaciones de productos
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('📱 DOM cargado, configurando listeners...');
+        
         window.addEventListener('product-added', event => {
+            console.log('🎉 Evento product-added recibido:', event.detail);
+            
             Swal.fire({
                 icon: 'success',
                 title: '¡Producto agregado!',
                 text: 'El producto se ha creado correctamente.',
                 confirmButtonColor: '#f59e42'
+            }).then(() => {
+                const productId = event.detail?.productId;
+                console.log('🆔 ID del producto:', productId);
+                
+                if (productId) {
+                    // Delay más largo para móviles
+                    setTimeout(() => {
+                        window.scrollToProduct(productId);
+                    }, 1000);
+                }
             });
         });
 
         window.addEventListener('product-updated', event => {
+            console.log('🔄 Evento product-updated recibido:', event.detail);
+            
             Swal.fire({
                 icon: 'success',
                 title: '¡Producto actualizado!',
                 text: 'El producto se ha actualizado correctamente.',
                 confirmButtonColor: '#f59e42'
+            }).then(() => {
+                const productId = event.detail?.productId;
+                console.log('🆔 ID del producto actualizado:', productId);
+                
+                if (productId) {
+                    setTimeout(() => {
+                        window.scrollToProduct(productId);
+                    }, 1000);
+                }
             });
         });
 
@@ -423,5 +586,15 @@
                 }
             });
         });
+    });
+
+    // Listener adicional para Livewire después de actualizar DOM
+    document.addEventListener('livewire:navigated', () => {
+        console.log('🔄 Livewire navegación completada');
+    });
+
+    // Listener para cuando Livewire actualiza el DOM
+    document.addEventListener('livewire:updated', () => {
+        console.log('🔄 Livewire DOM actualizado');
     });
 </script>
