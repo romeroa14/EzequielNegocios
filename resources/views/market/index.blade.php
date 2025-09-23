@@ -127,7 +127,8 @@
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6">
                 @if($marketPrices->count() > 0)
-                    <div class="overflow-x-auto">
+                    <!-- Vista Desktop (Tabla) -->
+                    <div class="hidden md:block overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -231,6 +232,99 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Vista Móvil (Cards) -->
+                    <div class="md:hidden space-y-4">
+                        @foreach($marketPrices as $price)
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <!-- Primera fila: Producto y Precio -->
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center flex-1">
+                                        <div class="flex-shrink-0 h-12 w-12">
+                                            @if(\App\Helpers\ImageHelper::imageExists($price->product->image))
+                                                <img class="h-12 w-12 rounded-full object-cover" 
+                                                     src="{{ \App\Helpers\ImageHelper::getProductImageUrl($price->product->image, $price->product->name) }}" 
+                                                     alt="{{ $price->product->name }}">
+                                            @else
+                                                <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                                    <img src="{{ asset('images/default-product.svg') }}" 
+                                                         alt="Imagen por defecto" 
+                                                         class="h-8 w-8 text-gray-400">
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                {{ $price->product->name }}
+                                            </div>
+                                            <div class="text-xs text-gray-500">
+                                                {{ $price->product->productCategory->name ?? 'Sin categoría' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-lg font-bold text-gray-900">
+                                            {{ $price->formatted_price }}
+                                        </div>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $price->currency === 'VES' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                            {{ $price->currency }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Segunda fila: Conversión y Detalles -->
+                                <div class="border-t border-gray-200 pt-3">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <!-- Conversión -->
+                                        <div>
+                                            <div class="text-xs font-medium text-gray-500 mb-1">Conversión</div>
+                                            <div class="text-sm font-semibold text-blue-600">
+                                                @if($price->currency === 'VES' && isset($price->price_usd))
+                                                    <div class="font-medium">$ {{ number_format($price->price_usd, 2, ',', '.') }}</div>
+                                                    <div class="text-xs text-gray-500">
+                                                        Equivalente en USD
+                                                    </div>
+                                                @elseif($price->currency === 'USD' && isset($price->price_ves_equivalent))
+                                                    <div class="font-medium">Bs. {{ number_format($price->price_ves_equivalent, 2, ',', '.') }}</div>
+                                                    <div class="text-xs text-gray-500">
+                                                        Equivalente en VES
+                                                    </div>
+                                                @else
+                                                    <span class="text-gray-400 text-xs">Sin conversión</span>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <!-- Actualizado por -->
+                                        <div>
+                                            <div class="text-xs font-medium text-gray-500 mb-1">Actualizado por</div>
+                                            <div class="text-sm text-gray-700">
+                                                {{ $price->updated_by_name }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Notas (si existen) -->
+                                    @if($price->notes)
+                                        <div class="mt-3">
+                                            <div class="text-xs font-medium text-gray-500 mb-1">Notas</div>
+                                            <div class="text-sm text-gray-700 bg-white p-2 rounded border">
+                                                {{ $price->notes }}
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <!-- Botón de Historial -->
+                                    <div class="mt-3 text-center">
+                                        <a href="{{ route('market.product.history', $price->product_id) }}" 
+                                           class="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200">
+                                            Ver Historial
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 @else
                     <div class="text-center py-12">
