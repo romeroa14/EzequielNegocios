@@ -40,9 +40,17 @@
                     <div class="p-4">
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-lg font-semibold text-gray-900 truncate">{{ $listing->title }}</h3>
-                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $listing->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                {{ ucfirst($listing->status) }}
-                            </span>
+                            <div class="flex items-center gap-2">
+                                @if($listing->is_harvesting)
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800 flex items-center gap-1">
+                                        <span>🌾</span>
+                                        <span>En Cosecha</span>
+                                    </span>
+                                @endif
+                                <span class="px-2 py-1 text-xs font-medium rounded-full {{ $listing->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                    {{ ucfirst($listing->status) }}
+                                </span>
+                            </div>
                         </div>
                         
                         <p class="text-sm text-gray-600 mb-2">{{ $listing->product->name }}</p>
@@ -65,7 +73,7 @@
                             <span class="text-sm text-gray-500">{{ $listing->formatted_presentation }}</span>
                         </div>
 
-                        <div class="text-sm text-gray-500 mb-4">
+                        <div class="text-sm text-gray-500 mb-4 space-y-1">
                             <p class="flex items-center gap-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -73,6 +81,12 @@
                                 </svg>
                                 {{ $listing->location }}
                             </p>
+                            @if($listing->is_harvesting && $listing->harvest_date)
+                                <p class="flex items-center gap-1 text-orange-600">
+                                    <span>🌾</span>
+                                    <span>Cosecha: {{ \Carbon\Carbon::parse($listing->harvest_date)->format('d/m/Y') }}</span>
+                                </p>
+                            @endif
                         </div>
 
                         <div class="flex justify-between items-center">
@@ -377,17 +391,53 @@
                                         @enderror
                                     </div>
                                     </div>
-                                    <!-- Fecha de Cosecha -->
+                                    <!-- Toggle de Cosecha y Fecha en una fila -->
                                     <div class="w-full mt-4">
-                                        <label class="block text-sm font-medium mb-1">Fecha de Cosecha</label>
-                                        <input 
-                                            type="date" 
-                                            wire:model="form.harvest_date" 
-                                            class="w-full border rounded px-3 py-2 text-sm" 
-                                        />
-                                        @error('form.harvest_date')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
+                                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 overflow-hidden">
+                                            <div class="flex flex-col lg:flex-row items-start lg:items-center gap-4">
+                                                <!-- Checkbox de cosecha -->
+                                                <div class="flex-shrink-0 w-full lg:w-1/2">
+                                                    <label class="flex items-start cursor-pointer">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            wire:model.live="form.is_harvesting"
+                                                            class="w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-1 mt-1"
+                                                        />
+                                                        <span class="ml-2 text-xs font-medium text-gray-700">
+                                                            <span class="mr-1">🌾</span>
+                                                            <span class="text-blue-600 font-semibold">¡Anuncia tu cosecha!</span>
+                                                            <br>
+                                                            <span class="text-gray-600">Marca si tu producto está en cosecha y los compradores sabrán cuándo estará listo para la venta.</span>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                                
+                                                <!-- Campo de fecha (condicional) -->
+                                                @if($form['is_harvesting'])
+                                                    <div class="w-full lg:w-1/2 transition-all duration-300 ease-in-out">
+                                                        <label class="block text-xs font-medium text-gray-700 mb-1">
+                                                            <span class="text-green-600 font-semibold">📅 ¿Cuándo estará listo?</span>
+                                                        </label>
+                                                        <input 
+                                                            type="date" 
+                                                            wire:model="form.harvest_date" 
+                                                            class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500" 
+                                                            placeholder="dd/mm/aaaa"
+                                                        />
+                                                        @error('form.harvest_date')
+                                                            <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span>
+                                                        @enderror
+                                                        <p class="text-xs text-green-600 mt-1 font-medium">
+                                                            Los compradores verán esta fecha y podrán planificar su compra
+                                                        </p>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            
+                                            @error('form.is_harvesting')
+                                                <span class="text-red-600 text-xs mt-2 block text-center">{{ $message }}</span>
+                                            @enderror
+                                        </div>
                                     </div>
 
                                     <!-- Ubicación en una sola línea -->

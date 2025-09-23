@@ -131,7 +131,6 @@
                         <div class="mb-6">
                             <div class="flex items-center gap-3">
                                 <div>
-                                    <span class="text-3xl font-bold text-gray-900">$</span>
                                     <span class="text-3xl font-bold text-gray-900">{{ $listing['formatted_price'] }}</span>
                                 </div>
                                 @if(isset($listing['bs_price']))

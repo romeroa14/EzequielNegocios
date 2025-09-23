@@ -20,7 +20,8 @@ return new class extends Migration
             $table->decimal('unit_price', 10, 2);
             $table->enum('currency_type', ['USD', 'VES'])->default('USD')->comment('Moneda en la que está expresado el precio');
             $table->enum('quality_grade', ['premium', 'standard', 'economic']);
-            $table->date('harvest_date');
+            $table->boolean('is_harvesting')->default(false)->comment('Indica si el producto está en cosecha');
+            $table->date('harvest_date')->nullable();
             $table->json('images')->nullable();
             $table->foreignId('product_presentation_id')->constrained('product_presentations')->onDelete('cascade');
             $table->decimal('presentation_quantity', 10, 2)->default(1.00);

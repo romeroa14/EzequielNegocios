@@ -31,6 +31,7 @@ class ListingsCrud extends Component
         'unit_price' => '',
         'currency_type' => 'USD',
         'quality_grade' => '',
+        'is_harvesting' => false,
         'harvest_date' => '',
         'state_id' => '',
         'municipality_id' => '',
@@ -56,7 +57,7 @@ class ListingsCrud extends Component
             'form.unit_price' => 'required|numeric|min:0',
             'form.currency_type' => 'required|in:USD,VES',
             'form.quality_grade' => 'required|in:premium,standard,economic',
-            'form.harvest_date' => 'required|date',
+            'form.harvest_date' => 'required_if:form.is_harvesting,true|nullable|date',
             'form.state_id' => 'required|exists:states,id',
             'form.municipality_id' => 'required|exists:municipalities,id',
             'form.parish_id' => 'required|exists:parishes,id',
@@ -173,6 +174,7 @@ class ListingsCrud extends Component
                 'unit_price' => $this->editingListing->unit_price,
                 'currency_type' => $this->editingListing->currency_type,
                 'quality_grade' => $this->editingListing->quality_grade,
+                'is_harvesting' => $this->editingListing->is_harvesting ?? false,
                 'harvest_date' => $this->editingListing->harvest_date ? $this->editingListing->harvest_date->format('Y-m-d') : '',
                 'state_id' => $this->editingListing->state_id,
                 'municipality_id' => $this->editingListing->municipality_id,
@@ -236,6 +238,7 @@ class ListingsCrud extends Component
             'unit_price' => '',
             'currency_type' => 'USD',
             'quality_grade' => '',
+            'is_harvesting' => false,
             'harvest_date' => '',
             'state_id' => '',
             'municipality_id' => '',
@@ -283,14 +286,29 @@ class ListingsCrud extends Component
                 'user_type' => get_class($person)
             ]);
 
-        $listingData = array_merge($this->form, [
+        // Limpiar datos antes de guardar
+        $cleanForm = $this->form;
+        
+        // Si no está en cosecha, limpiar la fecha de cosecha
+        if (!$cleanForm['is_harvesting']) {
+            $cleanForm['harvest_date'] = null;
+        }
+        
+        // Si está en cosecha pero no hay fecha, mantener null
+        if ($cleanForm['is_harvesting'] && empty($cleanForm['harvest_date'])) {
+            $cleanForm['harvest_date'] = null;
+        }
+
+        $listingData = array_merge($cleanForm, [
             'person_id' => $person->id,
-                'images' => $this->form['images'] ?? [], // Asegurarnos de que las imágenes se guarden
-            ]);
+            'images' => $cleanForm['images'] ?? [], // Asegurarnos de que las imágenes se guarden
+        ]);
 
             Log::info('Datos preparados para guardar', [
                 'listing_data' => $listingData,
-                'images_array' => $listingData['images']
+                'images_array' => $listingData['images'],
+                'is_harvesting' => $listingData['is_harvesting'],
+                'harvest_date' => $listingData['harvest_date']
             ]);
 
             // Verificar que el producto existe antes de crear

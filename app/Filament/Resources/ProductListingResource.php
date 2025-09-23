@@ -237,9 +237,17 @@ class ProductListingResource extends Resource
                             ])
                             ->required()
                             ->columnSpanFull(),
+                            
+                        Forms\Components\Toggle::make('is_harvesting')
+                            ->label('¿Está en cosecha?')
+                            ->default(false)
+                            ->live()
+                            ->columnSpanFull(),
+                            
                         Forms\Components\DatePicker::make('harvest_date')
                             ->label('Fecha de Cosecha')
-                            ->required()
+                            ->visible(fn (Forms\Get $get): bool => $get('is_harvesting'))
+                            ->required(fn (Forms\Get $get): bool => $get('is_harvesting'))
                             ->columnSpanFull(),
                     ])->columnSpan(2),
 
@@ -298,6 +306,14 @@ class ProductListingResource extends Resource
                         'secondary' => 'sold_out',
                     ]),
 
+                Tables\Columns\IconColumn::make('is_harvesting')
+                    ->label('En Cosecha')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('gray'),
+
                 Tables\Columns\TextColumn::make('productPresentation.name')
                     ->label('Presentación')
                     ->searchable(),
@@ -331,6 +347,11 @@ class ProductListingResource extends Resource
                         'standard' => 'Estándar',
                         'economic' => 'Económico',
                     ]),
+                Tables\Filters\TernaryFilter::make('is_harvesting')
+                    ->label('En Cosecha')
+                    ->placeholder('Todos')
+                    ->trueLabel('Sí')
+                    ->falseLabel('No'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
