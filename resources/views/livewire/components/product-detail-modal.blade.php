@@ -58,8 +58,8 @@
         </div>
 
         <!-- Modal -->
-        <div class="relative min-h-screen flex items-center justify-center p-4">
-            <div class="relative bg-white w-full max-w-6xl rounded-lg shadow-xl overflow-hidden">
+        <div class="relative min-h-screen flex items-center justify-center p-2 sm:p-4">
+            <div class="relative bg-white w-full max-w-6xl max-h-[90vh] rounded-lg shadow-xl overflow-hidden">
                 <!-- Close button -->
                 <button 
                     @click="show = false; $wire.closeModal()"
@@ -72,29 +72,30 @@
 
                 <!-- Content -->
                 @if($listing)
-                <div class="flex flex-col md:flex-row">
+                <div class="flex flex-col md:flex-row max-h-[90vh] overflow-y-auto">
                     <!-- Left side - Images -->
-                    <div class="w-full md:w-2/3 p-6 bg-white">
+                    <div class="w-full md:w-2/3 p-4 md:p-6 bg-white">
                         <!-- Main image -->
-                        <div class="relative aspect-w-4 aspect-h-3 bg-gray-50 rounded-lg mb-4">
+                        <div class="relative bg-gray-50 rounded-lg mb-4 overflow-hidden" style="height: 300px; min-height: 250px;">
                             @if($listing && !empty($listing['images']))
                                 <img 
                                     src="{{ $listing['images'][$selectedImageIndex ?? 0] }}"
-                                    class="w-full h-full object-contain"
+                                    class="w-full h-full object-cover"
                                     alt="{{ $listing['title'] }}"
                                 >
                             @endif
                         </div>
 
                         <!-- Thumbnails -->
-                        <div class="grid grid-cols-6 gap-2 mt-4">
+                        <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
                             @if($listing && !empty($listing['images']))
                                 @foreach($listing['images'] as $index => $image)
                                     <button 
                                         type="button"
                                         wire:click="$set('selectedImageIndex', {{ $index }})"
-                                        class="relative aspect-square rounded-lg overflow-hidden transition-all duration-200 ease-in-out
+                                        class="relative rounded-lg overflow-hidden transition-all duration-200 ease-in-out
                                                {{ $selectedImageIndex === $index ? 'ring-2 ring-blue-500' : 'hover:ring-2 hover:ring-blue-300' }}"
+                                        style="height: 60px;"
                                     >
                                         <img 
                                             src="{{ $image }}"
