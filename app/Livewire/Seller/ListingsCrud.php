@@ -94,6 +94,43 @@ class ListingsCrud extends Component
         ];
     }
 
+    protected function messages()
+    {
+        return [
+            'form.title.required' => 'El título es obligatorio.',
+            'form.title.string' => 'El título debe ser texto.',
+            'form.title.max' => 'El título no puede tener más de 255 caracteres.',
+            'form.description.required' => 'La descripción es obligatoria.',
+            'form.description.string' => 'La descripción debe ser texto.',
+            'form.unit_price.required' => 'El precio es obligatorio.',
+            'form.unit_price.numeric' => 'El precio debe ser un número.',
+            'form.unit_price.min' => 'El precio debe ser mayor a 0.',
+            'form.currency_type.required' => 'El tipo de moneda es obligatorio.',
+            'form.currency_type.in' => 'El tipo de moneda debe ser USD o VES.',
+            'form.quality_grade.required' => 'La calidad es obligatoria.',
+            'form.quality_grade.in' => 'La calidad debe ser premium, standard o economic.',
+            'form.harvest_date.required_if' => 'La fecha de cosecha es obligatoria cuando está en cosecha.',
+            'form.harvest_date.date' => 'La fecha de cosecha debe ser una fecha válida.',
+            'form.state_id.required' => 'El estado es obligatorio.',
+            'form.state_id.exists' => 'El estado seleccionado no es válido.',
+            'form.municipality_id.required' => 'El municipio es obligatorio.',
+            'form.municipality_id.exists' => 'El municipio seleccionado no es válido.',
+            'form.parish_id.required' => 'La parroquia es obligatoria.',
+            'form.parish_id.exists' => 'La parroquia seleccionada no es válida.',
+            'form.product_id.required' => 'El producto es obligatorio.',
+            'form.product_id.exists' => 'El producto seleccionado no es válido.',
+            'form.status.required' => 'El estatus es obligatorio.',
+            'form.status.in' => 'El estatus debe ser pending, active, sold_out o inactive.',
+            'form.product_presentation_id.required' => 'La presentación es obligatoria.',
+            'form.product_presentation_id.exists' => 'La presentación seleccionada no es válida.',
+            'form.presentation_quantity.required' => 'La cantidad es obligatoria.',
+            'form.presentation_quantity.numeric' => 'La cantidad debe ser un número.',
+            'form.presentation_quantity.min' => 'La cantidad debe ser mayor a 0.',
+            'temporaryImages.*.image' => 'El archivo debe ser una imagen.',
+            'temporaryImages.*.max' => 'La imagen no puede ser mayor a 2MB.',
+        ];
+    }
+
     public function getSelectedPresentationProperty()
     {
         if (!empty($this->form['product_presentation_id'])) {
