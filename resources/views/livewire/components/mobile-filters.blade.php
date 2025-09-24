@@ -127,6 +127,25 @@
                             />
                         </div>
                     </div>
+
+                    <!-- Tasas BCV -->
+                    <div class="pt-4 border-t border-gray-200 mb-4">
+                        <h6 class="text-sm font-semibold text-gray-900 mb-3">Tasas BCV</h6>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center p-2 bg-green-50 rounded-lg">
+                                <span class="text-sm text-gray-700">USD</span>
+                                <span class="text-sm font-medium text-green-700">
+                                    {{ number_format($this->bcvRates['usd'], 2, ',', '.') }} Bs
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 bg-blue-50 rounded-lg">
+                                <span class="text-sm text-gray-700">EUR</span>
+                                <span class="text-sm font-medium text-blue-700">
+                                    {{ number_format($this->bcvRates['eur'], 2, ',', '.') }} Bs
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Apply Filters Button -->

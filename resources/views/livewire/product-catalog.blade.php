@@ -15,10 +15,27 @@
             <!-- Header con filtro dropdown -->
             <div class="mb-8">
                 <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4">
-                    <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Catálogo de Productos</h2>
+                    <div>
+                        <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Catálogo de Productos</h2>
+                    </div>
                     
-                    <!-- Filtros y Ordenamiento -->
+                    <!-- Tasas BCV, Filtros y Ordenamiento -->
                     <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 items-stretch sm:items-center">
+                        <!-- Tasas BCV en el header (visible only on large screens and up) -->
+                        <div class="hidden lg:flex gap-4 items-center">
+                            <div class="flex items-center gap-2 px-3 py-1 bg-green-50 rounded-lg">
+                                <span class="text-xs text-gray-600">USD:</span>
+                                <span class="text-sm font-medium text-green-700">
+                                    {{ number_format($this->bcvRates['usd'], 2, ',', '.') }} Bs
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2 px-3 py-1 bg-blue-50 rounded-lg">
+                                <span class="text-xs text-gray-600">EUR:</span>
+                                <span class="text-sm font-medium text-blue-700">
+                                    {{ number_format($this->bcvRates['eur'], 2, ',', '.') }} Bs
+                                </span>
+                            </div>
+                        </div>
                         <!-- Sort Dropdown -->
                         <div class="relative" x-data="{ open: false }">
                             <button 
@@ -203,9 +220,13 @@
                                             </div>
                         </div>
                     </div>
+
+                    
                 </div>
 
                                
+                               
+
                                 <div class="pt-4 border-t border-gray-200">
                                     <button 
                                         wire:click="clearFilters"

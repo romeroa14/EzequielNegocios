@@ -109,6 +109,22 @@ class ProductCatalog extends Component
         ];
     }
 
+    public function getBcvRatesProperty()
+    {
+        $usdRate = \App\Models\ExchangeRate::getLatestRate('USD')?->rate ?? 0;
+        $eurRate = \App\Models\ExchangeRate::getLatestRate('EUR')?->rate ?? 0;
+        
+        Log::info('BCV Rates:', [
+            'usd' => $usdRate,
+            'eur' => $eurRate
+        ]);
+        
+        return [
+            'usd' => $usdRate,
+            'eur' => $eurRate
+        ];
+    }
+
     public function updated($propertyName)
     {
         // Solo loggear si la propiedad existe
