@@ -1,4 +1,15 @@
 <div>
+    <script>
+        document.addEventListener('livewire:init', () => {
+            console.log('🔥 Livewire initialized!');
+            
+            Livewire.on('test-message', (data) => {
+                console.log('📨 Livewire event received:', data);
+                alert('Livewire event: ' + data.message);
+            });
+        });
+    </script>
+    
     <div class="min-h-screen bg-gray-50 py-8">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header con filtro dropdown -->
@@ -54,7 +65,6 @@
                                         wire:model.live.debounce.300ms="search"
                                         placeholder="Escribe aquí..."
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                                        wire:keyup="updatedSearch"
                                     />
                                 </div>
 
@@ -92,7 +102,7 @@
                                         <!-- Categoría -->
                                         <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
-                                            <select wire:model="selectedCategory" wire:change="updatedSelectedCategory" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
+                                            <select wire:model.live="selectedCategory" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
                                                 <option value="">Todas las Categorías</option>
                                                 @foreach($categories as $category)
                                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -100,7 +110,7 @@
                                             </select>
                                             @if($selectedCategory)
                                                 <p class="text-xs text-green-600 mt-1">Filtro activo: {{ $categories->firstWhere('id', $selectedCategory)?->name }}</p>
-                        @endif
+                                            @endif
                                         </div>
 
                                         <!-- Subcategoría -->
@@ -128,7 +138,7 @@
                                         <!-- Marca -->
                                         <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">Marca</label>
-                                            <select wire:model="selectedBrand" wire:change="updatedSelectedBrand" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
+                                            <select wire:model.live="selectedBrand" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
                                                 <option value="">Todas las Marcas</option>
                                                 @foreach($brands as $brand)
                                                     <option value="{{ $brand->id }}">{{ $brand->name }}</option>
@@ -136,13 +146,13 @@
                                             </select>
                                             @if($selectedBrand)
                                                 <p class="text-xs text-green-600 mt-1">Filtro activo: {{ $brands->firstWhere('id', $selectedBrand)?->name }}</p>
-                        @endif
+                                            @endif
                                         </div>
 
                                         <!-- Presentación -->
                                         <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">Presentación</label>
-                                            <select wire:model="selectedPresentation" wire:change="updatedSelectedPresentation" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
+                                            <select wire:model.live="selectedPresentation" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
                                                 <option value="">Todas las Presentaciones</option>
                                                 @foreach($presentations as $presentation)
                                                     <option value="{{ $presentation->id }}">{{ $presentation->name }}</option>
@@ -176,6 +186,22 @@
 
                                 <!-- Test Buttons -->
                                 <div class="pt-4 border-t border-gray-200">
+                                    <button 
+                                        wire:click="testSearchFilter"
+                                        class="w-full px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors text-sm font-medium mb-2"
+                                        onclick="console.log('Button clicked!')"
+                                    >
+                                        🧪 Test Search Filter
+                                    </button>
+                                    
+                                    <button 
+                                        wire:click="testConnection"
+                                        class="w-full px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg transition-colors text-sm font-medium mb-2"
+                                        onclick="console.log('Test connection clicked!')"
+                                    >
+                                        🔥 Test Livewire Connection
+                                    </button>
+                                    
                                     <button 
                                         wire:click="testFilters"
                                         class="w-full px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors text-sm font-medium mb-2"

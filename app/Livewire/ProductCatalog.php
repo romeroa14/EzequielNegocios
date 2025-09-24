@@ -142,43 +142,17 @@ class ProductCatalog extends Component
         }
     }
 
-    public function updatedSearch()
-    {
-        Log::info('Search updated:', ['search' => $this->search]);
-        $this->resetPage();
-    }
+    // Removed updatedSearch() - handled by updated($propertyName)
 
-    public function updatedSelectedCategory()
-    {
-        Log::info('Category updated:', ['selectedCategory' => $this->selectedCategory]);
-        $this->selectedSubcategory = '';
-        $this->selectedLine = null;
-        $this->selectedBrand = null;
-        $this->resetPage();
-    }
+    // Removed updatedSelectedCategory() - handled by updated($propertyName)
 
-    public function updatedSelectedSubcategory()
-    {
-        $this->selectedLine = null;
-        $this->selectedBrand = null;
-    }
+    // Removed updatedSelectedSubcategory() - handled by updated($propertyName)
 
-    public function updatedSelectedLine()
-    {
-        $this->selectedBrand = null;
-    }
+    // Removed updatedSelectedLine() - handled by updated($propertyName)
 
-    public function updatedSelectedBrand()
-    {
-        Log::info('Brand updated:', ['selectedBrand' => $this->selectedBrand]);
-        $this->resetPage();
-    }
+    // Removed updatedSelectedBrand() - handled by updated($propertyName)
 
-    public function updatedSelectedPresentation()
-    {
-        Log::info('Presentation updated:', ['selectedPresentation' => $this->selectedPresentation]);
-        $this->resetPage();
-    }
+    // Removed updatedSelectedPresentation() - handled by updated($propertyName)
 
     public function applyFilters()
     {
@@ -234,6 +208,33 @@ class ProductCatalog extends Component
         ]);
     }
 
+    public function testSearchFilter()
+    {
+        Log::info('🧪 Testing search filter:', [
+            'current_search' => $this->search,
+            'search_length' => strlen($this->search),
+            'search_empty' => empty($this->search)
+        ]);
+        
+        // Force refresh of products
+        $this->resetPage();
+        
+        $this->dispatch('test-message', [
+            'message' => 'Search filter test completed. Check logs.',
+            'search' => $this->search
+        ]);
+    }
+
+    public function testConnection()
+    {
+        Log::info('🔥 TEST CONNECTION: Livewire is working!');
+        
+        $this->dispatch('test-message', [
+            'message' => '✅ Livewire connection is working!',
+            'timestamp' => now()->toDateTimeString()
+        ]);
+    }
+
     public function clearFilters()
     {
         $this->reset(['search', 'selectedCategory', 'selectedSubcategory', 'selectedLine', 'selectedBrand', 'selectedPresentation', 'selectedQuality', 'minPrice', 'maxPrice', 'producer']);
@@ -264,8 +265,10 @@ class ProductCatalog extends Component
 
     public function getProductsProperty()
     {
-        Log::info('Getting products with filters:', [
+        Log::info('🔥 Getting products with filters:', [
             'search' => $this->search,
+            'search_length' => strlen($this->search),
+            'search_empty' => empty($this->search),
             'selectedCategory' => $this->selectedCategory,
             'selectedSubcategory' => $this->selectedSubcategory,
             'selectedLine' => $this->selectedLine,
@@ -290,6 +293,11 @@ class ProductCatalog extends Component
             ])
             ->where('status', 'active')
             ->when($this->search, function (Builder $query) {
+                Log::info('🔍 Applying search filter:', [
+                    'search_term' => $this->search,
+                    'search_length' => strlen($this->search)
+                ]);
+                
                 $query->where(function (Builder $subQuery) {
                     $subQuery->where('title', 'like', '%' . $this->search . '%')
                         ->orWhere('description', 'like', '%' . $this->search . '%')

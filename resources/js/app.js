@@ -1,9 +1,9 @@
 import './bootstrap';
-import Alpine from 'alpinejs';
 import Swal from 'sweetalert2';
 
-// Initialize Alpine.js
-window.Alpine = Alpine;
-Alpine.start();
+// Alpine.js is loaded by Livewire, so we don't need to initialize it here
+// import Alpine from 'alpinejs';
+// window.Alpine = Alpine;
+// Alpine.start();
 
 window.Swal = Swal;
