@@ -1,118 +1,170 @@
 <div>
     <div class="min-h-screen bg-gray-50 py-8">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Header estilo NFT -->
+            <!-- Header con filtro dropdown -->
             <div class="mb-8">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-gray-900">Catálogo de Productos</h2>
-                    <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">EXPLORAR MÁS</a>
-                </div>
+                    
+                    <!-- Filtro Dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button 
+                            @click="open = !open"
+                            class="flex items-center gap-3 bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 7H21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                <path d="M6 12H18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                <path d="M10 17H14" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                            <span>Sort By: {{ $sortBy === 'created_at' ? 'Recently Added' : ($sortBy === 'title' ? 'Name A-Z' : ($sortBy === 'title_desc' ? 'Name Z-A' : ($sortBy === 'unit_price' ? 'Price: Low to High' : 'Price: High to Low'))) }}</span>
+                        </button>
 
-                <!-- Filtros estilo NFT -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <div class="flex flex-wrap items-center gap-4">
-                        <!-- Categoría -->
-                        <div class="relative">
-                            <select wire:model.live="selectedCategory" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition-colors border-0 focus:ring-2 focus:ring-blue-500">
-                                <option value="">Todas las Categorías</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <!-- Dropdown Menu -->
+                        <div 
+                            x-show="open" 
+                            @click.away="open = false"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95"
+                            class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                            style="display: none;"
+                        >
+                            <div class="p-6">
+                                <!-- Búsqueda -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Buscar productos</label>
+                                    <input 
+                                        type="text" 
+                                        wire:model.live.debounce.300ms="search"
+                                        placeholder="Escribe aquí..."
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
 
-                        <!-- Subcategoría -->
-                        <div class="relative">
-                            <select wire:model.live="selectedSubcategory" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition-colors border-0 focus:ring-2 focus:ring-blue-500">
-                                <option value="">Todas las Subcategorías</option>
-                                @foreach($subcategories as $subcategory)
-                                    <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                                <!-- Sort by -->
+                                <div class="mb-4">
+                                    <h6 class="text-sm font-semibold text-gray-900 mb-3">Sort by</h6>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <span class="text-sm">Recently added</span>
+                                            <input type="radio" wire:model.live="sortBy" value="created_at" class="text-blue-600 focus:ring-blue-500">
+                                        </label>
+                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <span class="text-sm">Name A-Z</span>
+                                            <input type="radio" wire:model.live="sortBy" value="title" class="text-blue-600 focus:ring-blue-500">
+                                        </label>
+                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <span class="text-sm">Name Z-A</span>
+                                            <input type="radio" wire:model.live="sortBy" value="title_desc" class="text-blue-600 focus:ring-blue-500">
+                                        </label>
+                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <span class="text-sm">Price: Low to High</span>
+                                            <input type="radio" wire:model.live="sortBy" value="unit_price" class="text-blue-600 focus:ring-blue-500">
+                                        </label>
+                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <span class="text-sm">Price: High to Low</span>
+                                            <input type="radio" wire:model.live="sortBy" value="unit_price_desc" class="text-blue-600 focus:ring-blue-500">
+                                        </label>
+                                    </div>
+                                </div>
 
-                        <!-- Línea de Producto -->
-                        <div class="relative">
-                            <select wire:model.live="selectedLine" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition-colors border-0 focus:ring-2 focus:ring-blue-500">
-                                <option value="">Todas las Líneas</option>
-                                @foreach($productLines as $line)
-                                    <option value="{{ $line->id }}">{{ $line->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                                <!-- Filtros -->
+                                <div class="mb-4">
+                                    <h6 class="text-sm font-semibold text-gray-900 mb-3">Filtros</h6>
+                                    <div class="space-y-3">
+                                        <!-- Categoría -->
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Categoría</label>
+                                            <select wire:model.live="selectedCategory" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">Todas las Categorías</option>
+                                                @foreach($categories as $category)
+                                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
 
-                        <!-- Marca -->
-                        <div class="relative">
-                            <select wire:model.live="selectedBrand" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition-colors border-0 focus:ring-2 focus:ring-blue-500">
-                                <option value="">Todas las Marcas</option>
-                                @foreach($brands as $brand)
-                                    <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                                        <!-- Subcategoría -->
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Subcategoría</label>
+                                            <select wire:model.live="selectedSubcategory" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">Todas las Subcategorías</option>
+                                                @foreach($subcategories as $subcategory)
+                                                    <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
 
-                        <!-- Presentación -->
-                        <div class="relative">
-                            <select wire:model.live="selectedPresentation" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition-colors border-0 focus:ring-2 focus:ring-blue-500">
-                                <option value="">Todas las Presentaciones</option>
-                                @foreach($presentations as $presentation)
-                                    <option value="{{ $presentation->id }}">{{ $presentation->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                                        <!-- Línea de Producto -->
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Línea de Producto</label>
+                                            <select wire:model.live="selectedLine" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">Todas las Líneas</option>
+                                                @foreach($productLines as $line)
+                                                    <option value="{{ $line->id }}">{{ $line->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
 
-                        <!-- Ordenar -->
-                        <div class="ml-auto">
-                            <select wire:model.live="sortBy" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition-colors border-0 focus:ring-2 focus:ring-blue-500">
-                                <option value="created_at">Más Recientes</option>
-                                <option value="title">Nombre A-Z</option>
-                                <option value="title_desc">Nombre Z-A</option>
-                                <option value="unit_price">Precio: Menor a Mayor</option>
-                                <option value="unit_price_desc">Precio: Mayor a Menor</option>
-                            </select>
-                        </div>
-                    </div>
+                                        <!-- Marca -->
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Marca</label>
+                                            <select wire:model.live="selectedBrand" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">Todas las Marcas</option>
+                                                @foreach($brands as $brand)
+                                                    <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
 
-                    <!-- Filtros adicionales -->
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <div class="flex flex-wrap items-center gap-4">
-                            <!-- Búsqueda -->
-                            <div class="flex-1 min-w-64">
-                                <input 
-                                    type="text" 
-                                    wire:model.live.debounce.300ms="search"
-                                    placeholder="Buscar productos..."
-                                    class="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition-colors border-0 focus:ring-2 focus:ring-blue-500"
-                                />
+                                        <!-- Presentación -->
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Presentación</label>
+                                            <select wire:model.live="selectedPresentation" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">Todas las Presentaciones</option>
+                                                @foreach($presentations as $presentation)
+                                                    <option value="{{ $presentation->id }}">{{ $presentation->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <!-- Rango de Precios -->
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-600 mb-1">Precio Mín.</label>
+                                                <input 
+                                                    type="number" 
+                                                    wire:model.live="minPrice"
+                                                    placeholder="0"
+                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-600 mb-1">Precio Máx.</label>
+                                                <input 
+                                                    type="number" 
+                                                    wire:model.live="maxPrice"
+                                                    placeholder="999999"
+                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Limpiar Filtros -->
+                                <div class="pt-4 border-t border-gray-200">
+                                    <button 
+                                        wire:click="clearFilters"
+                                        class="w-full px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors text-sm"
+                                    >
+                                        Limpiar Filtros
+                                    </button>
+                                </div>
                             </div>
-
-                            <!-- Precio Mínimo -->
-                            <div class="min-w-32">
-                                <input 
-                                    type="number" 
-                                    wire:model.live="minPrice"
-                                    placeholder="Precio mín."
-                                    class="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition-colors border-0 focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-
-                            <!-- Precio Máximo -->
-                            <div class="min-w-32">
-                                <input 
-                                    type="number" 
-                                    wire:model.live="maxPrice"
-                                    placeholder="Precio máx."
-                                    class="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition-colors border-0 focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-
-                            <!-- Limpiar Filtros -->
-                            <button 
-                                wire:click="clearFilters"
-                                class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
-                            >
-                                Limpiar Filtros
-                            </button>
                         </div>
                     </div>
                 </div>
