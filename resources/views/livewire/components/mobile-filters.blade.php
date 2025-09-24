@@ -37,19 +37,103 @@
                 </div>
 
                 <!-- Filter Content -->
-                @include('livewire.partials.filter-content', [
-                    'categories' => $categories,
-                    'subcategories' => $subcategories,
-                    'productLines' => $productLines,
-                    'brands' => $brands,
-                    'presentations' => $presentations
-                ])
+                <div class="space-y-4">
+                    <!-- Búsqueda -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-900 mb-2">Buscar productos</label>
+                        <input 
+                            type="text" 
+                            wire:model.live.debounce.300ms="search"
+                            placeholder="Escribe aquí..."
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                        />
+                    </div>
+
+                    <!-- Categoría -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                        <select wire:model.live="selectedCategory" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white">
+                            <option value="">Todas las Categorías</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Subcategoría -->
+                    @if($subcategories->isNotEmpty())
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Subcategoría</label>
+                        <select wire:model.live="selectedSubcategory" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white">
+                            <option value="">Todas las Subcategorías</option>
+                            @foreach($subcategories as $subcategory)
+                                <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+
+                    <!-- Línea de Producto -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Línea de Producto</label>
+                        <select wire:model.live="selectedLine" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white">
+                            <option value="">Todas las Líneas</option>
+                            @foreach($productLines as $line)
+                                <option value="{{ $line->id }}">{{ $line->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Marca -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+                        <select wire:model.live="selectedBrand" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white">
+                            <option value="">Todas las Marcas</option>
+                            @foreach($brands as $brand)
+                                <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Presentación -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Presentación</label>
+                        <select wire:model.live="selectedPresentation" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white">
+                            <option value="">Todas las Presentaciones</option>
+                            @foreach($presentations as $presentation)
+                                <option value="{{ $presentation->id }}">{{ $presentation->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Rango de Precios -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Precio Mín.</label>
+                            <input 
+                                type="number" 
+                                wire:model.live="minPrice"
+                                placeholder="0"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Precio Máx.</label>
+                            <input 
+                                type="number" 
+                                wire:model.live="maxPrice"
+                                placeholder="999999"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                            />
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Apply Filters Button -->
                 <div class="mt-6 space-y-2">
                     <button 
                         wire:click="applyFilters"
-                        class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200"
+                        class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-200"
                     >
                         Aplicar Filtros
                     </button>

@@ -14,22 +14,79 @@
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header con filtro dropdown -->
             <div class="mb-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-3xl font-bold text-gray-900">Catálogo de Productos</h2>
+                <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4">
+                    <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Catálogo de Productos</h2>
                     
-                    <!-- Filtro Dropdown -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button 
-                            @click="open = !open"
-                            class="flex items-center gap-3 bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors border border-gray-600"
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 7H21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-                                <path d="M6 12H18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-                                <path d="M10 17H14" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-                            </svg>
-                            <span>Sort By: {{ $sortBy === 'created_at' ? 'Recently Added' : ($sortBy === 'title' ? 'Name A-Z' : ($sortBy === 'title_desc' ? 'Name Z-A' : ($sortBy === 'unit_price' ? 'Price: Low to High' : 'Price: High to Low'))) }}</span>
-                        </button>
+                    <!-- Filtros y Ordenamiento -->
+                    <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 items-stretch sm:items-center">
+                        <!-- Sort Dropdown -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button 
+                                @click="open = !open"
+                                class="flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors border border-green-500 w-full sm:w-auto"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 7H21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                    <path d="M6 12H18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                    <path d="M10 17H14" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <span>Ordenar: {{ $sortBy === 'created_at' ? 'Recientes' : ($sortBy === 'title' ? 'Nombre A-Z' : ($sortBy === 'title_desc' ? 'Nombre Z-A' : ($sortBy === 'unit_price' ? 'Precio: Menor a Mayor' : 'Precio: Mayor a Menor'))) }}</span>
+                            </button>
+
+                            <!-- Sort Dropdown Menu -->
+                            <div 
+                                x-show="open" 
+                                @click.away="open = false"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95"
+                                class="absolute right-0 mt-2 w-64 sm:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                                style="display: none;"
+                            >
+                                <div class="p-4">
+                                    <h6 class="text-sm font-semibold text-gray-900 mb-3">Ordenar por</h6>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <span class="text-sm text-gray-900">Recientes</span>
+                                            <input type="radio" wire:model.live="sortBy" value="created_at" name="sortBy" class="text-green-600 focus:ring-green-500">
+                                        </label>
+                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <span class="text-sm text-gray-900">Nombre A-Z</span>
+                                            <input type="radio" wire:model.live="sortBy" value="title" name="sortBy" class="text-green-600 focus:ring-green-500">
+                                        </label>
+                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <span class="text-sm text-gray-900">Nombre Z-A</span>
+                                            <input type="radio" wire:model.live="sortBy" value="title_desc" name="sortBy" class="text-green-600 focus:ring-green-500">
+                                        </label>
+                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <span class="text-sm text-gray-900">Precio: Menor a Mayor</span>
+                                            <input type="radio" wire:model.live="sortBy" value="unit_price" name="sortBy" class="text-green-600 focus:ring-green-500">
+                                        </label>
+                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <span class="text-sm text-gray-900">Precio: Mayor a Menor</span>
+                                            <input type="radio" wire:model.live="sortBy" value="unit_price_desc" name="sortBy" class="text-green-600 focus:ring-green-500">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filtro Dropdown -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button 
+                                @click="open = !open"
+                                class="flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors border border-green-500 w-full sm:w-auto"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 7H21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                    <path d="M6 12H18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                    <path d="M10 17H14" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <span>Filtros</span>
+                            </button>
 
                         <!-- Dropdown Menu -->
                         <div 
@@ -41,21 +98,11 @@
                             x-transition:leave="transition ease-in duration-150"
                             x-transition:leave-start="opacity-100 scale-100"
                             x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                            class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
                             style="display: none;"
                         >
                             <div class="p-6">
-                                <!-- Debug Info -->
-                                <div class="mb-4 p-2 bg-yellow-100 rounded text-xs">
-                                    <strong>Debug:</strong><br>
-                                    Search: "{{ $search }}"<br>
-                                    Category: "{{ $selectedCategory }}"<br>
-                                    Brand: "{{ $selectedBrand }}"<br>
-                                    Presentation: "{{ $selectedPresentation }}"<br>
-                                    MinPrice: "{{ $minPrice }}"<br>
-                                    MaxPrice: "{{ $maxPrice }}"<br>
-                                    SortBy: "{{ $sortBy }}"
-                                </div>
+                              
                                 
                                 <!-- Búsqueda -->
                                 <div class="mb-4">
@@ -68,32 +115,6 @@
                                     />
                                 </div>
 
-                                <!-- Sort by -->
-                                <div class="mb-4">
-                                    <h6 class="text-sm font-semibold text-gray-900 mb-3">Sort by</h6>
-                                    <div class="space-y-2">
-                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
-                                            <span class="text-sm text-gray-900">Recently added</span>
-                                            <input type="radio" wire:model.live="sortBy" value="created_at" name="sortBy" class="text-blue-600 focus:ring-blue-500">
-                                        </label>
-                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
-                                            <span class="text-sm text-gray-900">Name A-Z</span>
-                                            <input type="radio" wire:model.live="sortBy" value="title" name="sortBy" class="text-blue-600 focus:ring-blue-500">
-                                        </label>
-                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
-                                            <span class="text-sm text-gray-900">Name Z-A</span>
-                                            <input type="radio" wire:model.live="sortBy" value="title_desc" name="sortBy" class="text-blue-600 focus:ring-blue-500">
-                                        </label>
-                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
-                                            <span class="text-sm text-gray-900">Price: Low to High</span>
-                                            <input type="radio" wire:model.live="sortBy" value="unit_price" name="sortBy" class="text-blue-600 focus:ring-blue-500">
-                                        </label>
-                                        <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
-                                            <span class="text-sm text-gray-900">Price: High to Low</span>
-                                            <input type="radio" wire:model.live="sortBy" value="unit_price_desc" name="sortBy" class="text-blue-600 focus:ring-blue-500">
-                                        </label>
-                                    </div>
-                            </div>
 
                                 <!-- Filtros -->
                                 <div class="mb-4">
@@ -184,38 +205,8 @@
                     </div>
                 </div>
 
-                                <!-- Test Buttons -->
+                               
                                 <div class="pt-4 border-t border-gray-200">
-                                    <button 
-                                        wire:click="testSearchFilter"
-                                        class="w-full px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors text-sm font-medium mb-2"
-                                        onclick="console.log('Button clicked!')"
-                                    >
-                                        🧪 Test Search Filter
-                                    </button>
-                                    
-                                    <button 
-                                        wire:click="testConnection"
-                                        class="w-full px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg transition-colors text-sm font-medium mb-2"
-                                        onclick="console.log('Test connection clicked!')"
-                                    >
-                                        🔥 Test Livewire Connection
-                                    </button>
-                                    
-                                    <button 
-                                        wire:click="testFilters"
-                                        class="w-full px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors text-sm font-medium mb-2"
-                                    >
-                                        Test Filters (Set Values)
-                                    </button>
-                                    
-                                    <button 
-                                        wire:click="debugFilters"
-                                        class="w-full px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors text-sm font-medium mb-2"
-                                    >
-                                        Debug Current Values
-                                    </button>
-                                    
                                     <button 
                                         wire:click="clearFilters"
                                         class="w-full px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors text-sm font-medium"
@@ -248,12 +239,7 @@
                                 <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300"></div>
                             </div>
                             
-                            <!-- Heart Button -->
-                            <button class="absolute top-3 right-3 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-colors">
-                                <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
+                            
                                 </div>
 
                                 <!-- Product Info -->
@@ -277,7 +263,7 @@
                             <div class="space-y-3 mb-4">
                                 <!-- Producer -->
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #10b981, #059669);">
                                         <span class="text-white text-xs font-bold">
                                             {{ substr($product->person->first_name, 0, 1) }}{{ substr($product->person->last_name, 0, 1) }}
                                         </span>
@@ -312,7 +298,7 @@
                             <div class="flex gap-2">
                                     <a 
                                         href="{{ route('productores.show', ['producer' => $product->person_id]) }}"
-                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg text-center transition-colors"
+                                    class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg text-center transition-colors"
                                     >
                                         Ver Productor
                                     </a>

@@ -44,7 +44,7 @@ class ProductCatalog extends Component
         'maxPrice' => ['except' => ''],
         'producer' => ['except' => ''],
         'sortBy' => ['except' => 'created_at'],
-        'sortDirection' => ['except' => 'desc']
+        'sortDirection' => ['except' => 'desc'],
     ];
 
     protected function rules()
@@ -111,16 +111,19 @@ class ProductCatalog extends Component
 
     public function updated($propertyName)
     {
-        Log::info('Property updated:', [
-            'property' => $propertyName,
-            'value' => $this->$propertyName,
-            'all_properties' => [
-                'search' => $this->search,
-                'selectedCategory' => $this->selectedCategory,
-                'selectedBrand' => $this->selectedBrand,
-                'selectedPresentation' => $this->selectedPresentation,
-            ]
-        ]);
+        // Solo loggear si la propiedad existe
+        if (property_exists($this, $propertyName)) {
+            Log::info('Property updated:', [
+                'property' => $propertyName,
+                'value' => $this->$propertyName,
+                'all_properties' => [
+                    'search' => $this->search,
+                    'selectedCategory' => $this->selectedCategory,
+                    'selectedBrand' => $this->selectedBrand,
+                    'selectedPresentation' => $this->selectedPresentation,
+                ]
+            ]);
+        }
         
         $this->validateOnly($propertyName);
         
@@ -134,6 +137,7 @@ class ProductCatalog extends Component
             $this->selectedBrand = null;
             $this->resetPage();
         }
+
 
         if (in_array($propertyName, ['minPrice', 'maxPrice'])) {
             if ($this->minPrice && $this->maxPrice && $this->maxPrice < $this->minPrice) {
@@ -342,19 +346,19 @@ class ProductCatalog extends Component
                 $query->where('person_id', $this->producer);
             })
             ->when($this->sortBy === 'title', function (Builder $query) {
-                $query->orderBy('title', $this->sortDirection);
+                $query->orderBy('title', 'asc');
             })
             ->when($this->sortBy === 'title_desc', function (Builder $query) {
                 $query->orderBy('title', 'desc');
             })
             ->when($this->sortBy === 'unit_price', function (Builder $query) {
-                $query->orderBy('unit_price', $this->sortDirection);
+                $query->orderBy('unit_price', 'asc');
             })
             ->when($this->sortBy === 'unit_price_desc', function (Builder $query) {
                 $query->orderBy('unit_price', 'desc');
             })
             ->when($this->sortBy === 'created_at', function (Builder $query) {
-                $query->orderBy('created_at', $this->sortDirection);
+                $query->orderBy('created_at', 'desc');
             })
             ->paginate(12);
     }
