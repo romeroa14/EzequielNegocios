@@ -28,9 +28,9 @@ class ProductCatalog extends Component
     public $sortDirection = 'desc';
     public $showFilters = false;
     public $producer = null;
-    public $selectedLine = null;
-    public $selectedBrand = null;
-    public $selectedPresentation = null;
+    public $selectedLine = '';
+    public $selectedBrand = '';
+    public $selectedPresentation = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -82,30 +82,23 @@ class ProductCatalog extends Component
         ];
     }
 
-    public function updated($propertyName)
-    {
-        $this->validateOnly($propertyName);
-        
-        if ($propertyName === 'search') {
-            $this->resetPage();
-        }
-
-        if ($propertyName === 'selectedCategory') {
-            $this->selectedSubcategory = '';
-            $this->resetPage();
-        }
-
-        if (in_array($propertyName, ['minPrice', 'maxPrice'])) {
-            if ($this->minPrice && $this->maxPrice && $this->maxPrice < $this->minPrice) {
-                $this->addError('maxPrice', 'El precio máximo debe ser mayor o igual al precio mínimo.');
-            }
-        }
-    }
-
     public function mount()
     {
         $this->producer = request()->query('producer');
         $this->validate();
+        
+        // Debug: Log current filter values
+        Log::info('ProductCatalog mounted with filters:', [
+            'search' => $this->search,
+            'selectedCategory' => $this->selectedCategory,
+            'selectedSubcategory' => $this->selectedSubcategory,
+            'selectedLine' => $this->selectedLine,
+            'selectedBrand' => $this->selectedBrand,
+            'selectedPresentation' => $this->selectedPresentation,
+            'minPrice' => $this->minPrice,
+            'maxPrice' => $this->maxPrice,
+            'sortBy' => $this->sortBy
+        ]);
     }
 
     public function getExchangeRatesProperty()
@@ -116,13 +109,48 @@ class ProductCatalog extends Component
         ];
     }
 
+    public function updated($propertyName)
+    {
+        Log::info('Property updated:', [
+            'property' => $propertyName,
+            'value' => $this->$propertyName,
+            'all_properties' => [
+                'search' => $this->search,
+                'selectedCategory' => $this->selectedCategory,
+                'selectedBrand' => $this->selectedBrand,
+                'selectedPresentation' => $this->selectedPresentation,
+            ]
+        ]);
+        
+        $this->validateOnly($propertyName);
+        
+        if ($propertyName === 'search') {
+            $this->resetPage();
+        }
+
+        if ($propertyName === 'selectedCategory') {
+            $this->selectedSubcategory = '';
+            $this->selectedLine = null;
+            $this->selectedBrand = null;
+            $this->resetPage();
+        }
+
+        if (in_array($propertyName, ['minPrice', 'maxPrice'])) {
+            if ($this->minPrice && $this->maxPrice && $this->maxPrice < $this->minPrice) {
+                $this->addError('maxPrice', 'El precio máximo debe ser mayor o igual al precio mínimo.');
+            }
+        }
+    }
+
     public function updatedSearch()
     {
+        Log::info('Search updated:', ['search' => $this->search]);
         $this->resetPage();
     }
 
     public function updatedSelectedCategory()
     {
+        Log::info('Category updated:', ['selectedCategory' => $this->selectedCategory]);
         $this->selectedSubcategory = '';
         $this->selectedLine = null;
         $this->selectedBrand = null;
@@ -142,6 +170,13 @@ class ProductCatalog extends Component
 
     public function updatedSelectedBrand()
     {
+        Log::info('Brand updated:', ['selectedBrand' => $this->selectedBrand]);
+        $this->resetPage();
+    }
+
+    public function updatedSelectedPresentation()
+    {
+        Log::info('Presentation updated:', ['selectedPresentation' => $this->selectedPresentation]);
         $this->resetPage();
     }
 
@@ -150,18 +185,60 @@ class ProductCatalog extends Component
         $this->resetPage();
     }
 
+    public function testFilters()
+    {
+        $this->search = 'test search';
+        $this->selectedCategory = '1';
+        $this->selectedBrand = '1';
+        $this->selectedPresentation = '1';
+        $this->minPrice = '100';
+        $this->maxPrice = '1000';
+        $this->sortBy = 'title';
+        $this->resetPage();
+        
+        Log::info('Test filters set:', [
+            'search' => $this->search,
+            'selectedCategory' => $this->selectedCategory,
+            'selectedBrand' => $this->selectedBrand,
+            'selectedPresentation' => $this->selectedPresentation,
+            'minPrice' => $this->minPrice,
+            'maxPrice' => $this->maxPrice,
+            'sortBy' => $this->sortBy
+        ]);
+    }
+
+    public function debugFilters()
+    {
+        Log::info('Debug current filter values:', [
+            'search' => $this->search,
+            'selectedCategory' => $this->selectedCategory,
+            'selectedSubcategory' => $this->selectedSubcategory,
+            'selectedLine' => $this->selectedLine,
+            'selectedBrand' => $this->selectedBrand,
+            'selectedPresentation' => $this->selectedPresentation,
+            'selectedQuality' => $this->selectedQuality,
+            'minPrice' => $this->minPrice,
+            'maxPrice' => $this->maxPrice,
+            'sortBy' => $this->sortBy,
+            'sortDirection' => $this->sortDirection
+        ]);
+        
+        $this->dispatch('debug-message', [
+            'message' => 'Debug values logged to console. Check logs.',
+            'values' => [
+                'search' => $this->search,
+                'selectedCategory' => $this->selectedCategory,
+                'selectedBrand' => $this->selectedBrand,
+                'selectedPresentation' => $this->selectedPresentation,
+            ]
+        ]);
+    }
+
     public function clearFilters()
     {
-        $this->search = '';
-        $this->selectedCategory = '';
-        $this->selectedSubcategory = '';
-        $this->selectedLine = '';
-        $this->selectedBrand = '';
-        $this->selectedPresentation = '';
-        $this->selectedQuality = '';
-        $this->minPrice = '';
-        $this->maxPrice = '';
-        $this->producer = '';
+        $this->reset(['search', 'selectedCategory', 'selectedSubcategory', 'selectedLine', 'selectedBrand', 'selectedPresentation', 'selectedQuality', 'minPrice', 'maxPrice', 'producer']);
+        $this->sortBy = 'created_at';
+        $this->sortDirection = 'desc';
         $this->resetPage();
     }
 
@@ -187,6 +264,18 @@ class ProductCatalog extends Component
 
     public function getProductsProperty()
     {
+        Log::info('Getting products with filters:', [
+            'search' => $this->search,
+            'selectedCategory' => $this->selectedCategory,
+            'selectedSubcategory' => $this->selectedSubcategory,
+            'selectedLine' => $this->selectedLine,
+            'selectedBrand' => $this->selectedBrand,
+            'selectedPresentation' => $this->selectedPresentation,
+            'minPrice' => $this->minPrice,
+            'maxPrice' => $this->maxPrice,
+            'sortBy' => $this->sortBy
+        ]);
+        
         return ProductListing::query()
             ->with([
                 'product.productCategory',
@@ -244,7 +333,21 @@ class ProductCatalog extends Component
             ->when($this->producer, function (Builder $query) {
                 $query->where('person_id', $this->producer);
             })
-            ->orderBy($this->sortBy, $this->sortDirection)
+            ->when($this->sortBy === 'title', function (Builder $query) {
+                $query->orderBy('title', $this->sortDirection);
+            })
+            ->when($this->sortBy === 'title_desc', function (Builder $query) {
+                $query->orderBy('title', 'desc');
+            })
+            ->when($this->sortBy === 'unit_price', function (Builder $query) {
+                $query->orderBy('unit_price', $this->sortDirection);
+            })
+            ->when($this->sortBy === 'unit_price_desc', function (Builder $query) {
+                $query->orderBy('unit_price', 'desc');
+            })
+            ->when($this->sortBy === 'created_at', function (Builder $query) {
+                $query->orderBy('created_at', $this->sortDirection);
+            })
             ->paginate(12);
     }
 
