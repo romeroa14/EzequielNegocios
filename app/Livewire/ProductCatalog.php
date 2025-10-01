@@ -31,6 +31,8 @@ class ProductCatalog extends Component
     public $selectedLine = '';
     public $selectedBrand = '';
     public $selectedPresentation = '';
+    public $perPage = 12;
+    public $currentPage = 1;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -376,7 +378,7 @@ class ProductCatalog extends Component
             ->when($this->sortBy === 'created_at', function (Builder $query) {
                 $query->orderBy('created_at', 'desc');
             })
-            ->paginate(12);
+            ->paginate($this->perPage);
     }
 
     public function getCategoriesProperty()
@@ -530,6 +532,15 @@ class ProductCatalog extends Component
     {
         // Aquí puedes implementar la lógica para contactar al vendedor
         $this->dispatch('contactProducer', ['productId' => $productId]);
+    }
+
+    public function loadMore()
+    {
+        $this->perPage += 12;
+        Log::info('Loading more products:', [
+            'new_per_page' => $this->perPage,
+            'current_page' => $this->currentPage
+        ]);
     }
 
     public function render()
