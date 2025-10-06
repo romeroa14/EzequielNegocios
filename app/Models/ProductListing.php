@@ -29,6 +29,8 @@ class ProductListing extends Model
         'images',
         'product_presentation_id',
         'presentation_quantity',
+        'selling_location_type',
+        'market_id',
         'state_id',
         'municipality_id',
         'parish_id',
@@ -42,6 +44,7 @@ class ProductListing extends Model
         'harvest_date' => 'datetime',
         'images' => 'array',
         'presentation_quantity' => 'decimal:2',
+        'selling_location_type' => 'string',
     ];
 
     protected $appends = [
@@ -89,8 +92,18 @@ class ProductListing extends Model
         if ($this->state && $this->state->name) {
             $location[] = $this->state->name;
         }
+        $market = $this->market;
+        if ($market && $market->name) {
+            $location[] = $market->name;
+        }
+        if ($market && $market->state && $market->state->name) {
+            $location[] = $market->state->name;
+        }
+        if ($market && $market->municipality && $market->municipality->name) {
+            $location[] = $market->municipality->name;
+        }
         
-        return implode(', ', $location) ?: 'Ubicación no especificada';
+        return implode(', ', $location) ?: 'ubicación no especificada';
     }
 
     public static function rules($id = null)
@@ -178,6 +191,11 @@ class ProductListing extends Model
     public function parish(): BelongsTo
     {
         return $this->belongsTo(Parish::class);
+    }
+
+    public function market(): BelongsTo
+    {
+        return $this->belongsTo(Market::class);
     }
 
     public function productPresentation(): BelongsTo

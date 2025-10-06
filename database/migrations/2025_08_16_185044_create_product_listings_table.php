@@ -11,6 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Crear tabla de mercados antes para permitir la FK en product_listings
+        Schema::create('markets', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('location')->nullable();
+            $table->enum('category', ['wholesale', 'retail'])->default('wholesale');
+            $table->string('photo')->nullable();
+            // Ubicación normalizada
+            $table->foreignId('state_id')->nullable()->constrained('states')->nullOnDelete();
+            $table->foreignId('municipality_id')->nullable()->constrained('municipalities')->nullOnDelete();
+            $table->foreignId('parish_id')->nullable()->constrained('parishes')->nullOnDelete();
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('product_listings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('person_id')->constrained('people')->onDelete('cascade');
@@ -25,9 +41,13 @@ return new class extends Migration
             $table->json('images')->nullable();
             $table->foreignId('product_presentation_id')->constrained('product_presentations')->onDelete('cascade');
             $table->decimal('presentation_quantity', 10, 2)->default(1.00);
-            $table->foreignId('state_id')->constrained('states')->onDelete('cascade');
-            $table->foreignId('municipality_id')->constrained('municipalities')->onDelete('cascade');
-            $table->foreignId('parish_id')->constrained('parishes')->onDelete('cascade');
+            // Tipo de venta: puerta de finca o mercado mayorista
+            $table->enum('selling_location_type', ['farm_gate', 'wholesale_market'])->default('farm_gate');
+            // Relación opcional con mercados mayoristas
+            $table->foreignId('market_id')->nullable()->constrained('markets')->nullOnDelete();
+            $table->foreignId('state_id')->nullable()->constrained('states')->nullOnDelete();
+            $table->foreignId('municipality_id')->nullable()->constrained('municipalities')->nullOnDelete();
+            $table->foreignId('parish_id')->nullable()->constrained('parishes')->nullOnDelete();
             $table->enum('status', ['active', 'pending', 'sold_out', 'inactive'])->default('pending');
             $table->timestamps();
         });
@@ -39,5 +59,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('product_listings');
+        Schema::dropIfExists('markets');
     }
 };

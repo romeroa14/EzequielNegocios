@@ -19,6 +19,7 @@ use App\Models\Product;
 use App\Models\State;
 use App\Models\Municipality;
 use App\Models\Parish;
+use App\Models\Market;
 use App\Models\ProductPresentation;
 
 class ProductListingResource extends Resource
@@ -126,6 +127,23 @@ class ProductListingResource extends Resource
                 Forms\Components\Section::make('Ubicación')
                     ->description('Selecciona la ubicación donde se encuentra el producto')
                     ->schema([
+                        Forms\Components\Radio::make('selling_location_type')
+                            ->label('Tipo de venta')
+                            ->options([
+                                'farm_gate' => 'Puerta de Finca',
+                                'wholesale_market' => 'Mercado Mayorista',
+                            ])
+                            ->default('farm_gate')
+                            ->inline()
+                            ->live(),
+
+                        Forms\Components\Select::make('market_id')
+                            ->label('Mercado Mayorista')
+                            ->options(Market::query()->where('category', 'wholesale')->pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->visible(fn (Forms\Get $get) => $get('selling_location_type') === 'wholesale_market')
+                            ->required(fn (Forms\Get $get) => $get('selling_location_type') === 'wholesale_market'),
                         Forms\Components\Select::make('state_id')
                             ->label('Estado')
                             ->options(function () {
@@ -133,7 +151,8 @@ class ProductListingResource extends Resource
                                     ->where('country_id', 296) // Venezuela
                                     ->pluck('name', 'id');
                             })
-                            ->required()
+                            ->required(fn (Forms\Get $get) => $get('selling_location_type') === 'farm_gate')
+                            ->visible(fn (Forms\Get $get) => $get('selling_location_type') === 'farm_gate')
                             ->live()
                             ->afterStateUpdated(function ($state, callable $set) {
                                 $set('municipality_id', null);
@@ -150,7 +169,8 @@ class ProductListingResource extends Resource
                                     ->where('state_id', $stateId)
                                     ->pluck('name', 'id');
                             })
-                            ->required()
+                            ->required(fn (Forms\Get $get) => $get('selling_location_type') === 'farm_gate')
+                            ->visible(fn (Forms\Get $get) => $get('selling_location_type') === 'farm_gate')
                             ->live()
                             ->afterStateUpdated(fn ($state, callable $set) => $set('parish_id', null)),
                         Forms\Components\Select::make('parish_id')
@@ -164,7 +184,8 @@ class ProductListingResource extends Resource
                                     ->where('municipality_id', $municipalityId)
                                     ->pluck('name', 'id');
                             })
-                            ->required(),
+                            ->required(fn (Forms\Get $get) => $get('selling_location_type') === 'farm_gate')
+                            ->visible(fn (Forms\Get $get) => $get('selling_location_type') === 'farm_gate'),
                     ])->columnSpan(2),
 
                 Forms\Components\Section::make('Detalles del Producto')

@@ -220,6 +220,8 @@ class ProductResource extends Resource
                     ->imageResizeTargetHeight('1080')
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                     ->maxSize(5120)
+                    ->enableOpen()
+                    ->enableDownload()
                     ->downloadable()
                     ->openable()
                     ->previewable()

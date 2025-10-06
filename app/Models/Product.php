@@ -53,7 +53,8 @@ class Product extends Model
             'description' => 'required|string',
             'sku_base' => 'required|string|max:50|unique:products,sku_base,' . $id,
             'custom_quantity' => 'nullable|numeric|min:0.01',
-            'image' => 'nullable|image|max:2048',
+            // Alinear con ProductResource (hasta 5MB y tipos permitidos)
+            'image' => 'nullable|image|mimes:jpeg,png,webp|max:5120',
             'seasonal_info' => 'nullable|array',
             'is_active' => 'boolean',
             'creator_user_id' => 'nullable|exists:users,id',

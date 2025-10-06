@@ -79,6 +79,11 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
+                                @if($listing->selling_location_type === 'wholesale_market')
+                                    <span>Mercado Mayorista</span>
+                                @else
+                                    <span>Puerta de Finca</span>
+                                @endif
                                 {{ $listing->location }}
                             </p>
                             @if($listing->is_harvesting && $listing->harvest_date)
@@ -440,61 +445,94 @@
                                         </div>
                                     </div>
 
-                                    <!-- Ubicación en una sola línea -->
-                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-                                    <!-- Estado -->
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Estado</label>
-                                        <select 
-                                            wire:model.live="form.state_id"
-                                            class="w-full border rounded px-3 py-2 text-sm"
-                                        >
-                                            <option value="">Seleccione un estado</option>
-                                            @foreach($states as $state)
-                                                <option value="{{ $state->id }}">{{ $state->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('form.state_id')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Municipio -->
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Municipio</label>
-                                        <select 
-                                            wire:model.live="form.municipality_id"
-                                            class="w-full border rounded px-3 py-2 text-sm"
-                                            @if(!$form['state_id']) disabled @endif
-                                        >
-                                            <option value="">Seleccione un municipio</option>
-                                            @foreach($municipalities as $municipality)
-                                                <option value="{{ $municipality->id }}">{{ $municipality->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('form.municipality_id')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Parroquia -->
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Parroquia</label>
-                                        <select 
-                                            wire:model="form.parish_id"
-                                            class="w-full border rounded px-3 py-2 text-sm"
-                                            @if(!$form['municipality_id']) disabled @endif
-                                        >
-                                            <option value="">Seleccione una parroquia</option>
-                                            @foreach($parishes as $parish)
-                                                <option value="{{ $parish->id }}">{{ $parish->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('form.parish_id')
-                                            <span class="text-red-600 text-xs">{{ $message }}</span>
-                                        @enderror
+                                    <!-- Tipo de Venta -->
+                                    <div class="mt-4">
+                                        <label class="block text-sm font-medium mb-1">Tipo de Venta</label>
+                                        <div class="flex gap-4 text-sm">
+                                            <label class="flex items-center gap-2">
+                                                <input type="radio" value="farm_gate" wire:model.live="form.selling_location_type" /> Puerta de Finca
+                                            </label>
+                                            <label class="flex items-center gap-2">
+                                                <input type="radio" value="wholesale_market" wire:model.live="form.selling_location_type" /> Mercado Mayorista
+                                            </label>
                                         </div>
                                     </div>
+
+                                    <!-- Selección de Mercado Mayorista -->
+                                    @if(($form['selling_location_type'] ?? 'farm_gate') === 'wholesale_market')
+                                        <div class="mt-2">
+                                            <label class="block text-sm font-medium mb-1">Mercado Mayorista</label>
+                                            <select wire:model.live="form.market_id" class="w-full border rounded px-3 py-2 text-sm bg-white">
+                                                <option value="">Seleccione un mercado</option>
+                                                @php($wholesaleMarkets = \App\Models\Market::where('category', 'wholesale')->get())
+                                                @foreach($wholesaleMarkets as $market)
+                                                    <option value="{{ $market->id }}">{{ $market->name }} - {{ $market->location }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('form.market_id')
+                                                <span class="text-red-600 text-xs">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    @endif
+
+                                    <!-- Ubicación en una sola línea (solo Puerta de Finca) -->
+                                    @if(($form['selling_location_type'] ?? 'farm_gate') === 'farm_gate')
+                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                                        <!-- Estado -->
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Estado</label>
+                                            <select 
+                                                wire:model.live="form.state_id"
+                                                class="w-full border rounded px-3 py-2 text-sm"
+                                            >
+                                                <option value="">Seleccione un estado</option>
+                                                @foreach($states as $state)
+                                                    <option value="{{ $state->id }}">{{ $state->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('form.state_id')
+                                                <span class="text-red-600 text-xs">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    
+
+                                        <!-- Municipio -->
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Municipio</label>
+                                            <select 
+                                                wire:model.live="form.municipality_id"
+                                                class="w-full border rounded px-3 py-2 text-sm"
+                                                @if(!$form['state_id']) disabled @endif
+                                            >
+                                                <option value="">Seleccione un municipio</option>
+                                                @foreach($municipalities as $municipality)
+                                                    <option value="{{ $municipality->id }}">{{ $municipality->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('form.municipality_id')
+                                                <span class="text-red-600 text-xs">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <!-- Parroquia -->
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Parroquia</label>
+                                            <select 
+                                                wire:model="form.parish_id"
+                                                class="w-full border rounded px-3 py-2 text-sm"
+                                                @if(!$form['municipality_id']) disabled @endif
+                                            >
+                                                <option value="">Seleccione una parroquia</option>
+                                                @foreach($parishes as $parish)
+                                                    <option value="{{ $parish->id }}">{{ $parish->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('form.parish_id')
+                                                <span class="text-red-600 text-xs">{{ $message }}</span>
+                                            @enderror
+                                            </div>
+                                        </div>
+                                    @endif
 
                                     <!-- Estatus -->
                                     <div class="w-full mt-4">

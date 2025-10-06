@@ -33,6 +33,8 @@ class ListingsCrud extends Component
         'quality_grade' => '',
         'is_harvesting' => false,
         'harvest_date' => '',
+        'selling_location_type' => 'farm_gate',
+        'market_id' => '',
         'state_id' => '',
         'municipality_id' => '',
         'parish_id' => '',
@@ -58,9 +60,11 @@ class ListingsCrud extends Component
             'form.currency_type' => 'required|in:USD,VES',
             'form.quality_grade' => 'required|in:premium,standard,economic',
             'form.harvest_date' => 'required_if:form.is_harvesting,true|nullable|date',
-            'form.state_id' => 'required|exists:states,id',
-            'form.municipality_id' => 'required|exists:municipalities,id',
-            'form.parish_id' => 'required|exists:parishes,id',
+            'form.selling_location_type' => 'required|in:farm_gate,wholesale_market',
+            'form.market_id' => 'required_if:form.selling_location_type,wholesale_market|nullable|exists:markets,id',
+            'form.state_id' => 'required_if:form.selling_location_type,farm_gate|nullable|exists:states,id',
+            'form.municipality_id' => 'required_if:form.selling_location_type,farm_gate|nullable|exists:municipalities,id',
+            'form.parish_id' => 'required_if:form.selling_location_type,farm_gate|nullable|exists:parishes,id',
             'form.product_id' => [
                 'required',
                 'exists:products,id',
@@ -111,11 +115,15 @@ class ListingsCrud extends Component
             'form.quality_grade.in' => 'La calidad debe ser premium, standard o economic.',
             'form.harvest_date.required_if' => 'La fecha de cosecha es obligatoria cuando está en cosecha.',
             'form.harvest_date.date' => 'La fecha de cosecha debe ser una fecha válida.',
-            'form.state_id.required' => 'El estado es obligatorio.',
+            'form.selling_location_type.required' => 'Debe indicar dónde vende.',
+            'form.selling_location_type.in' => 'Tipo de venta inválido.',
+            'form.market_id.required_if' => 'Debe seleccionar un mercado mayorista.',
+            'form.market_id.exists' => 'El mercado seleccionado no es válido.',
+            'form.state_id.required_if' => 'El estado es obligatorio para puerta de finca.',
             'form.state_id.exists' => 'El estado seleccionado no es válido.',
-            'form.municipality_id.required' => 'El municipio es obligatorio.',
+            'form.municipality_id.required_if' => 'El municipio es obligatorio para puerta de finca.',
             'form.municipality_id.exists' => 'El municipio seleccionado no es válido.',
-            'form.parish_id.required' => 'La parroquia es obligatoria.',
+            'form.parish_id.required_if' => 'La parroquia es obligatoria para puerta de finca.',
             'form.parish_id.exists' => 'La parroquia seleccionada no es válida.',
             'form.product_id.required' => 'El producto es obligatorio.',
             'form.product_id.exists' => 'El producto seleccionado no es válido.',
@@ -333,6 +341,22 @@ class ListingsCrud extends Component
         
         // Si está en cosecha pero no hay fecha, mantener null
         if ($cleanForm['is_harvesting'] && empty($cleanForm['harvest_date'])) {
+            $cleanForm['harvest_date'] = null;
+        }
+
+        // Normalizar valores vacíos a null para columnas numéricas/fecha
+        foreach (['state_id', 'municipality_id', 'parish_id', 'market_id', 'product_id', 'product_presentation_id'] as $key) {
+            if (array_key_exists($key, $cleanForm) && ($cleanForm[$key] === '' || $cleanForm[$key] === null)) {
+                $cleanForm[$key] = null;
+            }
+        }
+        // Si es mercado mayorista, limpiar ubicación de finca
+        if (($cleanForm['selling_location_type'] ?? 'farm_gate') === 'wholesale_market') {
+            $cleanForm['state_id'] = null;
+            $cleanForm['municipality_id'] = null;
+            $cleanForm['parish_id'] = null;
+        }
+        if (empty($cleanForm['harvest_date'])) {
             $cleanForm['harvest_date'] = null;
         }
 
