@@ -544,10 +544,34 @@ class ProductCatalog extends Component
         }
     }
 
-    public function contactSeller($productId)
+    public function contactSeller($listingId)
     {
-        // Aquí puedes implementar la lógica para contactar al vendedor
-        $this->dispatch('contactProducer', ['productId' => $productId]);
+        try {
+            $listing = ProductListing::with('person')->findOrFail($listingId);
+            $person = $listing->person;
+
+            // Intentar obtener número de WhatsApp/telefono del productor
+            $rawPhone = $person->whatsapp ?? $person->phone ?? $person->mobile ?? null;
+            $phone = $rawPhone ? preg_replace('/\D+/', '', $rawPhone) : '';
+
+            if (!$phone) {
+                $this->dispatch('error', 'El productor no tiene un número de WhatsApp configurado.');
+                return;
+            }
+
+            // Mensaje inicial
+            $message = "Hola {$person->first_name}, vi tu publicación \"{$listing->title}\" en EzequielNegocios. ¿Sigue disponible?";
+            $url = 'https://wa.me/' . $phone . '?text=' . urlencode($message);
+
+            // Redirección directa a WhatsApp
+            return redirect()->away($url);
+        } catch (\Exception $e) {
+            Log::error('Error al preparar contacto por WhatsApp', [
+                'listing_id' => $listingId,
+                'error' => $e->getMessage(),
+            ]);
+            $this->dispatch('error', 'No se pudo abrir WhatsApp para contactar al productor.');
+        }
     }
 
     public function loadMore()
