@@ -561,7 +561,7 @@ class ProductCatalog extends Component
 
             // Mensaje inicial
             $message = "Hola {$person->first_name}, vi tu publicación \"{$listing->title}\" en EzequielNegocios. ¿Sigue disponible?";
-            $url = 'https://wa.me/' . $phone . '?text=' . urlencode($message);
+            $url = 'https://wa.me/+58' . $phone . '?text=' . urlencode($message);
 
             // Redirección directa a WhatsApp
             return redirect()->away($url);
