@@ -288,7 +288,7 @@ class ListingsCrud extends Component
             'state_id' => '',
             'municipality_id' => '',
             'parish_id' => '',
-            'status' => 'pending',
+            'status' => 'active',
             'images' => [], // Asegurarnos de resetear también las imágenes
             'product_presentation_id' => '',
             'presentation_quantity' => 1,

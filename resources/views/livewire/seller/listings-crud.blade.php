@@ -541,8 +541,8 @@
                                             wire:model="form.status" 
                                             class="w-full border rounded px-3 py-2 text-sm bg-white"
                                         >
-                                            <option value="pending">Pendiente</option>
                                             <option value="active">Activo</option>
+                                            <option value="pending">Pendiente</option>
                                             <option value="sold_out">Agotado</option>
                                             <option value="inactive">Inactivo</option>
                                         </select>

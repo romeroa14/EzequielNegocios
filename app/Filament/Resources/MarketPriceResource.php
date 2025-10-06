@@ -186,24 +186,24 @@ class MarketPriceResource extends Resource
                     })
                     ->sortable(false),
 
-                Tables\Columns\TextColumn::make('currency')
-                    ->label('Moneda')
-                    ->badge()
-                    ->description('Moneda del precio original')
-                    ->color(fn (string $state): string => match ($state) {
-                        'VES' => 'success',
-                        'USD' => 'warning',
-                        default => 'gray',
-                    }),
+                // Tables\Columns\TextColumn::make('currency')
+                //     ->label('Moneda')
+                //     ->badge()
+                //     ->description('Moneda del precio original')
+                //     ->color(fn (string $state): string => match ($state) {
+                //         'VES' => 'success',
+                //         'USD' => 'warning',
+                //         default => 'gray',
+                //     }),
 
                 Tables\Columns\TextColumn::make('price_date')
                     ->label('Última Actualización')
                     ->date()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('updatedBy.full_name')
-                    ->label('Actualizado por')
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('updatedBy.full_name')
+                //     ->label('Actualizado por')
+                //     ->sortable(),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Activo')

@@ -290,7 +290,7 @@ class ProductListingResource extends Resource
                         'sold_out' => 'Agotado',
                         'inactive' => 'Inactivo',
                     ])
-                    ->default('pending')
+                    ->default('active')
                     ->required(),
             ]);
     }
