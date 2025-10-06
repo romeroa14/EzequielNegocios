@@ -19,7 +19,7 @@
                         <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Catálogo de Productos</h2>
                     </div>
                     
-                    <!-- Tasas BCV, Filtros y Ordenamiento -->
+                    <!-- Tasas BCV, Mercado, Filtros y Ordenamiento -->
                     <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 items-stretch sm:items-center">
                         <!-- Tasas BCV en el header (visible only on large screens and up) -->
                         <div class="hidden lg:flex gap-4 items-center">
@@ -36,6 +36,19 @@
                                 </span>
                             </div>
                         </div>
+                        <!-- Filtro rápido por Mercado -->
+                        <div>
+                            <select
+                                wire:model.live="selectedMarket"
+                                class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                            >
+                                <option value="">Fitrar por mercado</option>
+                                @foreach($markets as $market)
+                                    <option value="{{ $market->id }}">🛒 {{ $market->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <!-- Sort Dropdown -->
                         <div class="relative" x-data="{ open: false }">
                             <button 
@@ -137,6 +150,16 @@
                                 <div class="mb-4">
                                     <h6 class="text-sm font-semibold text-gray-900 mb-3">Filtros</h6>
                                     <div class="space-y-3">
+                                        <!-- Mercado -->
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Mercado</label>
+                                            <select wire:model.live="selectedMarket" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
+                                                <option value="">Todos los mercados</option>
+                                                @foreach($markets as $market)
+                                                    <option value="{{ $market->id }}">{{ $market->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                         <!-- Categoría -->
                                         <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
@@ -297,23 +320,35 @@
                                     </div>
                                 </div>
 
-                                <!-- Price -->
-                                <div class="flex items-center justify-between">
-                                        <div>
-                                        <span class="text-xs text-gray-500">Precio</span>
-                                            <div class="flex items-center gap-2">
-                                            <h5 class="text-lg font-bold text-green-600">{{ $product->formatted_price }}</h5>
-                                                @if($product->current_rate)
-                                                    @if($product->currency_type === 'USD')
-                                                        <span class="text-sm text-gray-500">≈ {{ $product->formatted_bs_price }}</span>
-                                                    @else
-                                                        <span class="text-sm text-gray-500">≈ {{ $product->formatted_usd_price }}</span>
-                                                    @endif
-                                                @endif
-                                        </div>
+                                <!-- Price + Meta row (presentation + location) -->
+                                <div>
+                                    <span class="text-xs text-gray-500">Precio</span>
+                                    <div class="flex items-center gap-2">
+                                        <h5 class="text-lg font-bold text-green-600">{{ $product->formatted_price }}</h5>
+                                        @if($product->current_rate)
+                                            @if($product->currency_type === 'USD')
+                                                <span class="text-sm text-gray-500">≈ {{ $product->formatted_bs_price }}</span>
+                                            @else
+                                                <span class="text-sm text-gray-500">≈ {{ $product->formatted_usd_price }}</span>
+                                            @endif
+                                        @endif
+                                    </div>
+
+                                    @php($presentationName = $product->productPresentation?->name)
+                                    <div class="flex flex-wrap items-center gap-2 mt-1 text-xs">
+                                        @if($presentationName)
+                                            <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                                                💲 Precio por {{ strtolower($presentationName) }}
+                                            </span>
+                                        @endif
+                                        @if($product->selling_location_type === 'wholesale_market')
+                                            <span class="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">🛒 Mercado</span>
+                                        @elseif($product->state)
+                                            <span class="px-2 py-0.5 rounded-full bg-green-100 text-green-800">📍 {{ $product->state->name }}</span>
+                                        @endif
                                     </div>
                                 </div>
-                                    </div>
+                            </div>
 
                             <!-- Action Buttons -->
                             <div class="flex gap-2">
@@ -323,6 +358,12 @@
                                     >
                                         Ver Productor
                                     </a>
+                                    <button 
+                                        wire:click="contactSeller({{ $product->id }})"
+                                        class="px-4 py-2 border border-green-600 text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                                    >
+                                        Contactar
+                                    </button>
                                 <button 
                                     wire:click="showProductDetail({{ $product->id }})"
                                     class="px-4 py-2 border border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 rounded-lg transition-colors"

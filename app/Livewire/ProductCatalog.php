@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\ProductLine;
 use App\Models\Brand;
 use App\Models\ProductPresentation;
+use App\Models\Market;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
@@ -31,6 +32,7 @@ class ProductCatalog extends Component
     public $selectedLine = '';
     public $selectedBrand = '';
     public $selectedPresentation = '';
+    public $selectedMarket = '';
     public $perPage = 12;
     public $currentPage = 1;
 
@@ -41,6 +43,7 @@ class ProductCatalog extends Component
         'selectedLine' => ['except' => ''],
         'selectedBrand' => ['except' => ''],
         'selectedPresentation' => ['except' => ''],
+        'selectedMarket' => ['except' => ''],
         'selectedQuality' => ['except' => ''],
         'minPrice' => ['except' => ''],
         'maxPrice' => ['except' => ''],
@@ -61,6 +64,7 @@ class ProductCatalog extends Component
             'sortBy' => 'required|in:created_at,unit_price,title,harvest_date',
             'sortDirection' => 'required|in:asc,desc',
             'producer' => 'nullable|exists:people,id',
+            'selectedMarket' => 'nullable|exists:markets,id',
         ];
     }
 
@@ -153,6 +157,10 @@ class ProductCatalog extends Component
             $this->selectedSubcategory = '';
             $this->selectedLine = null;
             $this->selectedBrand = null;
+            $this->resetPage();
+        }
+
+        if ($propertyName === 'selectedMarket') {
             $this->resetPage();
         }
 
@@ -351,6 +359,9 @@ class ProductCatalog extends Component
             ->when($this->selectedPresentation, function (Builder $query) {
                 $query->where('product_presentation_id', $this->selectedPresentation);
             })
+            ->when($this->selectedMarket, function (Builder $query) {
+                $query->where('market_id', $this->selectedMarket);
+            })
             ->when($this->selectedQuality, function (Builder $query) {
                 $query->where('quality_grade', $this->selectedQuality);
             })
@@ -435,6 +446,11 @@ class ProductCatalog extends Component
         return ProductPresentation::where('is_active', true)
             ->orderBy('name')
             ->get();
+    }
+
+    public function getMarketsProperty()
+    {
+        return Market::query()->orderBy('name')->get();
     }
 
     /**
@@ -553,6 +569,7 @@ class ProductCatalog extends Component
             'productLines' => $this->productLines,
             'brands' => $this->brands,
             'presentations' => $this->presentations,
+            'markets' => $this->markets,
             'exchangeRates' => $this->exchangeRates,
         ]);
     }
