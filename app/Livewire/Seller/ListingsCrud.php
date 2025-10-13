@@ -653,6 +653,131 @@ class ListingsCrud extends Component
         $this->dispatch('show-delete-confirmation');
     }
 
+    // Métodos para compartir publicaciones
+    public function shareToWhatsApp($listingId)
+    {
+        try {
+            $listing = ProductListing::with(['product', 'person'])->findOrFail($listingId);
+            
+            // Construir mensaje personalizado
+            $message = "🌱 *" . $listing->title . "*\n\n";
+            $message .= "💰 *Precio:* " . $listing->formatted_price . "\n";
+            $message .= "📦 *Presentación:* " . $listing->formatted_presentation . "\n";
+            $message .= "📍 *Ubicación:* " . $listing->location . "\n";
+            $message .= "👤 *Vendedor:* " . $listing->person->name . "\n\n";
+            $message .= "🔗 *Ver más detalles:* " . route('market.index') . "\n\n";
+            $message .= "#EzequielNegocios #Agricultura #Venezuela";
+            
+            // URL de WhatsApp con mensaje
+            $url = 'https://wa.me/?text=' . urlencode($message);
+            
+            return redirect()->away($url);
+        } catch (\Exception $e) {
+            Log::error('Error al compartir por WhatsApp', [
+                'listing_id' => $listingId,
+                'error' => $e->getMessage()
+            ]);
+            $this->dispatch('error', 'No se pudo abrir WhatsApp para compartir.');
+        }
+    }
+
+    public function shareToFacebook($listingId)
+    {
+        try {
+            $listing = ProductListing::findOrFail($listingId);
+            $url = route('market.index');
+            
+            // URL de Facebook con parámetros
+            $facebookUrl = 'https://www.facebook.com/sharer/sharer.php?u=' . urlencode($url);
+            
+            return redirect()->away($facebookUrl);
+        } catch (\Exception $e) {
+            Log::error('Error al compartir por Facebook', [
+                'listing_id' => $listingId,
+                'error' => $e->getMessage()
+            ]);
+            $this->dispatch('error', 'No se pudo abrir Facebook para compartir.');
+        }
+    }
+
+    public function shareToTwitter($listingId)
+    {
+        try {
+            $listing = ProductListing::with(['product'])->findOrFail($listingId);
+            $url = route('market.index');
+            
+            // Mensaje para Twitter
+            $text = "🌱 " . $listing->title . " - " . $listing->formatted_price . " en EzequielNegocios";
+            
+            // URL de Twitter con parámetros
+            $twitterUrl = 'https://twitter.com/intent/tweet?text=' . urlencode($text) . '&url=' . urlencode($url);
+            
+            return redirect()->away($twitterUrl);
+        } catch (\Exception $e) {
+            Log::error('Error al compartir por Twitter', [
+                'listing_id' => $listingId,
+                'error' => $e->getMessage()
+            ]);
+            $this->dispatch('error', 'No se pudo abrir Twitter para compartir.');
+        }
+    }
+
+    public function shareToEmail($listingId)
+    {
+        try {
+            $listing = ProductListing::with(['product', 'person'])->findOrFail($listingId);
+            $url = route('market.index');
+            
+            // Asunto del email
+            $subject = "🌱 " . $listing->title . " - EzequielNegocios";
+            
+            // Cuerpo del email
+            $body = "Hola,\n\n";
+            $body .= "Te comparto esta publicación de " . $listing->person->name . ":\n\n";
+            $body .= "📦 Producto: " . $listing->product->name . "\n";
+            $body .= "💰 Precio: " . $listing->formatted_price . "\n";
+            $body .= "📦 Presentación: " . $listing->formatted_presentation . "\n";
+            $body .= "📍 Ubicación: " . $listing->location . "\n\n";
+            $body .= "🔗 Ver más detalles: " . $url . "\n\n";
+            $body .= "¡Saludos!";
+            
+            // URL de mailto
+            $emailUrl = 'mailto:?subject=' . urlencode($subject) . '&body=' . urlencode($body);
+            
+            return redirect()->away($emailUrl);
+        } catch (\Exception $e) {
+            Log::error('Error al compartir por Email', [
+                'listing_id' => $listingId,
+                'error' => $e->getMessage()
+            ]);
+            $this->dispatch('error', 'No se pudo abrir el cliente de email.');
+        }
+    }
+
+    public function downloadSocialMediaImage($listingId)
+    {
+        try {
+            $listing = ProductListing::with(['product', 'person'])->findOrFail($listingId);
+            
+            // Generar URL para descargar imagen personalizada para redes sociales
+            $imageUrl = route('listing.social-media-image', $listingId);
+            
+            // Abrir en nueva ventana para descargar
+            $this->js("
+                window.open('" . $imageUrl . "', '_blank');
+            ");
+            
+            $this->dispatch('success', 'Imagen para redes sociales generada. Descárgala y compártela en tus redes sociales.');
+            
+        } catch (\Exception $e) {
+            Log::error('Error al generar imagen para redes sociales', [
+                'listing_id' => $listingId,
+                'error' => $e->getMessage()
+            ]);
+            $this->dispatch('error', 'No se pudo generar la imagen para redes sociales.');
+        }
+    }
+
     #[On('deleteListing')]
     public function deleteListing($listingId = null)
     {

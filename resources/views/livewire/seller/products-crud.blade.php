@@ -1,10 +1,14 @@
 <div class="bg-white rounded-xl shadow-lg p-4 sm:p-8 mb-8">
-    <!-- Header y botón de nuevo producto -->
+    <!-- Header -->
     <div class="flex flex-wrap gap-4 items-center justify-between mb-6">
         <h2 class="text-2xl font-bold">Mis Productos</h2>
         <div class="flex gap-2">
-            <button wire:click="openModal"
-                class="inline-flex items-center bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow">
+            <!-- Botón deshabilitado con mensaje explicativo -->
+            <button 
+                disabled
+                class="inline-flex items-center bg-gray-400 text-white font-bold py-2 px-4 rounded shadow cursor-not-allowed opacity-60"
+                title="Los productos son creados por administradores. Los vendedores solo pueden crear publicaciones de productos existentes."
+            >
                 <span class="mr-1">+</span> Nuevo Producto
             </button>
             
@@ -71,6 +75,12 @@
         <!-- Productos del Vendedor -->
         <div>
             <h3 class="text-xl font-semibold mb-4">📦 Mis Productos</h3>
+            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p class="text-sm text-blue-700">
+                    <strong>Nota:</strong> Los productos son creados por administradores. 
+                    Como vendedor, solo puedes editar tus productos existentes o crear publicaciones de productos universales.
+                </p>
+            </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         @forelse($products['seller'] as $product)
             <div id="product-{{ $product->id }}" class="bg-white rounded-lg shadow p-4 flex flex-col">
@@ -133,7 +143,7 @@
                     <div class="relative w-full max-w-3xl bg-white shadow-xl rounded-lg">
                         <!-- Header fijo -->
                         <div class="sticky top-0 bg-white px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                            <h2 class="text-lg font-semibold truncate">{{ $editingProduct ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
+                            <h2 class="text-lg font-semibold truncate">Editar Producto</h2>
                             <button wire:click="closeModal" class="text-gray-400 hover:text-gray-700">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -370,7 +380,7 @@
                             type="submit"
                                         class="px-4 py-2 text-sm font-medium bg-yellow-500 hover:bg-yellow-600 text-white rounded"
                         >
-                            Guardar
+                            Actualizar Producto
                         </button>
                     </div>
                 </form>

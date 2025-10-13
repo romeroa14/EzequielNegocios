@@ -104,6 +104,7 @@ Route::get('/politica-cookies', [CookieController::class, 'cookiePolicy'])->name
 Route::get('/mercado', [MarketController::class, 'index'])->name('market.index');
 Route::get('/mercado/semanal', [MarketController::class, 'weekly'])->name('market.weekly');
 Route::get('/mercado/producto/{product}/historial', [MarketController::class, 'productHistory'])->name('market.product.history');
+Route::get('/listing/{id}/social-media-image', [App\Http\Controllers\ListingController::class, 'generateSocialMediaImage'])->name('listing.social-media-image');
 
 // Webhooks movidos a routes/api.php para evitar CSRF
 Route::get('/preferencias-cookies', [CookieController::class, 'showPreferences'])->name('cookie.preferences.show');

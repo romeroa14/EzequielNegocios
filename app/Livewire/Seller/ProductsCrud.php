@@ -237,6 +237,12 @@ class ProductsCrud extends Component
             'user_id' => Auth::id()
         ]);
 
+        // Solo permitir edición de productos existentes, no creación de nuevos
+        if (!$productId) {
+            session()->flash('error', 'Los vendedores no pueden crear productos nuevos. Solo pueden editar productos existentes o crear publicaciones de productos universales.');
+            return;
+        }
+
         $this->resetForm();
         $this->changeImage = false;
         

@@ -11,7 +11,7 @@
     <!-- Listado de publicaciones -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($listings as $listing)
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="bg-white rounded-lg shadow-sm overflow-visible">
                     <!-- Imagen Principal -->
                     <div class="relative aspect-w-16 aspect-h-9 bg-gray-100">
                         @if($listing->hasImages() && !empty($listing->images))
@@ -37,7 +37,7 @@
                     </div>
 
                     <!-- Información -->
-                    <div class="p-4">
+                    <div class="p-4 overflow-visible">
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-lg font-semibold text-gray-900 truncate">{{ $listing->title }}</h3>
                             <div class="flex items-center gap-2">
@@ -95,17 +95,30 @@
                         </div>
 
                         <div class="flex justify-between items-center">
+                            <div class="flex gap-2">
+                                <button 
+                                    wire:click="openModal({{ $listing->id }})"
+                                    class="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                                >
+                                    Editar
+                                </button>
+                                <button 
+                                    wire:click="confirmDelete({{ $listing->id }})"
+                                    class="text-red-600 hover:text-red-800 font-medium text-sm"
+                                >
+                                    Eliminar
+                                </button>
+                            </div>
+                            
+                            <!-- Botón de descarga para RRSS -->
                             <button 
-                                wire:click="openModal({{ $listing->id }})"
-                                class="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                                wire:click="downloadSocialMediaImage({{ $listing->id }})"
+                                class="text-green-600 hover:text-green-800 font-medium text-sm flex items-center gap-1"
                             >
-                                Editar
-                            </button>
-                            <button 
-                                wire:click="confirmDelete({{ $listing->id }})"
-                                class="text-red-600 hover:text-red-800 font-medium text-sm"
-                            >
-                                Eliminar
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Descargar Imagen para RRSS
                             </button>
                         </div>
                     </div>
