@@ -342,7 +342,7 @@
                                             </span>
                                         @endif
                                         @if($product->selling_location_type === 'wholesale_market')
-                                            <span class="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">🛒 Mercado</span>
+                                            <span class="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">🛒 {{ $product->market->name }}</span>
                                         @elseif($product->state)
                                             <span class="px-2 py-0.5 rounded-full bg-green-100 text-green-800">📍 {{ $product->state->name }}</span>
                                         @endif
