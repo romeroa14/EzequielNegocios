@@ -12,10 +12,27 @@
             Livewire.on('showProductDetail', (data) => {
                 console.log('📦 Opening product modal:', data);
                 
-                // Cambiar la URL sin recargar la página
-                const url = new URL(window.location);
-                url.searchParams.set('product', data.id);
-                window.history.pushState({}, '', url);
+                // Obtener el ID del producto
+                let productId = null;
+                if (data && data.id) {
+                    productId = data.id;
+                } else if (data && data[0] && data[0].id) {
+                    productId = data[0].id;
+                } else if (typeof data === 'number') {
+                    productId = data;
+                }
+                
+                console.log('📦 Product ID found:', productId);
+                
+                if (productId) {
+                    // Cambiar la URL sin recargar la página
+                    const url = new URL(window.location);
+                    url.searchParams.set('product', productId);
+                    window.history.pushState({}, '', url);
+                    console.log('📦 URL updated to:', url.toString());
+                } else {
+                    console.error('❌ No product ID found in data:', data);
+                }
                 
                 // Disparar evento para abrir el modal
                 Livewire.dispatch('modal-ready');
@@ -351,7 +368,7 @@
                                     <div class="flex flex-wrap items-center gap-2 mt-1 text-xs">
                                         @if($presentationName)
                                             <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
-                                                💲 Precio por {{ strtolower($presentationName) }}
+                                                💲 Precio por {{ strtolower($presentationName) }} {{ $product->productPresentation?->unit_type }} {{ $product->presentation_quantity }}
                                             </span>
                                         @endif
                                         @if($product->selling_location_type === 'wholesale_market')

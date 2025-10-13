@@ -501,6 +501,8 @@ class ProductCatalog extends Component
     public function showProductDetail($listingId)
     {
         try {
+            Log::info('showProductDetail called with ID:', ['listing_id' => $listingId]);
+            
             $listing = ProductListing::with([
                 'product.productCategory',
                 'product.productSubcategory', 
@@ -516,8 +518,10 @@ class ProductCatalog extends Component
             ->where('status', 'active')
             ->firstOrFail();
 
+            Log::info('Listing found:', ['listing_id' => $listing->id, 'title' => $listing->title]);
+
             // Preparar los datos para el modal
-            $this->dispatch('showProductDetail', [
+            $eventData = [
                 'id' => $listing->id,
                 'title' => $listing->title,
                 'description' => $listing->description,
@@ -545,7 +549,12 @@ class ProductCatalog extends Component
                 'status' => $listing->status,
                 'formatted_status' => ucfirst($listing->status),
                 'share_url' => route('welcome') . '?product=' . $listing->id // URL con parámetro para modal
-            ]);
+            ];
+
+            Log::info('Dispatching showProductDetail event:', ['event_data' => $eventData]);
+            
+            // Disparar evento con todos los datos
+            $this->dispatch('showProductDetail', $eventData);
 
         } catch (\Exception $e) {
             Log::error('Error showing product detail:', [
