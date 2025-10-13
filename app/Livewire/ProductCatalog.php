@@ -89,17 +89,17 @@ class ProductCatalog extends Component
         ];
     }
 
-    public function mount()
+    public function mount($productId = null)
     {
         $this->producer = request()->query('producer');
         $this->validate();
         
-        // Verificar si hay un producto específico para mostrar
-        $productId = request()->query('product');
-        if ($productId) {
-            Log::info('Product ID detected in mount:', ['product_id' => $productId]);
+        // Verificar si hay un producto específico para mostrar (desde parámetro o query)
+        $urlProductId = $productId ?? request()->query('product');
+        if ($urlProductId) {
+            Log::info('Product ID detected in mount:', ['product_id' => $urlProductId, 'source' => $productId ? 'parameter' : 'query']);
             // Obtener los datos completos del producto y abrir el modal
-            $this->showProductDetail($productId);
+            $this->showProductDetail($urlProductId);
         }
         
         // Debug: Log current filter values
@@ -548,7 +548,7 @@ class ProductCatalog extends Component
                 'formatted_date' => $listing->harvest_date ? $listing->harvest_date->format('d/m/Y') : null,
                 'status' => $listing->status,
                 'formatted_status' => ucfirst($listing->status),
-                'share_url' => route('welcome') . '?product=' . $listing->id // URL con parámetro para modal
+                'share_url' => route('catalogo.product', ['productId' => $listing->id]) // URL directa al producto
             ];
 
             Log::info('Dispatching showProductDetail event:', ['event_data' => $eventData]);
@@ -609,7 +609,7 @@ class ProductCatalog extends Component
             $listing = ProductListing::with(['product', 'person'])->findOrFail($listingId);
             
             // Crear URL con parámetro para abrir modal
-            $shareUrl = route('welcome') . '?product=' . $listingId;
+            $shareUrl = route('catalogo.product', ['productId' => $listingId]);
             
             // Mostrar modal simple con link y botón copiar
             $this->js("

@@ -27,6 +27,13 @@
                     });
                 });
 
+                Livewire.on('showProductDetail', (data) => {
+                    console.log('Modal received showProductDetail:', data);
+                    this.show = true;
+                    this.images = $wire.listing.images;
+                    this.selectedImageIndex = 0;
+                });
+
                 Livewire.on('modal-closed', () => {
                     this.show = false;
                     this.selectedImageIndex = 0;
@@ -226,13 +233,13 @@
                         
                         <!-- Share Button -->
                         <button 
-                            onclick="showShareModal('{{ $listing['share_url'] ?? '' }}')"
+                            wire:click="generateShareLink({{ $listing['id'] ?? '' }})"
                             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg text-center transition duration-150 ease-in-out flex items-center justify-center gap-2"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                             </svg>
-                            Compartir Producto
+                            Generar Link
                         </button>
                     </div>
                 </div>

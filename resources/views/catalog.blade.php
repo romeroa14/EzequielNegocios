@@ -6,7 +6,7 @@
     <!-- Banner superior -->
     <x-ad-sense-banner type="banner" />
     
-    @livewire('product-catalog')
+    @livewire('product-catalog', ['productId' => $productId ?? null])
     
     <!-- Banner inferior -->
     <x-ad-sense-banner type="banner" />

@@ -56,6 +56,9 @@ Route::get('/catalogo', function() {
     return view('catalog');
 })->name('catalogo');
 
+// Ruta para productos específicos con parámetro product
+Route::get('/catalogo/product/{productId}', [App\Http\Controllers\ProductModalController::class, 'show'])->name('catalogo.product');
+
 // Endpoint AJAX para detalles del producto
 Route::get('/product-details/{productId}', function($productId) {
     $product = \App\Models\ProductListing::with([

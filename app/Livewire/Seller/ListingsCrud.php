@@ -783,47 +783,56 @@ class ListingsCrud extends Component
         try {
             $listing = ProductListing::with(['product', 'person'])->findOrFail($listingId);
             
-            // Generar URL para obtener links de compartir
-            $shareUrl = route('listing.share-link', $listingId);
+            // Crear URL directa al producto
+            $shareUrl = route('catalogo.product', ['productId' => $listingId]);
             
-            // Hacer petición AJAX para obtener los links
+            // Mostrar modal simple con link y botón copiar
             $this->js("
-                fetch('" . $shareUrl . "')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Mostrar modal con opciones de compartir
-                            const modal = document.createElement('div');
-                            modal.innerHTML = `
-                                <div style='position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;'>
-                                    <div style='background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%;'>
-                                        <h3 style='margin-bottom: 20px;'>Compartir Publicación</h3>
-                                        <div style='margin-bottom: 15px;'>
-                                            <a href='` + data.whatsapp_url + `' target='_blank' style='display: block; padding: 10px; background: #25D366; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 10px; text-align: center;'>📱 WhatsApp</a>
-                                            <a href='` + data.facebook_url + `' target='_blank' style='display: block; padding: 10px; background: #1877F2; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 10px; text-align: center;'>📘 Facebook</a>
-                                            <a href='` + data.twitter_url + `' target='_blank' style='display: block; padding: 10px; background: #1DA1F2; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 10px; text-align: center;'>🐦 Twitter</a>
-                                        </div>
-                                        <button onclick='this.parentElement.parentElement.remove()' style='padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 5px; cursor: pointer;'>Cerrar</button>
-                                    </div>
+                const modal = document.createElement('div');
+                modal.innerHTML = `
+                    <div style='position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;'>
+                        <div style='background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%;'>
+                            <h3 style='margin-bottom: 20px;'>Compartir Publicación</h3>
+                            <div style='margin-bottom: 15px;'>
+                                <label style='display: block; font-size: 14px; color: #374151; margin-bottom: 8px; font-weight: 500;'>Link de la publicación:</label>
+                                <div style='display: flex; gap: 8px;'>
+                                    <input type='text' id='shareLink' value='" . $shareUrl . "' readonly style='flex: 1; padding: 8px; border: 1px solid #d1d5db; border-radius: 5px; font-size: 14px; background: #f9fafb;' onclick='this.select()'>
+                                    <button onclick='copyToClipboard()' style='padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;'>Copiar</button>
                                 </div>
-                            `;
-                            document.body.appendChild(modal);
-                        } else {
-                            alert('Error al generar links de compartir');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error al generar links de compartir');
-                    });
+                            </div>
+                            <button onclick='this.parentElement.parentElement.remove()' style='padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 5px; cursor: pointer;'>Cerrar</button>
+                        </div>
+                    </div>
+                `;
+                
+                // Función para copiar al portapapeles
+                window.copyToClipboard = function() {
+                    const input = document.getElementById('shareLink');
+                    input.select();
+                    input.setSelectionRange(0, 99999);
+                    document.execCommand('copy');
+                    
+                    // Mostrar mensaje de confirmación
+                    const button = event.target;
+                    const originalText = button.textContent;
+                    button.textContent = '¡Copiado!';
+                    button.style.background = '#059669';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = '#10b981';
+                    }, 2000);
+                };
+                
+                document.body.appendChild(modal);
             ");
             
         } catch (\Exception $e) {
-            Log::error('Error al generar links de compartir', [
+            Log::error('Error al generar link de compartir', [
                 'listing_id' => $listingId,
                 'error' => $e->getMessage()
             ]);
-            $this->dispatch('error', 'No se pudo generar los links de compartir.');
+            $this->dispatch('error', 'No se pudo generar el link de compartir.');
         }
     }
 

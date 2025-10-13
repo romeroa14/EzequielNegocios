@@ -17,8 +17,11 @@ class ProducerController extends Controller
         return view('producers.index', compact('producers'));
     }
 
-    public function show(Person $producer)
+    public function show($id)
     {
+        // Buscar el productor por ID con sus relaciones
+        $producer = Person::with(['state', 'municipality', 'parish'])->findOrFail($id);
+        
         $listings = ProductListing::where('person_id', $producer->id)
             ->where('status', 'active')
             ->with(['product', 'state', 'municipality', 'parish'])
@@ -30,8 +33,11 @@ class ProducerController extends Controller
         ]);
     }
 
-    public function contact(Request $request, Person $producer)
+    public function contact(Request $request, $id)
     {
+        // Buscar el productor por ID
+        $producer = Person::findOrFail($id);
+        
         // Aquí puedes implementar la lógica de contacto
         // Por ejemplo, enviar un email o redireccionar a WhatsApp
         return back()->with('success', 'Mensaje enviado correctamente');
