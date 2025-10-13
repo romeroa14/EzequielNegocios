@@ -105,6 +105,10 @@ Route::get('/mercado', [MarketController::class, 'index'])->name('market.index')
 Route::get('/mercado/semanal', [MarketController::class, 'weekly'])->name('market.weekly');
 Route::get('/mercado/producto/{product}/historial', [MarketController::class, 'productHistory'])->name('market.product.history');
 Route::get('/listing/{id}/social-media-image', [App\Http\Controllers\ListingController::class, 'generateSocialMediaImage'])->name('listing.social-media-image');
+Route::get('/listing/{id}/social-media-preview', [App\Http\Controllers\ListingController::class, 'previewSocialMediaImage'])->name('listing.social-media-preview');
+Route::get('/listing/{id}/share-link', [App\Http\Controllers\ListingController::class, 'generateShareLink'])->name('listing.share-link');
+Route::get('/producto/{id}', [App\Http\Controllers\ProductController::class, 'show'])->name('product.show');
+Route::get('/producto/{producer_slug}/{listing_slug}/{id}', [App\Http\Controllers\ProductController::class, 'showFriendly'])->name('product.show.friendly');
 
 // Webhooks movidos a routes/api.php para evitar CSRF
 Route::get('/preferencias-cookies', [CookieController::class, 'showPreferences'])->name('cookie.preferences.show');

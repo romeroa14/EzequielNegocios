@@ -14,6 +14,7 @@ use App\Models\ProductPresentation;
 use App\Models\Market;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ProductCatalog extends Component
 {
@@ -93,6 +94,14 @@ class ProductCatalog extends Component
         $this->producer = request()->query('producer');
         $this->validate();
         
+        // Verificar si hay un producto específico para mostrar
+        $productId = request()->query('product');
+        if ($productId) {
+            Log::info('Product ID detected in mount:', ['product_id' => $productId]);
+            // Obtener los datos completos del producto y abrir el modal
+            $this->showProductDetail($productId);
+        }
+        
         // Debug: Log current filter values
         Log::info('ProductCatalog mounted with filters:', [
             'search' => $this->search,
@@ -103,7 +112,8 @@ class ProductCatalog extends Component
             'selectedPresentation' => $this->selectedPresentation,
             'minPrice' => $this->minPrice,
             'maxPrice' => $this->maxPrice,
-            'sortBy' => $this->sortBy
+            'sortBy' => $this->sortBy,
+            'product_id' => $productId
         ]);
     }
 
@@ -533,7 +543,8 @@ class ProductCatalog extends Component
                 'formatted_location' => $listing->formatted_location,
                 'formatted_date' => $listing->harvest_date ? $listing->harvest_date->format('d/m/Y') : null,
                 'status' => $listing->status,
-                'formatted_status' => ucfirst($listing->status)
+                'formatted_status' => ucfirst($listing->status),
+                'share_url' => route('welcome') . '?product=' . $listing->id // URL con parámetro para modal
             ]);
 
         } catch (\Exception $e) {
@@ -582,6 +593,65 @@ class ProductCatalog extends Component
             'current_page' => $this->currentPage
         ]);
     }
+
+    public function generateShareLink($listingId)
+    {
+        try {
+            $listing = ProductListing::with(['product', 'person'])->findOrFail($listingId);
+            
+            // Crear URL con parámetro para abrir modal
+            $shareUrl = route('welcome') . '?product=' . $listingId;
+            
+            // Mostrar modal simple con link y botón copiar
+            $this->js("
+                const modal = document.createElement('div');
+                modal.innerHTML = `
+                    <div style='position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;'>
+                        <div style='background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%;'>
+                            <h3 style='margin-bottom: 20px;'>Compartir Producto</h3>
+                            <div style='margin-bottom: 15px;'>
+                                <label style='display: block; font-size: 14px; color: #374151; margin-bottom: 8px; font-weight: 500;'>Link del producto:</label>
+                                <div style='display: flex; gap: 8px;'>
+                                    <input type='text' id='shareLink' value='" . $shareUrl . "' readonly style='flex: 1; padding: 8px; border: 1px solid #d1d5db; border-radius: 5px; font-size: 14px; background: #f9fafb;' onclick='this.select()' >
+                                    <button onclick='copyToClipboard()' style='padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;'>Copiar</button>
+                                </div>
+                            </div>
+                            <button onclick='this.parentElement.parentElement.remove()' style='padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 5px; cursor: pointer;'>Cerrar</button>
+                        </div>
+                    </div>
+                `;
+                
+                // Función para copiar al portapapeles
+                window.copyToClipboard = function() {
+                    const input = document.getElementById('shareLink');
+                    input.select();
+                    input.setSelectionRange(0, 99999);
+                    document.execCommand('copy');
+                    
+                    // Mostrar mensaje de confirmación
+                    const button = event.target;
+                    const originalText = button.textContent;
+                    button.textContent = '¡Copiado!';
+                    button.style.background = '#059669';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = '#10b981';
+                    }, 2000);
+                };
+                
+                document.body.appendChild(modal);
+            ");
+            
+        } catch (\Exception $e) {
+            Log::error('Error al generar link de compartir', [
+                'listing_id' => $listingId,
+                'error' => $e->getMessage()
+            ]);
+            $this->dispatch('error', 'No se pudo generar el link de compartir.');
+        }
+    }
+        
 
     public function render()
     {

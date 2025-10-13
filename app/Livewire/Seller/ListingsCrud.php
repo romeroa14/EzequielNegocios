@@ -767,7 +767,7 @@ class ListingsCrud extends Component
                 window.open('" . $imageUrl . "', '_blank');
             ");
             
-            $this->dispatch('success', 'Imagen para redes sociales generada. Descárgala y compártela en tus redes sociales.');
+            $this->dispatch('success', 'Imagen PNG 1080x1350 generada. Descárgala y compártela en tus redes sociales.');
             
         } catch (\Exception $e) {
             Log::error('Error al generar imagen para redes sociales', [
@@ -775,6 +775,55 @@ class ListingsCrud extends Component
                 'error' => $e->getMessage()
             ]);
             $this->dispatch('error', 'No se pudo generar la imagen para redes sociales.');
+        }
+    }
+
+    public function generateShareLink($listingId)
+    {
+        try {
+            $listing = ProductListing::with(['product', 'person'])->findOrFail($listingId);
+            
+            // Generar URL para obtener links de compartir
+            $shareUrl = route('listing.share-link', $listingId);
+            
+            // Hacer petición AJAX para obtener los links
+            $this->js("
+                fetch('" . $shareUrl . "')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Mostrar modal con opciones de compartir
+                            const modal = document.createElement('div');
+                            modal.innerHTML = `
+                                <div style='position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;'>
+                                    <div style='background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%;'>
+                                        <h3 style='margin-bottom: 20px;'>Compartir Publicación</h3>
+                                        <div style='margin-bottom: 15px;'>
+                                            <a href='` + data.whatsapp_url + `' target='_blank' style='display: block; padding: 10px; background: #25D366; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 10px; text-align: center;'>📱 WhatsApp</a>
+                                            <a href='` + data.facebook_url + `' target='_blank' style='display: block; padding: 10px; background: #1877F2; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 10px; text-align: center;'>📘 Facebook</a>
+                                            <a href='` + data.twitter_url + `' target='_blank' style='display: block; padding: 10px; background: #1DA1F2; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 10px; text-align: center;'>🐦 Twitter</a>
+                                        </div>
+                                        <button onclick='this.parentElement.parentElement.remove()' style='padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 5px; cursor: pointer;'>Cerrar</button>
+                                    </div>
+                                </div>
+                            `;
+                            document.body.appendChild(modal);
+                        } else {
+                            alert('Error al generar links de compartir');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al generar links de compartir');
+                    });
+            ");
+            
+        } catch (\Exception $e) {
+            Log::error('Error al generar links de compartir', [
+                'listing_id' => $listingId,
+                'error' => $e->getMessage()
+            ]);
+            $this->dispatch('error', 'No se pudo generar los links de compartir.');
         }
     }
 

@@ -21,8 +21,8 @@
         "vite": "^5.0.0"
     },
     "dependencies": {
-        "alpinejs": "^3.13.3",
         "@alpinejs/focus": "^3.13.3",
+        "alpinejs": "^3.13.3",
         "sweetalert2": "^11.10.5"
     }
 }

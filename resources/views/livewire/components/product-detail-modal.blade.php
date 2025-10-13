@@ -31,6 +31,11 @@
                     this.show = false;
                     this.selectedImageIndex = 0;
                     this.images = [];
+                    
+                    // Limpiar parámetro de URL cuando se cierre el modal
+                    const url = new URL(window.location);
+                    url.searchParams.delete('product');
+                    window.history.pushState({}, '', url);
                 });
             },
             changeImage(index) {
@@ -52,7 +57,11 @@
         <!-- Backdrop -->
         <div 
             class="fixed inset-0 transition-opacity" 
-            @click="show = false; $wire.closeModal()"
+            @click="show = false; $wire.closeModal(); 
+                    // Limpiar parámetro de URL
+                    const url = new URL(window.location);
+                    url.searchParams.delete('product');
+                    window.history.pushState({}, '', url);"
         >
             <div class="absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
         </div>
@@ -62,7 +71,11 @@
             <div class="relative bg-white w-full max-w-6xl max-h-[90vh] rounded-lg shadow-xl overflow-hidden">
                 <!-- Close button -->
                 <button 
-                    @click="show = false; $wire.closeModal()"
+                    @click="show = false; $wire.closeModal(); 
+                            // Limpiar parámetro de URL
+                            const url = new URL(window.location);
+                            url.searchParams.delete('product');
+                            window.history.pushState({}, '', url);"
                     class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-10 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 shadow-lg"
                 >
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,10 +219,21 @@
                         <!-- Contact Button -->
                         <a 
                             href="{{ route('productores.show', ['producer' => $listing['seller']['id']]) }}"
-                            class="block w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg text-center transition duration-150 ease-in-out"
+                            class="block w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg text-center transition duration-150 ease-in-out mb-3"
                         >
                             Ver Productor
                         </a>
+                        
+                        <!-- Share Button -->
+                        <button 
+                            onclick="showShareModal('{{ $listing['share_url'] ?? '' }}')"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg text-center transition duration-150 ease-in-out flex items-center justify-center gap-2"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                            </svg>
+                            Compartir Producto
+                        </button>
                     </div>
                 </div>
                 @endif
