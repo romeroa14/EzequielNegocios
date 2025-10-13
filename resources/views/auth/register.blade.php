@@ -49,14 +49,24 @@
         <form method="POST" action="{{ route('register') }}" class="space-y-6" id="user-registration-form">
             @csrf
 
-            <!-- Tipo de Usuario -->
-            <div>
-                <x-input-label for="role" :value="__('Tipo de Usuario')" />
-                <select id="role" name="role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                   
-                    <option value="seller" {{ old('role') == 'seller' ? 'selected' : '' }}>Vendedor</option>
-                </select>
-                <x-input-error :messages="$errors->get('role')" class="mt-2" />
+            <!-- Información del Perfil -->
+            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex items-center mb-3">
+                    <svg class="h-6 w-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-green-900">Perfil Completo</h3>
+                </div>
+                <p class="text-sm text-green-800 mb-3">
+                    Con este perfil podrás <strong>vender</strong> tus productos, <strong>comprar</strong> de otros productores y <strong>consultar</strong> precios de mercado.
+                </p>
+                <div class="flex items-center text-sm text-green-700">
+                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Acceso completo a todas las funcionalidades</span>
+                </div>
+                <input type="hidden" name="role" value="seller">
             </div>
 
             <!-- Información Personal -->

@@ -282,7 +282,7 @@ class Person extends Authenticatable
     {
         return match($this->role) {
             self::ROLE_BUYER => 'catalog',
-            self::ROLE_SELLER => 'seller.dashboard',
+            self::ROLE_SELLER => 'seller.listings',
             default => 'home',
         };
     }

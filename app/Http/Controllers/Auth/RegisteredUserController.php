@@ -123,7 +123,7 @@ class RegisteredUserController extends Controller
                 return redirect()->route('seller.dashboard');
             }
 
-            return redirect()->route('buyer.dashboard');
+            return redirect()->route('buyer.seller/listings');
         } catch (\Exception $e) {
             return back()
                 ->withInput()

@@ -61,10 +61,10 @@ class LoginController extends Controller
 
             // Redirigir según el rol
             if ($person->role === 'seller') {
-                return redirect()->intended(route('seller.dashboard'))
+                return redirect('/seller/listings')
                     ->with('success', $welcomeMessage);
             } else {
-                return redirect()->intended(route('catalog'))
+                return redirect(route('catalogo'))
                     ->with('success', $welcomeMessage);
             }
         }

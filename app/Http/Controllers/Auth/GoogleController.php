@@ -114,10 +114,10 @@ class GoogleController extends Controller
                         Auth::guard('person')->login($person);
                         
                         if ($person->role === 'seller') {
-                            return redirect()->route('seller.dashboard')
+                            return redirect('/seller/listings')
                                 ->with('success', '¡Bienvenido de vuelta! Tu cuenta ha sido verificada automáticamente.');
                         } else {
-                            return redirect()->route('catalogo')
+                            return redirect(route('catalogo'))
                                 ->with('success', '¡Bienvenido de vuelta! Tu cuenta ha sido verificada automáticamente.');
                         }
                     } else {
@@ -136,11 +136,11 @@ class GoogleController extends Controller
                 // Redirigir al dashboard según el rol
                 if ($person->role === 'seller') {
                     Log::info('Redirigiendo al dashboard del seller existente');
-                    return redirect()->route('seller.dashboard')
+                    return redirect('/seller/listings')
                         ->with('success', '¡Bienvenido de vuelta!');
                 } else {
                     Log::info('Redirigiendo al catálogo para compradores existentes');
-                    return redirect()->route('catalogo')
+                    return redirect(route('catalogo'))
                         ->with('success', '¡Bienvenido de vuelta!');
                 }
             }
@@ -185,7 +185,7 @@ class GoogleController extends Controller
 
             // Redirigir al catálogo para nuevos usuarios
             Log::info('Redirigiendo al catálogo para nueva persona');
-            return redirect()->route('catalogo')
+            return redirect(route('catalogo'))
                 ->with('success', '¡Bienvenido! Te has registrado exitosamente con Google.');
 
         } catch (\Exception $e) {
@@ -231,10 +231,10 @@ class GoogleController extends Controller
             $person->markAsVerifiedIfComplete();
             
             if ($person->role === 'seller') {
-                return redirect()->route('seller.dashboard')
+                return redirect()->route('seller.listings')
                     ->with('success', '¡Tu cuenta ha sido verificada automáticamente!');
             } else {
-                return redirect()->route('catalog')
+                    return redirect()->route('catalog')
                     ->with('success', '¡Tu cuenta ha sido verificada automáticamente!');
             }
         }
@@ -317,10 +317,10 @@ class GoogleController extends Controller
 
         // Redirigir según el rol después de completar el perfil
         if ($person->role === 'seller') {
-            return redirect()->route('seller.dashboard')
+            return redirect('/seller/listings')
                 ->with('success', $successMessage);
         } else {
-            return redirect()->route('catalogo')
+            return redirect(route('catalogo'))
                 ->with('success', $successMessage);
         }
     }
