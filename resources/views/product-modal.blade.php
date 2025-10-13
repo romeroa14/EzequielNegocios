@@ -2,6 +2,10 @@
 
 @section('title', 'Producto - EzequielNegocios')
 
+@php
+    use Illuminate\Support\Facades\Storage;
+@endphp
+
 @section('content')
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,13 +60,17 @@
                     <!-- Main image -->
                     <div class="relative bg-gray-50 rounded-lg mb-4 overflow-hidden" style="height: 500px;">
                         @php
-                            $images = is_string($listing->images) ? json_decode($listing->images, true) : $listing->images;
+                            // Manejar tanto arrays como JSON strings
+                            $images = $listing->images;
+                            if (is_string($images)) {
+                                $images = json_decode($images, true);
+                            }
                             $hasImages = $images && is_array($images) && count($images) > 0;
                         @endphp
                         
                         @if($hasImages)
                             <img 
-                                src="{{ $images[0] }}"
+                                src="{{ Storage::url($images[0]) }}"
                                 class="w-full h-full object-cover"
                                 alt="{{ $listing->title }}"
                                 id="main-image"
@@ -86,12 +94,12 @@
                             @foreach($images as $index => $image)
                                 <button 
                                     type="button"
-                                    onclick="changeMainImage('{{ $image }}')"
+                                    onclick="changeMainImage('{{ Storage::url($image) }}')"
                                     class="relative rounded-lg overflow-hidden transition-all duration-200 ease-in-out hover:ring-2 hover:ring-blue-300"
                                     style="height: 60px;"
                                 >
                                     <img 
-                                        src="{{ $image }}"
+                                        src="{{ Storage::url($image) }}"
                                         class="w-full h-full object-cover"
                                         alt="Imagen {{ $index + 1 }}"
                                     >
@@ -202,9 +210,9 @@
                         
                         <button 
                             onclick="generateShareLink()"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg text-center transition duration-150 ease-in-out flex items-center justify-center gap-2"
+                            class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-3 rounded-lg text-center transition duration-150 ease-in-out flex items-center justify-center gap-2 text-sm"
                         >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
                             </svg>
                             Generar Link
