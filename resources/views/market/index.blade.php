@@ -95,7 +95,7 @@
                                         Moneda
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actualizado por
+                                        Fecha de actualización
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Notas
@@ -161,7 +161,7 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $price->updated_by_name }}
+                                            {{ ($price->updated_at ?? $price->price_date)->format('d/m/Y H:i') }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-500">
                                             @if($price->notes)
@@ -246,11 +246,11 @@
                                             </div>
                                         </div>
 
-                                        <!-- Actualizado por -->
+                                        <!-- Fecha de actualización -->
                                         <div>
-                                            <div class="text-xs font-medium text-gray-500 mb-1">Actualizado por</div>
+                                            <div class="text-xs font-medium text-gray-500 mb-1">Fecha de actualización</div>
                                             <div class="text-sm text-gray-700">
-                                                {{ $price->updated_by_name }}
+                                                {{ ($price->updated_at ?? $price->price_date)->format('d/m/Y H:i') }}
                                             </div>
                                         </div>
                                     </div>

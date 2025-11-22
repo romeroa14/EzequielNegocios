@@ -22,11 +22,15 @@ class MarketController extends Controller
         // Obtener solo el precio más reciente y activo de cada producto
         $marketPrices = MarketPrice::with(['product', 'updatedBy'])
             ->active()
-            ->orderBy('product_id')
+            ->orderBy('updated_at', 'desc')
             ->get()
             ->groupBy('product_id')
             ->map(function ($prices) {
-                return $prices->sortByDesc('price_date')->first();
+                return $prices->sortByDesc('updated_at')->first();
+            })
+            ->values()
+            ->sortByDesc(function ($price) {
+                return $price->updated_at ?? $price->price_date;
             })
             ->values();
 
